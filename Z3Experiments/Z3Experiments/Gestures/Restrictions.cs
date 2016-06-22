@@ -121,6 +121,18 @@ namespace PreposeGestures
             return result;
         }
 
+        public double CalcPercentage(Z3Body body)
+        {
+            var result = 1.0;
+
+            foreach (var restriction in this.Restrictions)
+            {
+                result = Math.Min(result, restriction.Percentage(body));
+            }
+
+            return result;
+        }
+
         protected List<SimpleBodyRestriction> Restrictions;
 
         
@@ -169,24 +181,36 @@ namespace PreposeGestures
     {
         public bool isNegated; 
         // restrictedJoints is the list of the the joints that must be activated by the restriction
-        internal SimpleBodyRestriction(Func<Z3Body, BoolExpr> restriction, List<JointType> restrictedJoints)
+        internal SimpleBodyRestriction(
+            Func<Z3Body, BoolExpr> restriction,
+            Func<Z3Body, double> percentage, 
+            List<JointType> restrictedJoints)
         {
             this.RestrictionFunc = restriction;
+            this.PercentageFunc = percentage;
             this.RestrictedJoints = restrictedJoints;
         }
 
-        internal SimpleBodyRestriction(Func<Z3Body, BoolExpr> restriction, JointType restrictedJoint)
+        internal SimpleBodyRestriction(
+            Func<Z3Body, BoolExpr> restriction,
+            Func<Z3Body, double> percentage,
+            JointType restrictedJoint)
         {
             this.RestrictionFunc = restriction;
+            this.PercentageFunc = percentage;
             this.RestrictedJoints = new List<JointType>();
             this.RestrictedJoints.Add(restrictedJoint);
         }
 
-        internal SimpleBodyRestriction(Func<Z3Body, BoolExpr> restriction, params JointType[] restrictedJoints)
+        internal SimpleBodyRestriction(
+            Func<Z3Body, BoolExpr> restriction,
+            Func<Z3Body, double> percentage,
+            params JointType[] restrictedJoints)
         {
             Contract.Ensures(restrictedJoints.Length > 0);
 
             this.RestrictionFunc = restriction;
+            this.PercentageFunc = percentage;
             this.RestrictedJoints = new List<JointType>();
 
             foreach(var restrictedJoint in restrictedJoints)
@@ -253,6 +277,11 @@ namespace PreposeGestures
             return this.RestrictionFunc(body);
         }
 
+        public double Percentage(Z3Body body)
+        {
+            return this.PercentageFunc(body);
+        }
+
         public List<JointType> GetJointTypes()
         {
             return this.RestrictedJoints;
@@ -279,8 +308,12 @@ namespace PreposeGestures
                     throw new NotSupportedException(exp.NodeType.ToString());
             }
         }
-        
+
+        // this returns the boolean expression which tells if the input body met the restriction requirements 
         private Func<Z3Body, BoolExpr> RestrictionFunc { get; set; }
+
+        // this returns how near to complete the restrictions is the current body, in a scale from 0 to 1
+        private Func<Z3Body, double> PercentageFunc { get; set; }
 
         // Keep track of which joints are restricted
         private List<JointType> RestrictedJoints;
@@ -294,59 +327,18 @@ namespace PreposeGestures
 
     public class NoBodyRestriction : SimpleBodyRestriction
     {
-        public NoBodyRestriction() : base(body => Z3.Context.MkTrue(), new List<JointType>()) { }
+        public NoBodyRestriction() : base(
+            body => Z3.Context.MkTrue(),
+            body => 1.0, 
+            new List<JointType>()
+            ) { }
 
         public override string ToString()
         {
             return "none";
         }
     }
-
-    public class LowerThanBodyRestriction : SimpleBodyRestriction
-    {
-        public LowerThanBodyRestriction(JointType jointType, int angleThreshold)
-            : base(
-            body =>
-            {
-                double maxY = TrigonometryHelper.GetSine(angleThreshold);
-                return Z3.Context.MkLt(body.Joints[jointType].Y, Z3Math.Real(maxY));
-            },
-            jointType)
-        {
-            this.JointType = jointType;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0} {1}", this.GetType().Name, this.JointType);
-        }
-
-        public JointType JointType { get; private set; }
-    }
-
-    public class KeepAngleRestriction : SimpleBodyRestriction
-    {
-        public KeepAngleRestriction(JointType jointType, Direction direction, int angleThreshold = 15)
-            : base(
-            body =>
-            {
-                return body.Joints[jointType].IsAngleBetweenLessThan(Z3Point3D.DirectionPoint(direction), angleThreshold);
-            },
-            jointType)
-        {
-            this.JointType = jointType;
-            this.Direction = direction;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("keep your {0} {1}", this.JointType, this.Direction);
-        }
-
-        public JointType JointType { get; private set; }
-        public Direction Direction { get; set; }
-    }
-
+    
     public class TouchBodyRestriction : SimpleBodyRestriction
     {
         public TouchBodyRestriction(JointType jointType, JointSide handSide, double distanceThreshold = 0.2, bool dont = false)
@@ -364,6 +356,31 @@ namespace PreposeGestures
                 }
 
                 return expr;
+            },
+            body =>
+            {
+                var sidedHandType = JointTypeHelper.GetSidedJointType(SidedJointName.Hand, handSide);
+
+                var joint1Position = body.GetJointPosition(jointType);
+                var joint2Position = body.GetJointPosition(sidedHandType);
+
+                var p1 = new Point3D(
+                    joint1Position.GetXValue(), 
+                    joint1Position.GetYValue(), 
+                    joint1Position.GetZValue());
+
+                var p2 = new Point3D(
+                    joint2Position.GetXValue(),
+                    joint2Position.GetYValue(),
+                    joint2Position.GetZValue());
+
+                var distance = Math.Max(0.00000001, p1.DistanceTo(p2));
+                var percentage = Math.Min(1.0, distanceThreshold / distance);
+
+                if (dont)
+                    percentage = Math.Min(1.0, distance / distanceThreshold);
+
+                return percentage;
             },
             jointType,
             JointTypeHelper.GetSidedJointType(SidedJointName.Hand, handSide))
@@ -390,17 +407,153 @@ namespace PreposeGestures
         public JointType JointType { get; private set; }
     }
 
+    public class RotateDirectionRestriction : SimpleBodyRestriction
+    {
+        public RotateDirectionRestriction(JointType jointType, Z3Point3D startPoint, int degrees, Direction direction)
+            : base(body =>
+            {
+                ArithExpr currentValue;
+                var targetValue = 0.0;
+                var directionSign = 1.0;
+                var currentPoint = body.Joints[jointType];
+                CalcCurrentAndTargetValue(currentPoint, startPoint, degrees, direction,
+                    out currentValue, out targetValue, out directionSign);
+                
+                BoolExpr expr = Z3.Context.MkTrue();
+
+                switch (direction)
+                {
+                    case Direction.Right:   
+                    case Direction.Up:      
+                    case Direction.Front:   
+                        expr = Z3.Context.MkGt(currentValue, Z3Math.Real(targetValue)); 
+                        break;
+                    case Direction.Left:   
+                    case Direction.Down:   
+                    case Direction.Back:    
+                        expr = Z3.Context.MkLt(currentValue, Z3Math.Real(targetValue)); break;
+                }
+                return expr;
+            },
+            body =>
+            {
+                ArithExpr currentValue;
+                var targetValue = 0.0;
+                var directionSign = 1.0;
+                var currentPoint = body.Joints[jointType];
+                CalcCurrentAndTargetValue(currentPoint, startPoint, degrees, direction, 
+                    out currentValue, out targetValue, out directionSign);
+
+                var percentage = PercentageCalculator.calc(
+                    -1*directionSign, 
+                    targetValue, 
+                    Z3Math.GetRealValue(currentValue));
+
+                return percentage;
+            },
+            jointType)
+        {
+            this.JointType = jointType;
+            this.Direction = direction;
+            this.Degrees = degrees;
+        }
+
+        private static void CalcCurrentAndTargetValue(
+            Z3Point3D currentPoint,
+            Z3Point3D startPoint,
+            int degrees,
+            Direction direction,
+            out ArithExpr currentValue,
+            out double targetValue,
+            out double directionSign)
+        {
+            // once it is rotating towards a direction there is a limit for the rotation
+            // in this case the limit is imposed to a single component (X, Y or Z) relative to the direction
+            var limitValue = Math.Sin(75 * Math.PI / 180.0);
+            var radians = degrees * Math.PI / 180.0; // assigning a double for angle in radians
+
+            // determining if the direction sign is negative
+            directionSign = 1.0;
+            switch (direction)
+            {
+                case Direction.Down:
+                case Direction.Back:
+                case Direction.Left:
+                    directionSign = -1.0;
+                    break;
+            }
+
+            // update limit based on the direction sign
+            limitValue *= directionSign;
+
+            // start value stores the component (X, Y or Z) from the startPoint
+            // determining the current and start value      
+            currentValue = currentPoint.X;
+            var startValue = 0.0;
+            switch (direction)
+            {
+                case Direction.Right:
+                case Direction.Left:
+                    startValue = startPoint.GetXValue();
+                    currentValue = currentPoint.X;
+                    break;
+                case Direction.Up:
+                case Direction.Down:
+                    startValue = startPoint.GetYValue();
+                    currentValue = currentPoint.Y;
+                    break;
+                case Direction.Front:
+                case Direction.Back:
+                    startValue = startPoint.GetZValue();
+                    currentValue = currentPoint.Z;
+                    break;
+            }
+
+            double startRadians = Math.Asin(startValue);
+            double targetRadians = startRadians + (directionSign * radians);
+            targetValue = Math.Sin(targetRadians);
+
+            // this first case tells that the rotation is bigger than the desired and 
+            // is moving the vector (targetValue) on the opposite direction
+            // this rotation is not desired here because we are rotating towards a direction
+            // the rotation is not a pure transform            
+            var targetIsLowerThanStart =
+                directionSign * targetValue <
+                directionSign * startValue;
+
+            // this second case tells that the rotation exceeded the limitValue
+            var targetExceedsLimit = Math.Abs(targetValue) > Math.Abs(limitValue);
+
+            // on both cases the targetValue should be the limitValue
+            if (targetIsLowerThanStart || targetExceedsLimit)
+            {
+                targetValue = limitValue;
+            }
+        }
+
+        public override string ToString()
+        {
+            return string.Format("rotate your {0} {1} degrees {2}", this.JointType, this.Degrees, this.Direction);
+        }
+
+        public JointType JointType { get; set; }
+
+        public int Degrees { get; set; }
+
+        public Direction Direction { get; set; }
+    }
+
     public class PutBodyRestriction : SimpleBodyRestriction
     {
         public PutBodyRestriction(JointType jointType1, JointType jointType2, RelativeDirection direction, bool dont = false)
             : base(body =>
             {
-                ArithExpr distanceThreshold = Z3Math.Real(0.1);
+                var distanceThreshold = Z3Math.Real(0.01);
+                
+                var joint1Position = body.GetJointPosition(jointType1);
+                var joint2Position = body.GetJointPosition(jointType2);
 
-                Z3Point3D joint1Position = body.GetJointPosition(jointType1);
-                Z3Point3D joint2Position = body.GetJointPosition(jointType2);
-
-                BoolExpr expr = Z3.Context.MkTrue();
+                var expr = Z3.Context.MkTrue();
 
                 switch (direction)
                 {
@@ -430,17 +583,93 @@ namespace PreposeGestures
                 }
 
                 if (dont) expr = Z3.Context.MkNot(expr);
-
                 return expr;
             },
-            //JointTypeHelper.GetListFromLeafToRoot(jointType1).Union(JointTypeHelper.GetListFromLeafToRoot(jointType2)).ToList())
+            body =>
+            {
+                var distanceThreshold = 0.01;
+
+                var joint1Position = body.GetJointPosition(jointType1);
+                var joint2Position = body.GetJointPosition(jointType2);
+                
+                var point1 = new Point3D(
+                    joint1Position.GetXValue(),
+                    joint1Position.GetYValue(),
+                    joint1Position.GetZValue());
+
+                var point2 = new Point3D(
+                    joint2Position.GetXValue(),
+                    joint2Position.GetYValue(),
+                    joint2Position.GetZValue());
+
+                var targetValue = 1.0;
+                var currentValue = 1.0;
+                var lowerBound = 0.0;
+
+                // inverting direction if expression is negated
+                if (dont)
+                {
+                    switch (direction)
+                    {
+                        case RelativeDirection.ToTheRightOfYour: direction = RelativeDirection.ToTheLeftOfYour; break;
+                        case RelativeDirection.ToTheLeftOfYour:  direction = RelativeDirection.ToTheRightOfYour; break;
+                        case RelativeDirection.OnTopOfYour:      direction = RelativeDirection.BelowYour; break;
+                        case RelativeDirection.BelowYour:        direction = RelativeDirection.OnTopOfYour; break;
+                        case RelativeDirection.InFrontOfYour:    direction = RelativeDirection.BehindYour; break;
+                        case RelativeDirection.BehindYour:       direction = RelativeDirection.InFrontOfYour; break;
+                    }
+                }
+
+                switch (direction)
+                {
+                    case RelativeDirection.ToTheRightOfYour:
+                        currentValue = point1.X;
+                        targetValue = point2.X + distanceThreshold;
+                        lowerBound = -1.0;
+                        break;
+
+                    case RelativeDirection.ToTheLeftOfYour:
+                        currentValue = point1.X;
+                        targetValue = point2.X - distanceThreshold;
+                        lowerBound = 1.0;
+                        break;
+
+                    case RelativeDirection.OnTopOfYour:
+                        currentValue = point1.Y;
+                        targetValue = point2.Y + distanceThreshold;
+                        lowerBound = -1.0;
+                        break;
+
+                    case RelativeDirection.BelowYour:
+                        currentValue = point1.Y;
+                        targetValue = point2.Y - distanceThreshold;
+                        lowerBound = 1.0;
+                        break;
+
+                    case RelativeDirection.InFrontOfYour:
+                        currentValue = point1.Z;
+                        targetValue = point2.Z + distanceThreshold;
+                        lowerBound = -1.0;
+                        break;
+
+                    case RelativeDirection.BehindYour:
+                        currentValue = point1.Z;
+                        targetValue = point2.Z - distanceThreshold;
+                        lowerBound = 1.0;
+                        break;
+                }
+
+                var percentage = PercentageCalculator.calc(lowerBound, targetValue, currentValue);                
+                return percentage;
+            },
             jointType1,
             jointType2)
         {
             this.JointType1 = jointType1;
             this.JointType2 = jointType2;
             
-            this.Direction = direction;       
+            this.Direction = direction;
+
             if (dont)
             {
                 this.isNegated = true; 
@@ -465,16 +694,34 @@ namespace PreposeGestures
 
     public class AlignBodyRestriction : SimpleBodyRestriction
     {
-        public AlignBodyRestriction(JointType jointType1, JointType jointType2, int angleThreshold = 20, bool dont = false) :
+        public AlignBodyRestriction(JointType jointType1, JointType jointType2, int degreesThreshold = 20, bool dont = false) :
             base((body =>
              {
                  var joint1 = body.Joints[jointType1];
                  var joint2 = body.Joints[jointType2];
 
-                 BoolExpr expr = joint1.IsAngleBetweenLessThan(joint2, angleThreshold);
+                 BoolExpr expr = joint1.IsDegreesBetweenLessThan(joint2, degreesThreshold);
                  if (dont) expr = Z3.Context.MkNot(expr);
                  return expr;
-             }), jointType1, jointType2)
+             }),
+            (body =>
+             {
+                 var joint1 = body.Joints[jointType1];
+                 var joint2 = body.Joints[jointType2];
+
+                 var vec1 = new Point3D(joint1.GetXValue(), joint1.GetYValue(), joint1.GetZValue());
+                 var vec2 = new Point3D(joint2.GetXValue(), joint2.GetYValue(), joint2.GetZValue());
+
+                 var degrees = Math.Abs(vec1.RadiansTo(vec2) * 180/Math.PI);
+
+                 var percentage = degreesThreshold / degrees;
+                 if (dont) percentage = degrees / degreesThreshold;
+
+                 percentage = Math.Max(0.0, Math.Min(1.0, percentage));
+
+                 return percentage;
+             }),
+            jointType1, jointType2)
         {
             this.JointType1 = jointType1;
             this.JointType2 = jointType2;
@@ -496,6 +743,16 @@ namespace PreposeGestures
         public JointType JointType1 { get; set; }
 
         public JointType JointType2 { get; set; }
+    }
+
+    public class PercentageCalculator
+    {
+        public static double calc(double lowerBound, double targetValue, double currentValue)
+        {
+            var percentage = (currentValue - lowerBound)/(targetValue - lowerBound);
+            percentage = Math.Min(1.0,(Math.Max(0.0, percentage)));
+            return percentage;
+        }
     }
 
     // TODO Create restriction to filter invalid bodies (e.g.: with (0, 0, 0) points)

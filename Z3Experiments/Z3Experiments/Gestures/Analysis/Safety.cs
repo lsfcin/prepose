@@ -130,12 +130,13 @@ namespace PreposeGestures
             var head = new SimpleBodyRestriction(body =>
             {
                 Z3Point3D up = new Z3Point3D(0, 1, 0);
-                BoolExpr expr1 = body.Joints[JointType.Head].IsAngleBetweenLessThan(up, inclinationThreshold);
-                BoolExpr expr2 = body.Joints[JointType.Neck].IsAngleBetweenLessThan(up, inclinationThreshold);
+                BoolExpr expr1 = body.Joints[JointType.Head].IsDegreesBetweenLessThan(up, inclinationThreshold);
+                BoolExpr expr2 = body.Joints[JointType.Neck].IsDegreesBetweenLessThan(up, inclinationThreshold);
                 BoolExpr expr = Z3.Context.MkAnd(expr1, expr2);
 
                 return expr;
-            });
+            },
+            body => { return 1.0; });
             result.And(head);
 
             // Spine
@@ -143,15 +144,16 @@ namespace PreposeGestures
             var spine = new SimpleBodyRestriction(body =>
             {
                 Z3Point3D up = new Z3Point3D(0, 1, 0);
-                BoolExpr expr1 = body.Joints[JointType.SpineMid].IsAngleBetweenLessThan(up, inclinationThreshold);
-                BoolExpr expr2 = body.Joints[JointType.SpineShoulder].IsAngleBetweenLessThan(up, inclinationThreshold);
+                BoolExpr expr1 = body.Joints[JointType.SpineMid].IsDegreesBetweenLessThan(up, inclinationThreshold);
+                BoolExpr expr2 = body.Joints[JointType.SpineShoulder].IsDegreesBetweenLessThan(up, inclinationThreshold);
                 BoolExpr expr3 =
-                    body.Joints[JointType.SpineMid].IsAngleBetweenLessThan(
+                    body.Joints[JointType.SpineMid].IsDegreesBetweenLessThan(
                     body.Joints[JointType.SpineShoulder], inclinationThreshold);
                 BoolExpr expr = Z3.Context.MkAnd(expr1, expr2, expr3);
 
                 return expr;
-            });
+            },
+            body => { return 1.0; });
             result.And(spine);
 
             // Shoulders
@@ -159,11 +161,12 @@ namespace PreposeGestures
             var shoulders = new SimpleBodyRestriction(body =>
             {
                 BoolExpr expr =
-                    body.Joints[JointType.SpineMid].IsAngleBetweenGreaterThan(
+                    body.Joints[JointType.SpineMid].IsDegreesBetweenGreaterThan(
                     body.Joints[JointType.SpineShoulder], 120);
 
                 return expr;
-            });
+            },
+            body => { return 1.0; });
             result.And(shoulders);
 
             // Elbows
@@ -198,7 +201,8 @@ namespace PreposeGestures
                 BoolExpr expr = Z3.Context.MkAnd(exprLeft1, exprLeft2, exprRight1, exprRight2);
 
                 return expr;
-            });
+            },
+            body => { return 1.0; });
             result.And(elbows);
 
             // Wrists
@@ -218,9 +222,10 @@ namespace PreposeGestures
                     body.Joints[JointType.HipLeft].GetInverted() +
                     body.Joints[JointType.HipRight];
 
-                BoolExpr expr = shouldersSum.IsAngleBetweenLessThan(hipsSum, 45);
+                BoolExpr expr = shouldersSum.IsDegreesBetweenLessThan(hipsSum, 45);
                 return expr;
-            });
+            },
+            body => { return 1.0; });
             result.And(hips);
 
             // Legs
@@ -232,7 +237,8 @@ namespace PreposeGestures
                 BoolExpr expr = Z3.Context.MkAnd(expr1, expr2);
 
                 return expr;
-            });
+            },
+            body => { return 1.0; });
             result.And(legs);
 
             // Ankles

@@ -2,27 +2,27 @@
 {
     public class TrigonometryHelper
     {
-        private static int SafeAngle(int angle)
+        private static int SafeDegrees(int degrees)
         {
-            int result = angle % 360;
+            int result = degrees % 360;
             if (result < 0) result += 360;
             return result;
         }
 
-        public static double GetCosine(int angle)
+        public static double GetCosine(int degrees)
         {
-            return Cosines[SafeAngle(angle)];
+            return Cosines[SafeDegrees(degrees)];
         }
 
-        public static double GetSine(int angle)
+        public static double GetSine(int degrees)
         {
-            return Sines[SafeAngle(angle)];
+            return Sines[SafeDegrees(degrees)];
         }
 
-        // Gets distance between two normalized vectors given the angle between them
-        public static double GetDistance(int angle)
+        // Gets distance between two normalized vectors given the degrees between them
+        public static double GetDistance(int degrees)
         {
-            return Distances[SafeAngle(angle)];
+            return Distances[SafeDegrees(degrees)];
         }
 
         private static readonly double[] Cosines = {
@@ -752,7 +752,7 @@
             -0.0144	,
         };
 
-        // Distance between two normalized vectors given the angle between them
+        // Distance between two normalized vectors given the degrees between them
         private static readonly double[] Distances =
         {
             0	,

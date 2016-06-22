@@ -15,6 +15,7 @@ namespace PreposeGestureRecognizer
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
+    using System.Windows.Forms;
     using System.Linq;
     using Microsoft.Kinect;
     using PreposeGestures;
@@ -564,7 +565,7 @@ namespace PreposeGestureRecognizer
         private static string parsedText = "";
         //private static KinectApp gestureApp;
         private PreposeGestures.BodyMatcher matcher;
-        private static List<ProgressBar> mainProgressBars = null;
+        private static List<System.Windows.Controls.ProgressBar> mainProgressBars = null;
         private static List<TextBlock> posesTextBlocks = null;
 
         private void ManageGestureApp(
@@ -580,6 +581,18 @@ namespace PreposeGestureRecognizer
                 BodyMatching.TestBody(this.matcher, kinectJoints, jumpToNextPose);
 
             jumpToNextPose = false;
+
+            if(status.Count >= 2)
+            {
+                if (status[0].succeededDetection)
+                {
+                    SendKeys.SendWait("{RIGHT}");
+                }
+                if (status[1].succeededDetection)
+                {
+                    SendKeys.SendWait("{LEFT}");
+                }
+            }
 
             RenderFeedback(status);
             this.DrawTarget(kinectJoints, dc);
@@ -627,7 +640,7 @@ namespace PreposeGestureRecognizer
         private void StartMainProgressBars(List<ExecutionStep> steps)
         {
             if (mainProgressBars == null)
-                mainProgressBars = new List<ProgressBar>();
+                mainProgressBars = new List<System.Windows.Controls.ProgressBar>();
 
             if (posesTextBlocks == null)
                 posesTextBlocks = new List<TextBlock>();
@@ -636,7 +649,7 @@ namespace PreposeGestureRecognizer
             var xPos = 10;
             foreach (var step in steps)
             {
-                var bar = new ProgressBar();
+                var bar = new System.Windows.Controls.ProgressBar();
                 bar.Minimum = 0;
                 bar.Maximum = 100;
                 bar.Margin = new Thickness(xPos, 0, 0, -60);
@@ -684,15 +697,9 @@ namespace PreposeGestureRecognizer
 
         private void RenderFeedback(List<GestureStatus> feedback)
         {
-            //var gesturesIDs = gestureApp.GetMostAdvancedGesturesIDs();
+            var gesture = feedback[0];
 
-            //var bars = new List<ProgressBar>();
-            //var gesture = feedback[gesturesIDs[0]];
-            var gesture = feedback[feedback.Count - 1];
-
-            //this.MainGestureAndPoseNameTextBlock.Text = gesture.GestureName;// +": " + gesture.StepNames[gesture.CurrentStep];
-            var mainPosePercentage =
-                (2.0 - gesture.Distance) / 2;
+            var mainPosePercentage = gesture.Percentage;
             var mainGesturePercentage =
                 (double)gesture.CurrentStep /
                 gesture.NumSteps +
@@ -711,8 +718,8 @@ namespace PreposeGestureRecognizer
                     mainProgressBars[i].Value = 0;
             }
 
-            CompletedTimesTextBlock.Text = feedback[feedback.Count - 1].CompletedCount.ToString();
-            if (feedback[feedback.Count - 1].CompletedCount == 1)
+            CompletedTimesTextBlock.Text = feedback[0].CompletedCount.ToString();
+            if (feedback[0].CompletedCount == 1)
                 TimesTextBlock.Text = "time";
             else
                 TimesTextBlock.Text = "times";
@@ -724,8 +731,6 @@ namespace PreposeGestureRecognizer
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> baseJoints,
             DrawingContext dc)
         {
-            //var target = gestureApp.Gestures[gestureApp.Gestures.Count - 1].GetTarget();
-            //var status = gestureApp.Gestures[gestureApp.Gestures.Count - 1].GetStatus();
             var target = matcher.GetLastGestureTarget();
             var status = matcher.GetLastGestureStatus();
 
@@ -794,7 +799,6 @@ namespace PreposeGestureRecognizer
         {
 
             double width = 3;
-            //double alpha = 1;
 
             if (calculatedJoints.Contains((PreposeGestures.JointType)jointType1))
             {
@@ -880,7 +884,7 @@ namespace PreposeGestureRecognizer
 
             int index = AppDomain.CurrentDomain.BaseDirectory.IndexOf("prepose") + "prepose".Length;
             string testPath = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory.Substring(0, index), "Z3Experiments\\Z3Experiments"), "Tests");
-            testPath = Path.Combine(testPath, "soccer.app");
+            testPath = Path.Combine(testPath, "presentation.app");
             string text = System.IO.File.ReadAllText(testPath);
             this.ScriptTextBox.Text = text;
         }

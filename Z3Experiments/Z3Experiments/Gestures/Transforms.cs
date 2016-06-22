@@ -135,12 +135,12 @@ namespace PreposeGestures
 
     public class RotateJointTransform : JointTransform
     {
-        public RotateJointTransform(int angle, BodyPlaneType plane, RotationDirection rotationDirection = RotationDirection.Clockwise)
+        public RotateJointTransform(int degrees, BodyPlaneType plane, RotationDirection rotationDirection = RotationDirection.Clockwise)
             : base(
             joint =>
             {
-                double cosInput = TrigonometryHelper.GetCosine(angle);
-                double sinInput = TrigonometryHelper.GetSine(angle);
+                double cosInput = TrigonometryHelper.GetCosine(degrees);
+                double sinInput = TrigonometryHelper.GetSine(degrees);
 
                 if (rotationDirection == RotationDirection.CounterClockwise)
                     sinInput = -sinInput;
@@ -176,12 +176,39 @@ namespace PreposeGestures
             })
         { }
 
-        public RotateJointTransform(int angle, Direction direction)
+        // the rotation towards a direction is limited to the directive vector of that direction
+        public RotateJointTransform(int degrees, Direction direction)
             : base(
             joint =>
             {
-                double cosInput = TrigonometryHelper.GetCosine(angle);
-                double sinInput = TrigonometryHelper.GetSine(angle);
+                // define current degrees
+                var currentDegrees = 0.0;
+                switch(direction)
+                {
+                    case Direction.Right:
+                    case Direction.Left:
+                        currentDegrees = Math.Asin(joint.GetXValue()) * 180.0 / Math.PI;
+                        break;
+                    case Direction.Up:
+                    case Direction.Down:
+                        currentDegrees = Math.Asin(joint.GetYValue()) * 180.0 / Math.PI;
+                        break;
+                    case Direction.Front:
+                    case Direction.Back:
+                        currentDegrees = Math.Asin(joint.GetZValue()) * 180.0/Math.PI;
+                        break;
+                }
+
+                // check if current degrees + input degrees is an overflow
+                // which means the rotation is going towards the opposite direction 
+                if (currentDegrees + degrees > 90 ||
+                    currentDegrees - degrees < -90)
+                    // if so, set degrees as the complement to the limit value
+                    degrees = (int)(90.0 - currentDegrees);
+
+
+                double cosInput = TrigonometryHelper.GetCosine(degrees);
+                double sinInput = TrigonometryHelper.GetSine(degrees);
 
                 var cos = Z3Math.Real(cosInput);
                 var sin = Z3Math.Real(sinInput);
@@ -460,14 +487,14 @@ namespace PreposeGestures
         { }
     }
 
-    public class BodyTransform
+    public class CompositeBodyTransform
     {
-        public BodyTransform()
+        public CompositeBodyTransform()
         {
             this.JointTransforms = new Dictionary<JointType, JointTransform>();
         }
 
-        public BodyTransform(Dictionary<JointType, JointTransform> jointsTransforms)
+        public CompositeBodyTransform(Dictionary<JointType, JointTransform> jointsTransforms)
         {
             this.JointTransforms = jointsTransforms;
         }
@@ -477,15 +504,15 @@ namespace PreposeGestures
             get { { return this.JointTransforms.Count; } }
         }
 
-        public BodyTransform(JointType jointType, JointTransform point3DTransform)
+        public CompositeBodyTransform(JointType jointType, JointTransform point3DTransform)
             : this()
         {
             this.ComposeJointTransform(jointType, point3DTransform);
         }
 
-        public BodyTransform ComposeJointTransform(JointType jointType, JointTransform point3DTransform)
+        public CompositeBodyTransform ComposeJointTransform(JointType jointType, JointTransform point3DTransform)
         {
-            BodyTransform composed = new BodyTransform(this.JointTransforms);
+            CompositeBodyTransform composed = new CompositeBodyTransform(this.JointTransforms);
 
             if (!this.JointTransforms.ContainsKey(jointType))
                 composed.JointTransforms.Add(jointType, point3DTransform);
@@ -495,9 +522,9 @@ namespace PreposeGestures
             return composed;
         }
 
-        public BodyTransform Compose(BodyTransform that)
+        public CompositeBodyTransform Compose(CompositeBodyTransform that)
         {
-            BodyTransform composed = new BodyTransform();
+            CompositeBodyTransform composed = new CompositeBodyTransform();
 
             var jointTypes = EnumUtil.GetValues<JointType>();
 
@@ -534,15 +561,15 @@ namespace PreposeGestures
             return composed;
         }
 
-        public BodyTransform Compose(JointType jointType, JointTransform point3DTransform)
+        public CompositeBodyTransform Compose(JointType jointType, JointTransform point3DTransform)
         {
-            BodyTransform that = new BodyTransform(jointType, point3DTransform);
+            CompositeBodyTransform that = new CompositeBodyTransform(jointType, point3DTransform);
             return this.Compose(that);
         }
 
         public override bool Equals(object obj)
         {
-            var that = obj as BodyTransform;
+            var that = obj as CompositeBodyTransform;
             if (that == null) return false;
 
             var jointTypes = EnumUtil.GetValues<JointType>();

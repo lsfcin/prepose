@@ -44,7 +44,7 @@ namespace PreposeGestures
 		/// <param name="bodyTransform"></param>
 		/// <param name="outputBodyRestriction"></param>
 		/// <returns></returns>
-		public static Z3Body GenerateWitness(BodyTransform bodyTransform, CompositeBodyRestriction outputBodyRestriction)
+		public static Z3Body GenerateWitness(CompositeBodyTransform bodyTransform, CompositeBodyRestriction outputBodyRestriction)
 		{
 			var body = Z3Body.MkZ3Const();
 			var transformedBody = bodyTransform.Transform(body);
@@ -82,7 +82,7 @@ namespace PreposeGestures
 		/// <returns></returns>
 		public static Z3Body GenerateWitness(
 			CompositeBodyRestriction inputBodyRestriction,
-			BodyTransform bodyTransform,
+			CompositeBodyTransform bodyTransform,
 			CompositeBodyRestriction outputBodyRestriction)
 		{
 			var body = Z3Body.MkZ3Const();
@@ -115,23 +115,22 @@ namespace PreposeGestures
 		}
 
 		// Generates a body witness which satisfies two conditions
-		// 1. It is within a range (angle threshold) of a transform from a start body
+		// 1. It is within a range (degrees threshold) of a transform from a start body
 		// 2. It is within the considered restrictions
 		public static Z3Target GenerateTarget(
-			BodyTransform transform, 
+			CompositeBodyTransform transform, 
 			CompositeBodyRestriction restriction,
-			Z3Body startBody,
-			int angleThreshold)
+            Z3Body startBody,
+			int degreesThreshold)
 		{
 			var z3ConstBody = Z3Body.MkZ3Const();
 			z3ConstBody.Norms = startBody.Norms;
 			var transformedBody = transform.Transform(startBody);
 
 			var joints = transform.GetJointTypes().Union(restriction.GetJointTypes()).ToList();
-			var isNearExpr = z3ConstBody.IsAngleBetweenLessThan(transformedBody, joints, angleThreshold);
+			var isNearExpr = z3ConstBody.IsDegreesBetweenLessThan(transformedBody, joints, degreesThreshold);
 			var evaluateExpr = restriction.Evaluate(z3ConstBody);
 			//var normsExpr = BodyRestrictionBuilder.EvaluateNorms(startBody, z3ConstBody);
-
 			//var expr = Z3.Context.MkAnd(isNearExpr, evaluateExpr, normsExpr);
 			//var expr = Z3.Context.MkAnd(evaluateExpr, normsExpr);
 			var expr = Z3.Context.MkAnd(evaluateExpr, isNearExpr);
@@ -159,8 +158,7 @@ namespace PreposeGestures
 			{
 				return null;    
 			}
-		}
-
+		}        
 
         public static void WriteExprToDisk(BoolExpr expr, string exprName, string path)
         {

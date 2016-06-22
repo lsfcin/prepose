@@ -149,8 +149,9 @@ namespace PreposeGestures.Parser
 
 		public override Wrapper VisitPose(PreposeGesturesParser.PoseContext context)
 		{
-			var bt = new BodyTransform();
-			var br = new CompositeBodyRestriction();
+			var bt = new CompositeBodyTransform();
+            var br = new CompositeBodyRestriction();
+            var ds = new CompositeDelayedStatement();
 			foreach (var s in context.statement())
 			{
 				Contract.Assert(s != null);
@@ -159,9 +160,9 @@ namespace PreposeGestures.Parser
 				var statement = w.GetValue();
 				if (statement != null)
 				{
-					if (statement is BodyTransform)
+					if (statement is CompositeBodyTransform)
 					{
-						bt = bt.Compose((BodyTransform)statement);
+						bt = bt.Compose((CompositeBodyTransform)statement);
 						continue;
 					}
 
@@ -171,11 +172,17 @@ namespace PreposeGestures.Parser
 						continue;
 					}
 
+                    if (statement is CompositeDelayedStatement)
+                    {
+                        ds = ds.Compose((CompositeDelayedStatement)statement);
+                        continue;
+                    }
+
 					throw new ArgumentException("Wrong return type");
 				}
 			}
 
-			var pose = new Pose(context.ID().GetText(), bt, br);
+			var pose = new Pose(context.ID().GetText(), bt, br, ds);
 			if (this.Poses.ContainsKey(pose.Name))
 			{
 				throw new ArgumentException("Pose " + pose.Name + " has been previosly seen.");
@@ -187,49 +194,72 @@ namespace PreposeGestures.Parser
 		}
 
 		//        rotate_transform :  
-		//                'rotate' 'your' body_part angle angular_direction 'on' 'the' ? reference_plane;
+		//                'rotate' 'your' body_part degrees angular_direction 'on' 'the' ? reference_plane;
 		public override Wrapper VisitRotate_plane_transform(PreposeGesturesParser.Rotate_plane_transformContext context)
 		{
-			BodyTransform transform = new BodyTransform();
+			CompositeBodyTransform transform = new CompositeBodyTransform();
 			var direction = (RotationDirection)this.Visit(context.angular_direction());
 			var plane = (BodyPlaneType)this.Visit(context.reference_plane());
-			var angleText = context.NUMBER().GetText();
-			var angle = Convert.ToInt32(angleText);
+			var degreesText = context.NUMBER().GetText();
+			var degrees = Convert.ToInt32(degreesText);
 			foreach (var b in context.body_part())
 			{
 				var converted = (JointGroup)this.Visit(b);
 				transform = transform.Compose(
 					converted.Aggregate(j =>
-						BodyTransformBuilder.RotateTransform(j, angle, plane, direction)));
+						BodyTransformBuilder.RotateTransform(j, degrees, plane, direction)));
 			}
 
 			return new Wrapper(transform);
 		}
 
-		public override Wrapper VisitRotate_direction_transform(PreposeGesturesParser.Rotate_direction_transformContext context)
-		{
-			BodyTransform transform = new BodyTransform();
-			var direction = (Direction)this.Visit(context.direction());
-			var angleText = context.NUMBER().GetText();
-			var angle = Convert.ToInt32(angleText);            
+        // this is the rotate action working as a transform
+        // this was temporarily changed to make the rotate action work as a restriction as shown blow
+        public override Wrapper VisitRotate_direction_transform(PreposeGesturesParser.Rotate_direction_transformContext context)
+        {
+            var delayed = new CompositeDelayedStatement();
+            var direction = (Direction)this.Visit(context.direction());
+            var degreesText = context.NUMBER().GetText();
+            var degrees = Convert.ToInt32(degreesText);
 
-			foreach (var b in context.body_part())
-			{
-				var converted = (JointGroup)this.Visit(b);
-				transform = transform.Compose(
-					converted.Aggregate(j =>
-						BodyTransformBuilder.RotateTransform(j, angle, direction)));
-			}
+            foreach (var b in context.body_part())
+            {
+                var converted = (JointGroup)this.Visit(b);
+                delayed = delayed.Compose(
+                    converted.Aggregate(joint => 
+                        new CompositeDelayedStatement(
+                        new RotateDelayedStatement(joint, direction, degrees))));
+            }
 
-			return new Wrapper(transform);
-		}
+            return new Wrapper(delayed);
+        }
+
+        //// this is the rotate action working as a transform
+        //// this was temporarily changed to make the rotate action work as a restriction as shown blow
+        //public override Wrapper VisitRotate_direction_transform(PreposeGesturesParser.Rotate_direction_transformContext context)
+        //{
+        //    BodyTransform transform = new BodyTransform();
+        //    var direction = (Direction)this.Visit(context.direction());
+        //    var degreesText = context.NUMBER().GetText();
+        //    var degrees = Convert.ToInt32(degreesText);
+
+        //    foreach (var b in context.body_part())
+        //    {
+        //        var converted = (JointGroup)this.Visit(b);
+        //        transform = transform.Compose(
+        //            converted.Aggregate(j =>
+        //                BodyTransformBuilder.RotateTransform(j, degrees, direction)));
+        //    }
+
+        //    return new Wrapper(transform);
+        //}
 
 		//point_to_transform :    
 		//                                'point' 'your' body_part direction;
 		public override Wrapper VisitPoint_to_transform(PreposeGesturesParser.Point_to_transformContext context)
 		{
 			var direction = (Direction)this.Visit(context.direction());
-			BodyTransform transform = new BodyTransform();
+			CompositeBodyTransform transform = new CompositeBodyTransform();
 
 			foreach (var b in context.body_part())
 			{
@@ -518,7 +548,7 @@ namespace PreposeGestures.Parser
 			this.value = direction;
 		}
 
-		internal Wrapper(BodyTransform transform)
+		internal Wrapper(CompositeBodyTransform transform)
 		{
 			this.value = transform;
 		}
@@ -532,6 +562,11 @@ namespace PreposeGestures.Parser
 		{
 			this.value = joints;
 		}
+
+        internal Wrapper(CompositeDelayedStatement delayed)
+        {
+            this.value = delayed;
+        }
 
 		public static implicit operator Gesture(Wrapper w) {
 			Contract.Requires(w != null);
@@ -611,10 +646,10 @@ namespace PreposeGestures.Parser
 			return (Pose)w.value;
 		}
 
-		public static implicit operator BodyTransform(Wrapper w)
+		public static implicit operator CompositeBodyTransform(Wrapper w)
 		{
 			Contract.Requires(w != null);
-			return (BodyTransform)w.value;
+			return (CompositeBodyTransform)w.value;
 		}
 
 		public static implicit operator JointTransform(Wrapper w)

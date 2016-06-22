@@ -6,11 +6,11 @@ namespace PreposeGestures
 	public static class BodyRestrictionBuilder
 	{
 		// Therapy restrictions
-		public static IBodyRestriction StraightPostureRestriction(int angleThreshold = 15)
+		public static IBodyRestriction StraightPostureRestriction(int degreesThreshold = 15)
 		{
 			Z3Point3D up = new Z3Point3D(0, 1, 0);
 
-			double distanceThreshold = TrigonometryHelper.GetSine(angleThreshold);
+			double distanceThreshold = TrigonometryHelper.GetSine(degreesThreshold);
 
 			var result = new SimpleBodyRestriction(body =>
 			{
@@ -19,12 +19,14 @@ namespace PreposeGestures
 				expr = Z3.Context.MkAnd(expr, body.Joints[JointType.Neck].IsNearerThan(up, distanceThreshold));
 				expr = Z3.Context.MkAnd(expr, body.Joints[JointType.Head].IsNearerThan(up, distanceThreshold));
 				return expr;
-			});
+			},
+            body => { return 1.0; }
+            );
 
 			return result;
 		}
 
-		public static IBodyRestriction DistributeWeightRestriction(int angleThreshold = 15)
+		public static IBodyRestriction DistributeWeightRestriction(int degreesThreshold = 15)
 		{
 			var result = new SimpleBodyRestriction(body =>
 			{
@@ -33,10 +35,11 @@ namespace PreposeGestures
 				Z3Point3D legRight = body.Joints[JointType.KneeRight] + body.Joints[JointType.AnkleRight];
 				Z3Point3D legsAverage = (legLeft + legRight) / 2;
 
-				BoolExpr expr = legsAverage.IsAngleBetweenLessThan(up, angleThreshold);
+				BoolExpr expr = legsAverage.IsDegreesBetweenLessThan(up, degreesThreshold);
 
 				return expr;
-			});
+			},
+            body => { return 1.0; });
 
 			return result;
 		}
@@ -144,12 +147,13 @@ namespace PreposeGestures
 				//BoolExpr expr = Z3.Context.MkGt(xExpr, distanceThresholdSquared);
 
 				return expr;
-			});
+			},
+            body => { return 1.0; });
 
 			return result;
 		}        
 
-		public static IBodyRestriction DontTwistHipRestriction(int angleThreshold = 15)
+		public static IBodyRestriction DontTwistHipRestriction(int degreesThreshold = 15)
 		{
 			Z3Point3D up = new Z3Point3D(0, 1, 0);
 
@@ -171,21 +175,22 @@ namespace PreposeGestures
 
 				Z3Point3D leftToRightAnkleVec = rightAnklePosition - leftAnklePosition;
 
-				BoolExpr expr1 = leftToRightShoulderVec.IsAngleBetweenLessThan(leftToRightHipVec, angleThreshold);
-				BoolExpr expr2 = leftToRightShoulderVec.IsAngleBetweenLessThan(leftToRightAnkleVec, angleThreshold);
-				BoolExpr expr3 = leftToRightAnkleVec.IsAngleBetweenLessThan(leftToRightHipVec, angleThreshold);
+				BoolExpr expr1 = leftToRightShoulderVec.IsDegreesBetweenLessThan(leftToRightHipVec, degreesThreshold);
+				BoolExpr expr2 = leftToRightShoulderVec.IsDegreesBetweenLessThan(leftToRightAnkleVec, degreesThreshold);
+				BoolExpr expr3 = leftToRightAnkleVec.IsDegreesBetweenLessThan(leftToRightHipVec, degreesThreshold);
 
 				BoolExpr expr = Z3.Context.MkAnd(expr1, expr2, expr3);
 
 				return expr;
-			});
+			},
+            body => { return 1.0; });
 
 			return result;
 		}
 
-		public static IBodyRestriction ShouldersRelaxedRestriction(int angleThreshold = -5)
+		public static IBodyRestriction ShouldersRelaxedRestriction(int degreesThreshold = -5)
 		{
-			double maxY = TrigonometryHelper.GetSine(angleThreshold);
+			double maxY = TrigonometryHelper.GetSine(degreesThreshold);
 
 			var result = new SimpleBodyRestriction
 				(body =>
@@ -197,7 +202,8 @@ namespace PreposeGestures
 					BoolExpr expr = Z3.Context.MkAnd(expr1, expr2);
 
 					return expr;
-				});
+				},
+                body => { return 1.0; });
 
 			return result;
 		}
@@ -239,16 +245,16 @@ namespace PreposeGestures
 
 	public static class BodyTransformBuilder {
 		// Therapy transforms
-		public static BodyTransform ArmsDownTransform()
+		public static CompositeBodyTransform ArmsDownTransform()
 		{
-			return new BodyTransform()
+			return new CompositeBodyTransform()
 				.Compose(JointType.ElbowLeft, new SetJointDirectionTransform(0, -1, 0))
 				.Compose(JointType.WristLeft, new SetJointDirectionTransform(0, -1, 0))
 				.Compose(JointType.ElbowRight, new SetJointDirectionTransform(0, -1, 0))
 				.Compose(JointType.WristRight, new SetJointDirectionTransform(0, -1, 0));
 		}
 
-		public static BodyTransform CrossoverArmStretchTransform(JointSide sideOfStretchedArm)
+		public static CompositeBodyTransform CrossoverArmStretchTransform(JointSide sideOfStretchedArm)
 		{
 			JointSide oppositeSide;
 			JointTransform stretchDirectionTransform;
@@ -274,64 +280,23 @@ namespace PreposeGestures
 
 
 			// Apply the transforms in both arms
-			return new BodyTransform()
+			return new CompositeBodyTransform()
 				.Compose(stretchedElbow, stretchDirectionTransform)
 				.Compose(stretchedWrist, stretchDirectionTransform)
 				.Compose(supportElbow, new SetJointDirectionTransform(0, -1, 0))
 				.Compose(supportWrist, new SetJointDirectionTransform(0, 1, 0));
 		}
 
-		public static BodyTransform PointToTransform(JointType jointType, Direction direction)
+		public static CompositeBodyTransform PointToTransform(JointType jointType, Direction direction)
 		{
 			Z3Point3D point3D = Z3Point3D.DirectionPoint(direction);            
 
-			return new BodyTransform(jointType, new SetJointDirectionTransform(point3D));
+			return new CompositeBodyTransform(jointType, new SetJointDirectionTransform(point3D));
 		}
 
-		public static BodyTransform RotateTransform(JointType jointType, int angle, BodyPlaneType plane, RotationDirection direction)
+		public static CompositeBodyTransform RotateTransform(JointType jointType, int degrees, BodyPlaneType plane, RotationDirection direction)
 		{
-			return new BodyTransform(jointType, new RotateJointTransform(angle, plane, direction));
-		}
-
-		public static BodyTransform RotateTransform(JointType jointType, int angle, Direction direction)
-		{
-			return new BodyTransform(jointType, new RotateJointTransform(angle, direction));
-
-			//BodyPlaneType plane = new BodyPlaneType();
-			//RotationDirection rotationDir = new RotationDirection();
-
-			//// TODO still have to evaluate which rotationDir brings the vector nearer to the intended direction
-			//switch (direction)
-			//{
-			//	case (Direction.Front):
-			//		plane = BodyPlaneType.Sagittal;
-			//		rotationDir = RotationDirection.Clockwise;
-			//		break;
-			//	case (Direction.Back):
-			//		plane = BodyPlaneType.Sagittal;
-			//		rotationDir = RotationDirection.CounterClockwise;
-			//		break;
-			//	case (Direction.Right):
-			//		plane = BodyPlaneType.Frontal;
-			//		rotationDir = RotationDirection.Clockwise;
-			//		break;
-			//	case (Direction.Left):
-			//		plane = BodyPlaneType.Frontal;
-			//		rotationDir = RotationDirection.CounterClockwise;
-			//		break;
-			//	case (Direction.Up):
-			//		plane = BodyPlaneType.Horizontal;
-			//		rotationDir = RotationDirection.Clockwise;
-			//		break;
-			//	case (Direction.Down):
-			//		plane = BodyPlaneType.Horizontal;
-			//		rotationDir = RotationDirection.CounterClockwise;
-			//		break;
-			//	default:
-			//		break;
-			//}
-
-			//return new BodyTransform(jointType, new RotateJointTransform(angle, plane, rotationDir));
+			return new CompositeBodyTransform(jointType, new RotateJointTransform(degrees, plane, direction));
 		}
 	}
 
@@ -360,11 +325,11 @@ namespace PreposeGestures
 			var startTransform = BodyTransformBuilder.ArmsDownTransform();
 
 			// The create a new pose for the rise of the left arm
-			BodyTransform leftUpTransform = new BodyTransform();
+			CompositeBodyTransform leftUpTransform = new CompositeBodyTransform();
 			leftUpTransform = startTransform.Compose(JointType.WristLeft, new SetJointDirectionTransform(0, 1, 0));
 
 			// And another for the rise of the right arm
-			BodyTransform rightUpTransform = new BodyTransform();
+			CompositeBodyTransform rightUpTransform = new CompositeBodyTransform();
 			rightUpTransform = startTransform.Compose(JointType.WristRight, new SetJointDirectionTransform(0, 1, 0));
 
 			// Add the needed 
@@ -379,7 +344,7 @@ namespace PreposeGestures
 		public static IEnumerable<Pose> PassiveExternalRotation(int numberOfRepetitions = 4)
 		{
 			// Create the left pose and set both arms to point down
-			BodyTransform leftTransform = new BodyTransform();
+			CompositeBodyTransform leftTransform = new CompositeBodyTransform();
 			leftTransform = leftTransform.Compose(JointType.ElbowLeft, new SetJointDirectionTransform(0, -1, 0));
 			leftTransform = leftTransform.Compose(JointType.WristLeft, new SetJointDirectionTransform(-0.7, 0, 0.7));
 			leftTransform = leftTransform.Compose(JointType.ElbowRight, new SetJointDirectionTransform(0, -1, 0));
@@ -387,7 +352,7 @@ namespace PreposeGestures
 			Pose leftPose = new Pose("DontTwistHipRestriction-l", leftTransform, BodyRestrictionBuilder.DontTwistHipRestriction(5));
 
 			// Create the left pose and set both arms to point down
-			BodyTransform rightTransform = new BodyTransform();
+			CompositeBodyTransform rightTransform = new CompositeBodyTransform();
 			rightTransform = rightTransform.Compose(JointType.ElbowLeft, new SetJointDirectionTransform(0, -1, 0));
 			rightTransform = rightTransform.Compose(JointType.WristLeft, new SetJointDirectionTransform(0, 0, 1));
 			rightTransform = rightTransform.Compose(JointType.ElbowRight, new SetJointDirectionTransform(0, -1, 0));
@@ -403,14 +368,14 @@ namespace PreposeGestures
 
 		public static IEnumerable<Pose> ShoulderFlexion(int numberOfRepetitions = 3)
 		{
-			BodyTransform leftUp = new BodyTransform();
+			CompositeBodyTransform leftUp = new CompositeBodyTransform();
 			leftUp = leftUp.Compose(JointType.ElbowLeft, new SetJointDirectionTransform(0, 1, 0));
 			leftUp = leftUp.Compose(JointType.WristLeft, new SetJointDirectionTransform(0, 1, 0));
 			leftUp = leftUp.Compose(JointType.ElbowRight, new SetJointDirectionTransform(0, -1, 0));
 			leftUp = leftUp.Compose(JointType.WristRight, new SetJointDirectionTransform(0, -1, 0));
 			Pose leftPose = new Pose("leftUp", leftUp);
 
-			BodyTransform rightUp = new BodyTransform();
+			CompositeBodyTransform rightUp = new CompositeBodyTransform();
 			rightUp = rightUp.Compose(JointType.ElbowLeft, new SetJointDirectionTransform(0, -1, 0));
 			rightUp = rightUp.Compose(JointType.WristLeft, new SetJointDirectionTransform(0, -1, 0));
 			rightUp = rightUp.Compose(JointType.ElbowRight, new SetJointDirectionTransform(0, 1, 0));
@@ -426,14 +391,14 @@ namespace PreposeGestures
 
 		public static IEnumerable<Pose> ShoulderAbduction(int numberOfRepetitions = 3)
 		{
-			BodyTransform leftUp = new BodyTransform();
+			CompositeBodyTransform leftUp = new CompositeBodyTransform();
 			leftUp = leftUp.Compose(JointType.ElbowLeft, new SetJointDirectionTransform(-1, 0, 0));
 			leftUp = leftUp.Compose(JointType.WristLeft, new SetJointDirectionTransform(-1, 0, 0));
 			leftUp = leftUp.Compose(JointType.ElbowRight, new SetJointDirectionTransform(0, -1, 0));
 			leftUp = leftUp.Compose(JointType.WristRight, new SetJointDirectionTransform(0, -1, 0));
 			Pose leftPose = new Pose("leftUp", leftUp);
 
-			BodyTransform rightUp = new BodyTransform();
+			CompositeBodyTransform rightUp = new CompositeBodyTransform();
 			rightUp = rightUp.Compose(JointType.ElbowLeft, new SetJointDirectionTransform(0, -1, 0));
 			rightUp = rightUp.Compose(JointType.WristLeft, new SetJointDirectionTransform(0, -1, 0));
 			rightUp = rightUp.Compose(JointType.ElbowRight, new SetJointDirectionTransform(1, 0, 0));

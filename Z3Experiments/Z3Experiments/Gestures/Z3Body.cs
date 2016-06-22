@@ -224,9 +224,9 @@ namespace PreposeGestures
 			return result;
 		}
 
-		public BodyTransform Aggregate(Func<JointType, BodyTransform> func)
+		public CompositeBodyTransform Aggregate(Func<JointType, CompositeBodyTransform> func)
 		{
-			var result = new BodyTransform();
+			var result = new CompositeBodyTransform();
 			foreach (var joint in this.Joints)
 			{
 				var that = func(joint);
@@ -235,6 +235,18 @@ namespace PreposeGestures
 
 			return result;
 		}
+
+        public CompositeDelayedStatement Aggregate(Func<JointType, CompositeDelayedStatement> func)
+        {
+            var result = new CompositeDelayedStatement();
+            foreach (var joint in this.Joints)
+            {
+                var that = func(joint);
+                result = result.Compose(that);
+            }
+
+            return result;
+        }
 
 		public JointType Only()
 		{
@@ -288,6 +300,18 @@ namespace PreposeGestures
             return Math.Sqrt(X * X + Y * Y + Z * Z);
         }
 
+        public Point3D NormalizedCopy()
+        {
+            var result = new Point3D();
+            var norm = this.Norm();
+
+            result.X = this.X / norm;
+            result.Y = this.Y / norm;
+            result.Z = this.Z / norm;
+
+            return result;
+        }
+
         public double X { get; set; }
 
         public double Y { get; set; }
@@ -300,6 +324,25 @@ namespace PreposeGestures
                 this.X,
                 this.Y,
                 this.Z);
+        }
+
+        public double DistanceTo(Point3D point)
+        {
+            return Math.Sqrt(Math.Pow(X - point.X,2) + Math.Pow(Y - point.Y,2) + Math.Pow(Z - point.Z,2));
+        }
+
+        private double DotProduct(Point3D vec)
+        {
+            var p1 = this.NormalizedCopy();
+            var p2 = this.NormalizedCopy();
+
+            return p1.X * p2.X + p1.Y * p2.Y + p1.Z * p2.Z;
+        }
+
+        // returns the angle to provided vec in radians
+        public double RadiansTo(Point3D vec)
+        {
+            return Math.Acos(this.DotProduct(vec));
         }
     }
 
@@ -553,33 +596,33 @@ namespace PreposeGestures
 		//}
 		
 		// Assumes vectors are normalized
-		public BoolExpr IsAngleBetweenLessThan(Z3Point3D that, int angleThreshold)
+		public BoolExpr IsDegreesBetweenLessThan(Z3Point3D that, int degreesThreshold)
 		{   
-			double distanceThreshold = TrigonometryHelper.GetDistance(angleThreshold);
+			double distanceThreshold = TrigonometryHelper.GetDistance(degreesThreshold);
 			ArithExpr distance = this.CalcApproximateDistance(that);
 
 			BoolExpr result = Z3.Context.MkLt(distance, Z3Math.Real(distanceThreshold));
 
-            // TODO remove this, test code
-            SolverCheckResult checkResult = Z3AnalysisInterface.CheckStatus(result);
-            if (checkResult.Status == Status.SATISFIABLE)
-            {
-                var joint = new Z3Point3D(
-                        checkResult.Model.Evaluate(this.X, true) as ArithExpr,
-                        checkResult.Model.Evaluate(this.Y, true) as ArithExpr,
-                        checkResult.Model.Evaluate(this.Z, true) as ArithExpr);
+            //// TODO remove this, test code
+            //SolverCheckResult checkResult = Z3AnalysisInterface.CheckStatus(result);
+            //if (checkResult.Status == Status.SATISFIABLE)
+            //{
+            //    var joint = new Z3Point3D(
+            //            checkResult.Model.Evaluate(this.X, true) as ArithExpr,
+            //            checkResult.Model.Evaluate(this.Y, true) as ArithExpr,
+            //            checkResult.Model.Evaluate(this.Z, true) as ArithExpr);
 
-                var distanceSolvedExpr = checkResult.Model.Evaluate(distance, true) as ArithExpr;
-                var distanceValue = Z3Math.GetRealValue(distanceSolvedExpr);
-            }
-            // end of test code
+            //    var distanceSolvedExpr = checkResult.Model.Evaluate(distance, true) as ArithExpr;
+            //    var distanceValue = Z3Math.GetRealValue(distanceSolvedExpr);
+            //}
+            //// end of test code
 
 			return result;
 		}
 
-		public BoolExpr IsAngleBetweenGreaterThan(Z3Point3D that, int angleThreshold)
+		public BoolExpr IsDegreesBetweenGreaterThan(Z3Point3D that, int degreesThreshold)
 		{
-			BoolExpr result = Z3.Context.MkNot(this.IsAngleBetweenLessThan(that, angleThreshold));
+			BoolExpr result = Z3.Context.MkNot(this.IsDegreesBetweenLessThan(that, degreesThreshold));
 			return result;
 		}
 
@@ -699,7 +742,7 @@ namespace PreposeGestures
 			this.Norms = norms;
 		}
 
-        public Z3Body(Z3Body baseBody)
+        public Z3Body(Z3Body baseBody) : this()
         {
             foreach (var jointType in baseBody.Joints.Keys)
             {
@@ -788,7 +831,7 @@ namespace PreposeGestures
         //    return CalcDistanceExprs(target.Body, target.TransformedJoints);
         //}
 
-		public BoolExpr IsAngleBetweenLessThan(Z3Body that, List<JointType> joints, int angleThreshold)
+		public BoolExpr IsDegreesBetweenLessThan(Z3Body that, List<JointType> joints, int degreesThreshold)
 		{
 			BoolExpr result = Z3Math.True;
 
@@ -799,7 +842,7 @@ namespace PreposeGestures
 				result = 
 					Z3.Context.MkAnd(
 					result, 
-					this.Joints[jointType].IsAngleBetweenLessThan(that.Joints[jointType], angleThreshold));
+					this.Joints[jointType].IsDegreesBetweenLessThan(that.Joints[jointType], degreesThreshold));
 			}
 
 			return result;
@@ -847,8 +890,6 @@ namespace PreposeGestures
 				result = result + (this.Joints[currentJointType] * this.Norms[currentJointType]);
 				currentJointType = JointTypeHelper.GetFather(currentJointType);
 			}
-
-            result = result + (this.Joints[jointType] * this.Norms[jointType]);
 
 			return result;
 		}

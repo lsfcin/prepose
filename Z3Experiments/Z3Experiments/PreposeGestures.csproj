@@ -11,10 +11,14 @@
     <AssemblyName>PreposeGestures</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>dd33cbc6</NuGetPackageImportStamp>
   </PropertyGroup>
@@ -109,6 +113,7 @@
     <Compile Include="Gestures\App.cs" />
     <Compile Include="Gestures\BodyMatching.cs" />
     <Compile Include="Gestures\ExecutionStep.cs" />
+    <Compile Include="Gestures\DelayedStatements.cs" />
     <Compile Include="Gestures\Gestures.cs" />
     <Compile Include="Gestures\JointTypeHelper.cs" />
     <Compile Include="Gestures\Z3Body.cs" />
