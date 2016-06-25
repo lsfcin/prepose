@@ -76,7 +76,7 @@ namespace PreposeGestures
 
             foreach (GestureStatus gs in results)
             {
-                if (gesture.Name.Equals(gs.GestureName))
+                if (gesture.Name.Equals(gs.Name))
                 {
                     detected = gs.succeededDetection;
                     firstFrame = gs.succeededDetectionFirstFrame;

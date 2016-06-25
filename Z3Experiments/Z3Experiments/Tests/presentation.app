@@ -19,6 +19,23 @@ APP present:
 		pose1,
 		pose2,
 		pose3.
+
+	GESTURE next_3601:
+
+		POSE pose11:
+		rotate your right wrist 15 degrees up,
+		rotate your right wrist 15 degrees to your right.
+		
+		POSE pose21:
+		rotate your right wrist 25 degrees up.
+		
+		POSE pose31:
+		rotate your right wrist 45 degrees up.
+
+		EXECUTION:
+		pose11,
+		pose21,
+		pose31.
 		
 	
 //APP present:

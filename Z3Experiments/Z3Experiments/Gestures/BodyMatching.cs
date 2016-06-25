@@ -33,7 +33,6 @@ namespace PreposeGestures
                 Matchers.Add(matcher);
 
             }
-
         }
 
         public void AddGesture(Gesture gesture)
@@ -68,11 +67,9 @@ namespace PreposeGestures
             */
 
             // Matching itself uses the Z3 context - and that can't be shared across threads! 
-
             foreach (var matcher in this.Matchers)
             {
                 result.Add(matcher.TestBody(body, this.Precision, Z3.Context));
-                //result.Add(matcher.GetStatus());
             }
 
             // Check for each matcher to see if it succeeded. If it did, then synthesize a new target position. 
@@ -303,7 +300,7 @@ namespace PreposeGestures
         {
             GestureStatus result = new GestureStatus();
 
-            result.GestureName = this.Gesture.Name;
+            result.Name = this.Gesture.Name;
 
             string stepName = "";
 
@@ -390,7 +387,7 @@ namespace PreposeGestures
     {
         public GestureStatus()
         {
-            GestureName = "";
+            Name = "";
             StepNames = new List<string>();
             CurrentStep = 0;
             Percentage = 0;
@@ -398,7 +395,7 @@ namespace PreposeGestures
             CompletedCount = 0;
         }
 
-        public string GestureName { get; set; }
+        public string Name { get; set; }
 
         public List<string> StepNames { get; set; }
 

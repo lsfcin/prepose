@@ -28,6 +28,7 @@ namespace PreposeGestureRecognizer
     using System.Xml;
     using ICSharpCode.AvalonEdit.CodeCompletion;
     using System.Reflection;
+    using PreposeGestureRecognizer.Controls;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -563,39 +564,61 @@ namespace PreposeGestureRecognizer
         // Gestures logic
         private static bool playingGesture = false;
         private static string parsedText = "";
-        //private static KinectApp gestureApp;
         private PreposeGestures.BodyMatcher matcher;
-        private static List<System.Windows.Controls.ProgressBar> mainProgressBars = null;
-        private static List<TextBlock> posesTextBlocks = null;
 
         private void ManageGestureApp(
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints,
             DrawingContext dc)
         {
-            //var time = this.stopwatch.ElapsedMilliseconds;
-            //Console.WriteLine("Z3 milliseconds " + time);
-            //this.stopwatch.Reset();
-            //this.stopwatch.Start();
-
-            var status =
-                BodyMatching.TestBody(this.matcher, kinectJoints, jumpToNextPose);
+            // convert Kinect.Body to Z3Body
+            var body = ConvertBody(kinectJoints);
+            var statuses = this.matcher.TestBody(body);
 
             jumpToNextPose = false;
 
-            if(status.Count >= 2)
+            if(statuses.Count >= 2)
             {
-                if (status[0].succeededDetection)
+                if (statuses[0].succeededDetection)
                 {
                     SendKeys.SendWait("{RIGHT}");
                 }
-                if (status[1].succeededDetection)
+                if (statuses[1].succeededDetection)
                 {
                     SendKeys.SendWait("{LEFT}");
                 }
             }
-
-            RenderFeedback(status);
+            
+            // match the status return with the feedback UI controls
+            foreach(var status in statuses)
+            {
+                foreach(var panelChild in this.GesturesProgressPanel.Children)
+                {
+                    if (panelChild is GestureProgress)
+                    {
+                        var gestureProgress = (GestureProgress)panelChild;
+                        var gestureName = gestureProgress.Gesture.Name;
+                        if (gestureName.CompareTo(status.Name) == 0)
+                            gestureProgress.RenderFeedback(status);
+                    }
+                }
+            }
             this.DrawTarget(kinectJoints, dc);
+        }
+
+        private Z3Body ConvertBody(IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints)
+        {
+            var body = new Z3Body();
+            if (!jumpToNextPose)
+            {
+                body = Z3KinectConverter.CreateZ3Body(kinectJoints);
+            }
+            else
+            {
+                //body = GetCopiedBodyValues(this.Gestures[this.GetMostAdvancedGesturesIDs()[0]].GetTarget().Body);
+                var firstGestureBody = matcher.GetLastGestureTarget().Body;
+                body = new Z3Body(firstGestureBody);
+            }
+            return body;
         }
 
         private void PrecisionSlider_Loaded(object sender, RoutedEventArgs e)
@@ -634,96 +657,6 @@ namespace PreposeGestureRecognizer
             this.useSyntheticData = false;
         }
 
-        #endregion
-
-        #region Rendering Addtional UI Feedback
-        private void StartMainProgressBars(List<ExecutionStep> steps)
-        {
-            if (mainProgressBars == null)
-                mainProgressBars = new List<System.Windows.Controls.ProgressBar>();
-
-            if (posesTextBlocks == null)
-                posesTextBlocks = new List<TextBlock>();
-
-            var barWidth = ((this.Width - 110) / steps.Count) - 5;
-            var xPos = 10;
-            foreach (var step in steps)
-            {
-                var bar = new System.Windows.Controls.ProgressBar();
-                bar.Minimum = 0;
-                bar.Maximum = 100;
-                bar.Margin = new Thickness(xPos, 0, 0, -60);
-                bar.Height = 30;
-                bar.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-                bar.VerticalAlignment = System.Windows.VerticalAlignment.Bottom;
-
-                bar.Width = barWidth;
-                Grid.SetRow(bar, 2);
-                Grid.SetColumnSpan(bar, 2);
-                this.MainGrid.Children.Add(bar);
-                mainProgressBars.Add(bar);
-
-                var textBlock = new TextBlock();
-                textBlock.Text = step.Pose.Name;
-                textBlock.Margin = new Thickness(xPos - 1, 0, 0, -28);
-                textBlock.TextAlignment = TextAlignment.Left;
-                textBlock.FontSize = 19;
-                textBlock.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-                textBlock.VerticalAlignment = System.Windows.VerticalAlignment.Bottom;
-                Grid.SetRow(textBlock, 2);
-                Grid.SetColumnSpan(textBlock, 2);
-                this.MainGrid.Children.Add(textBlock);
-                posesTextBlocks.Add(textBlock);
-
-                xPos += (int)barWidth + 5;
-            }
-        }
-
-        private void StopMainProgressBars()
-        {
-            foreach (var bar in mainProgressBars)
-            {
-                this.MainGrid.Children.Remove(bar);
-            }
-
-            foreach (var textBlock in posesTextBlocks)
-            {
-                this.MainGrid.Children.Remove(textBlock);
-            }
-
-            mainProgressBars.Clear();
-            posesTextBlocks.Clear();
-        }
-
-        private void RenderFeedback(List<GestureStatus> feedback)
-        {
-            var gesture = feedback[0];
-
-            var mainPosePercentage = gesture.Percentage;
-            var mainGesturePercentage =
-                (double)gesture.CurrentStep /
-                gesture.NumSteps +
-                mainPosePercentage /
-                gesture.NumSteps;
-
-            for (int i = 0; i < gesture.NumSteps; ++i)
-            {
-                if (i < gesture.CurrentStep)
-                    mainProgressBars[i].Value = 100;
-
-                else if (i == gesture.CurrentStep)
-                    mainProgressBars[i].Value = 100 * mainPosePercentage;
-
-                else
-                    mainProgressBars[i].Value = 0;
-            }
-
-            CompletedTimesTextBlock.Text = feedback[0].CompletedCount.ToString();
-            if (feedback[0].CompletedCount == 1)
-                TimesTextBlock.Text = "time";
-            else
-                TimesTextBlock.Text = "times";
-        }
         #endregion
 
         #region Rendering Target
@@ -824,12 +757,11 @@ namespace PreposeGestureRecognizer
             else
                 drawingContext.DrawLine(shadowPen, shadowPoints[jointType0], shadowPoints[jointType1]);
         }
-
         #endregion
 
         #region Script Compiling
         private void StartButton_Click(object sender, RoutedEventArgs e)
-        {
+        {            
             if (!playingGesture)
             {
                 parsedText = this.ScriptTextBox.Text;
@@ -840,13 +772,16 @@ namespace PreposeGestureRecognizer
                     matcher = new BodyMatcher(app, (int)PrecisionSlider.Value);
                     Debug.WriteLine(app);
 
-                    // get the last gesture
-                    this.MainGestureAndPoseNameTextBlock.Text = app.Gestures[app.Gestures.Count - 1].Name;
-                    this.StartMainProgressBars(app.Gestures[app.Gestures.Count - 1].Steps);
+                    // get the main gesture
+                    foreach (var gesture in app.Gestures)
+                    {
+                        var progress = new PreposeGestureRecognizer.Controls.GestureProgress(gesture);
+                        this.GesturesProgressPanel.Children.Add(progress);
+                        this.GesturesProgressPanel.Height += progress.Height;
+                    }
+                    this.GesturesProgressViewer.Visibility = System.Windows.Visibility.Visible;
 
-                    this.CompletedGrid.Visibility = System.Windows.Visibility.Visible;
-                    this.MainGestureAndPoseNameTextBlock.Visibility = System.Windows.Visibility.Visible;
-
+                    this.ScriptTextBox.Visibility = System.Windows.Visibility.Hidden;
                     this.ScriptTextBox.IsReadOnly = true;
                     this.ScriptTextBox.Background = Brushes.WhiteSmoke;
                     this.ScriptTextBox.Foreground = Brushes.DarkGray;
@@ -861,11 +796,10 @@ namespace PreposeGestureRecognizer
             }
             else
             {
-                this.StopMainProgressBars();
-
-                this.CompletedGrid.Visibility = System.Windows.Visibility.Hidden;
-                this.MainGestureAndPoseNameTextBlock.Text = "";
-                this.MainGestureAndPoseNameTextBlock.Visibility = System.Windows.Visibility.Hidden;
+                this.GesturesProgressPanel.Height = 0;
+                this.GesturesProgressPanel.Children.Clear();
+                this.GesturesProgressViewer.Visibility = System.Windows.Visibility.Hidden;
+                
                 this.ScriptTextBox.Visibility = System.Windows.Visibility.Visible;
                 this.ScriptTextBox.IsReadOnly = false;
                 this.ScriptTextBox.Background = Brushes.White;
