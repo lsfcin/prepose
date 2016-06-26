@@ -108,7 +108,10 @@ namespace PreposeGestures
 
 		public override string ToString()
         {
-            var result = "rotate your " + JointType.ToString() + " " + Degrees + " degrees " + Direction.ToString();
+            var result = 
+                "rotate your " + EnumUtil.GetDescription<JointType>(JointType) + 
+                " " + Degrees + 
+                " degrees " + EnumUtil.GetDescription<Direction>(Direction);
             return result.ToLower();
         }
     }

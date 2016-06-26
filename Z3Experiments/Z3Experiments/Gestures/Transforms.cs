@@ -2,39 +2,57 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.ComponentModel;
 
 namespace PreposeGestures
 {
     public enum BodyPlaneType
     {
+        [Description("frontal")]
         Frontal = 0,
+        [Description("sagittal")]
         Sagittal = 1,
+        [Description("horizontal")]
         Horizontal = 2,
     }
 
     public enum RelativeDirection
     {
+        [Description("in front of your")]
         InFrontOfYour,
+        [Description("behind your")]
         BehindYour,
+        [Description("above your")]
         OnTopOfYour,
+        [Description("below your")]
         BelowYour,
+        [Description("to the left of your")]
         ToTheLeftOfYour,
+        [Description("to the right of your")]
         ToTheRightOfYour,
     }
 
     public enum Direction
     {
+        [Description("up")]
         Up,
+        [Description("down")]
         Down,
+        [Description("front")]
         Front,
+        [Description("back")]
         Back,
+        [Description("left")]
         Left,
+        [Description("right")]
         Right,
     }
 
     public enum RotationDirection
     {
+        [Description("clockwise")]
         Clockwise = 0,
+        [Description("counter clockwise")]
         CounterClockwise = 1,
     }
 
@@ -113,13 +131,6 @@ namespace PreposeGestures
         }
 
         private Func<Z3Point3D, Z3Point3D> TransformFunc { get; set; }
-    }
-
-    public class RemainStillJointTransform : JointTransform
-    {
-        public RemainStillJointTransform()
-            : base(joint => joint)
-        { }
     }
 
     public class SetJointDirectionTransform : JointTransform
@@ -669,7 +680,7 @@ namespace PreposeGestures
                 {
                     if (count > 0)
                         buf.AppendFormat("\n");
-                    buf.AppendFormat("\t{0}: {1}", jointType, this.JointTransforms[jointType]);
+                    buf.AppendFormat("\t{0}: {1}", EnumUtil.GetDescription<JointType>(jointType), this.JointTransforms[jointType]);
                     count++;
                 }
             }

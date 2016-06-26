@@ -796,7 +796,6 @@ namespace PreposeGestureRecognizer
             }
             else
             {
-                this.GesturesProgressPanel.Height = 0;
                 this.GesturesProgressPanel.Children.Clear();
                 this.GesturesProgressViewer.Visibility = System.Windows.Visibility.Hidden;
                 
@@ -834,10 +833,8 @@ namespace PreposeGestureRecognizer
             dlg.DefaultExt = ".app";
             dlg.Filter = "Gesture APP Files (*.app)|*.app|Text Files (*.txt)|*.txt";
 
-
             // Display OpenFileDialog by calling ShowDialog method 
             Nullable<bool> result = dlg.ShowDialog();
-
 
             // Get the selected file name and display in a TextBox 
             if (result == true)

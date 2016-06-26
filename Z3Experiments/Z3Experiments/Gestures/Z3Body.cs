@@ -5,28 +5,43 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace PreposeGestures
 {
 	public enum JointSide
 	{
-		Left = 0,
-		Right = 1,
-		Center = 3,
+		[Description("left")] 
+        Left = 0,
+        [Description("right")]
+        Right = 1,
+        [Description("center")]
+        Center = 3,
 	}
 
 	public enum SidedJointName
 	{
-		Shoulder = 0,
-		Elbow = 1,
-		Wrist = 2,
-		Hand = 3,
-		Hip = 4,
-		Knee = 5,
-		Ankle = 6,
-		Foot = 7,
-		HandTip = 8,
-		Thumb = 9,
+        [Description("shoulder")]
+        Shoulder = 0,
+        [Description("elbow")]
+        Elbow = 1,
+        [Description("wrist")]
+        Wrist = 2,
+        [Description("hand")]
+        Hand = 3,
+        [Description("hip")]
+        Hip = 4,
+        [Description("knee")]
+        Knee = 5,
+        [Description("ankle")]
+        Ankle = 6,
+        [Description("foot")]
+        Foot = 7,
+        [Description("hand tip")]
+        HandTip = 8,
+        [Description("thumb")]
+        Thumb = 9,
 	}
 
 	/// <summary>
@@ -35,30 +50,55 @@ namespace PreposeGestures
 	/// </summary>
 	public enum JointType
 	{
-		SpineBase = 0,
-		SpineMid = 1,
-		Neck = 2,
-		Head = 3,
-		ShoulderLeft = 4,
-		ElbowLeft = 5,
-		WristLeft = 6,
-		HandLeft = 7,
-		ShoulderRight = 8,
-		ElbowRight = 9,
-		WristRight = 10,
-		HandRight = 11,
-		HipLeft = 12,
-		KneeLeft = 13,
-		AnkleLeft = 14,
-		FootLeft = 15,
-		HipRight = 16,
-		KneeRight = 17,
-		AnkleRight = 18,
-		FootRight = 19,
-		SpineShoulder = 20,
-		HandTipLeft = 21,
-		ThumbLeft = 22,
-		HandTipRight = 23,
+        [Description("hips center")]
+        SpineBase = 0,
+        [Description("spine")]
+        SpineMid = 1,
+        [Description("neck")]
+        Neck = 2,
+        [Description("head")]
+        Head = 3,
+        [Description("left shoulder")]
+        ShoulderLeft = 4,
+        [Description("left elbow")]
+        ElbowLeft = 5,
+        [Description("left wrist")]
+        WristLeft = 6,
+        [Description("left hand")]
+        HandLeft = 7,
+        [Description("right shoulder")]
+        ShoulderRight = 8,
+        [Description("right elbow")]
+        ElbowRight = 9,
+        [Description("right wrist")]
+        WristRight = 10,
+        [Description("right hand")]
+        HandRight = 11,
+        [Description("left hip")]
+        HipLeft = 12,
+        [Description("left knee")]
+        KneeLeft = 13,
+        [Description("left ankle")]
+        AnkleLeft = 14,
+        [Description("left foot")]
+        FootLeft = 15,
+        [Description("right hip")]
+        HipRight = 16,
+        [Description("right knee")]
+        KneeRight = 17,
+        [Description("right ankle")]
+        AnkleRight = 18,
+        [Description("right foot")]
+        FootRight = 19,
+        [Description("shoulders center")]
+        SpineShoulder = 20,
+        [Description("left hand tip")]
+        HandTipLeft = 21,
+        [Description("left thumb")]
+        ThumbLeft = 22,
+        [Description("right hand tip")]
+        HandTipRight = 23,
+        [Description("right thumb")]
 		ThumbRight = 24,
 	}
 
@@ -85,7 +125,6 @@ namespace PreposeGestures
 			return result;
 		}
 	}
-
 
 	public static class Z3Math
 	{
@@ -261,6 +300,32 @@ namespace PreposeGestures
 		{
 			return Enum.GetValues(typeof(T)).Cast<T>();
 		}
+
+        public static string GetDescription<T>(this T enumerationValue)
+            where T : struct
+        {
+            Type type = enumerationValue.GetType();
+            if (!type.IsEnum)
+            {
+                throw new ArgumentException("EnumerationValue must be of Enum type", "enumerationValue");
+            }
+
+            //Tries to find a DescriptionAttribute for a potential friendly name
+            //for the enum
+            MemberInfo[] memberInfo = type.GetMember(enumerationValue.ToString());
+            if (memberInfo != null && memberInfo.Length > 0)
+            {
+                object[] attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+                if (attrs != null && attrs.Length > 0)
+                {
+                    //Pull out the description value
+                    return ((DescriptionAttribute)attrs[0]).Description;
+                }
+            }
+            //If we have no description attribute, just return the ToString of the enum
+            return enumerationValue.ToString();
+        }
 	}
 
 	public static class Rational
@@ -763,7 +828,7 @@ namespace PreposeGestures
 
 			foreach (var joint in Joints.OrderBy(k => k.Key))
 			{
-				buf.AppendFormat("\n\t{0}: {1}", joint.Key, joint.Value);
+				buf.AppendFormat("\n\t{0}: {1}", EnumUtil.GetDescription<JointType>(joint.Key), joint.Value);
 			}
 
 			return buf.ToString();
@@ -776,8 +841,8 @@ namespace PreposeGestures
 			var jointTypes = EnumUtil.GetValues<JointType>();
 			foreach (var jointType in jointTypes)
 			{
-				result.Joints.Add(jointType, Z3Point3D.MkZ3Const(jointType.ToString()));
-				result.Norms.Add(jointType, Z3.Context.MkRealConst(jointType.ToString() + " Norm"));
+				result.Joints.Add(jointType, Z3Point3D.MkZ3Const(EnumUtil.GetDescription<JointType>(jointType)));
+				result.Norms.Add(jointType, Z3.Context.MkRealConst(EnumUtil.GetDescription<JointType>(jointType) + " Norm"));
 			}
 
 			return result;
