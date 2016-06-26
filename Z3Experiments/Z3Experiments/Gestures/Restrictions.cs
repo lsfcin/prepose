@@ -155,25 +155,26 @@ namespace PreposeGestures
 
         public override string ToString()
         {
+            var result = "";
             if (Restrictions.Count > 0)
             {
-                return string.Format("[{0}: \n\t\t\t{1}]", this.Restrictions.Count, string.Join(", \n\t\t\t", this.Restrictions));
-            }
-            else
-            {
-                return "none";
-            }
-        }
+                var count = 0;
+                foreach(var restriction in this.Restrictions)
+                {
+                    if (count > 0)
+                        result += "\n";
 
-
-        public int GetRestrictionCount()
-        {
-            int result = 0;
-            foreach (var restriction in this.Restrictions) {
-                result += restriction.GetRestrictionCount();
+                    result += restriction.ToString();
+                    count++;
+                }
             }
 
             return result;
+        }
+
+        public int GetRestrictionCount()
+        {
+            return this.Restrictions.Count;
         }
     }
 

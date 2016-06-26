@@ -30,16 +30,10 @@ namespace PreposeGestures
             return result;
         }
 
-        public CompositeBodyTransform Transform { get; set; }
-        public CompositeBodyRestriction Restriction { get; set; }
-        public List<RotateDelayedStatement> Statements { get; set; }
-
-
         internal void Update(Z3Body body)
         {
             this.Restriction = new CompositeBodyRestriction();
-            this.Transform = new CompositeBodyTransform();
-            
+            this.Transform = new CompositeBodyTransform();            
 
             // treating rotate direction
             // for each definition
@@ -79,6 +73,24 @@ namespace PreposeGestures
                 }       
             }
         }
+
+		public override string ToString()
+        {
+            var result = "";
+            var count = 0;
+            foreach(var statement in Statements)
+            {
+                if (count > 0)
+                    result += "\n";
+                result += statement.ToString();
+                count++;
+            }
+            return result;
+        }
+
+        public CompositeBodyTransform Transform { get; set; }
+        public CompositeBodyRestriction Restriction { get; set; }
+        public List<RotateDelayedStatement> Statements { get; set; }
     }
 
     public class RotateDelayedStatement
@@ -93,5 +105,11 @@ namespace PreposeGestures
         public JointType JointType { get; set; }
         public Direction Direction { get; set; }
         public int Degrees { get; set; }
+
+		public override string ToString()
+        {
+            var result = "rotate your " + JointType.ToString() + " " + Degrees + " degrees " + Direction.ToString();
+            return result.ToLower();
+        }
     }
 }

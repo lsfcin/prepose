@@ -576,17 +576,17 @@ namespace PreposeGestureRecognizer
 
             jumpToNextPose = false;
 
-            if(statuses.Count >= 2)
-            {
-                if (statuses[0].succeededDetection)
-                {
-                    SendKeys.SendWait("{RIGHT}");
-                }
-                if (statuses[1].succeededDetection)
-                {
-                    SendKeys.SendWait("{LEFT}");
-                }
-            }
+            //if(statuses.Count >= 2)
+            //{
+            //    if (statuses[0].succeededDetection)
+            //    {
+            //        SendKeys.SendWait("{RIGHT}");
+            //    }
+            //    if (statuses[1].succeededDetection)
+            //    {
+            //        SendKeys.SendWait("{LEFT}");
+            //    }
+            //}
             
             // match the status return with the feedback UI controls
             foreach(var status in statuses)

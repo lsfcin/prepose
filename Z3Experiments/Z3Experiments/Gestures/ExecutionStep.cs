@@ -43,7 +43,6 @@
             {
                 return string.Format("{0} {1} and hold for {2} seconds", this.MotionRestriction, this.Pose.Name, this.HoldRestriction);
             }
-
             if (this.MotionRestriction != PreposeGestures.MotionRestriction.None && this.HoldRestriction > 0)
             {
                 return string.Format("{0} {1} and hold for {2} seconds", this.MotionRestriction, this.Pose.Name, this.HoldRestriction);

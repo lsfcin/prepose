@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" Height="60" Width="{Binding ActualWidth, ElementName=GesturesProgressViewer}">
+             mc:Ignorable="d" Height="70.223" Width="{Binding ActualWidth, ElementName=GesturesProgressViewer}">
     <Grid x:Name="MainGrid" Background="White">
         <TextBlock x:Name="MainGestureAndPoseNameTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="GestureName" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Margin="5,0,0,0"/>
         <Grid HorizontalAlignment="Right" Margin="0,0,4.667,-0.333">
@@ -11,6 +11,6 @@
             <TextBlock x:Name="CompletedTimesTextBlock" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Margin="15,10,14.667,0" Height="34" TextAlignment="Center" FontSize="28"/>
         </Grid>
         <ProgressBar x:Name="ProgressBar" Height="20" Margin="10,19,49.667,0" VerticalAlignment="Top"/>
-        <TextBlock x:Name="CurrentStepTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="CurrentPose" VerticalAlignment="Top" FontSize="14" FontWeight="Light" Margin="10,39,0,0"/>
+        <TextBlock x:Name="CurrentStepTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="CurrentPose" VerticalAlignment="Top" FontSize="24" FontWeight="Light" Margin="10,39,0,0"/>
     </Grid>
 </UserControl>

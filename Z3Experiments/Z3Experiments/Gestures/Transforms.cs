@@ -499,9 +499,9 @@ namespace PreposeGestures
             this.JointTransforms = jointsTransforms;
         }
 
-        public int TransformCount
+        public int GetTransformCount()
         {
-            get { { return this.JointTransforms.Count; } }
+            return this.JointTransforms.Count;
         }
 
         public CompositeBodyTransform(JointType jointType, JointTransform point3DTransform)
@@ -658,14 +658,20 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            var buf = new StringBuilder("BodyTransform:");
+            var buf = new StringBuilder("");
 
             var jointTypes = EnumUtil.GetValues<JointType>();
+            var count = 0;
 
             foreach (var jointType in jointTypes)
             {
                 if (this.JointTransforms.ContainsKey(jointType))
-                    buf.AppendFormat("\n\t{0}: {1}", jointType, this.JointTransforms[jointType]);
+                {
+                    if (count > 0)
+                        buf.AppendFormat("\n");
+                    buf.AppendFormat("\t{0}: {1}", jointType, this.JointTransforms[jointType]);
+                    count++;
+                }
             }
 
             return buf.ToString();

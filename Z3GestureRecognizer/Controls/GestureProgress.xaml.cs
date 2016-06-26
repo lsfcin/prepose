@@ -25,8 +25,8 @@ namespace PreposeGestureRecognizer.Controls
         {
             InitializeComponent();
             this.Gesture = gesture;
-            this.CurrentStepTextBlock.Text = gesture.Steps[0].Pose.Name;
-            this.MainGestureAndPoseNameTextBlock.Text = gesture.Name;            
+            this.CurrentStepTextBlock.Text = gesture.DeclaredPoses[0].ToString();//gesture.Steps[0].Pose.Name;
+            this.MainGestureAndPoseNameTextBlock.Text = gesture.Name;
         }
 
         public void StopMainProgressBars()
@@ -47,7 +47,6 @@ namespace PreposeGestureRecognizer.Controls
 
         public void RenderFeedback(GestureStatus status)
         {
-
             var GesturePercentage =
                 (double)status.CurrentStep /
                 status.NumSteps +
@@ -55,8 +54,13 @@ namespace PreposeGestureRecognizer.Controls
                 status.NumSteps;
 
             this.ProgressBar.Value = GesturePercentage * 100;
-            this.CurrentStepTextBlock.Text = status.StepNames[status.CurrentStep];
+            this.CurrentStepTextBlock.Text = status.StepNamesAndDescriptions[status.CurrentStep].Item2;
             this.CompletedTimesTextBlock.Text = status.CompletedCount.ToString();
+            this.Height = 
+                this.MainGestureAndPoseNameTextBlock.ActualHeight +
+                this.ProgressBar.ActualHeight +
+                this.CurrentStepTextBlock.ActualHeight +
+                10;
         }
 
         public Gesture Gesture { get; set; }

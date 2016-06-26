@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 APP present:
-	GESTURE next_360:
+	GESTURE anext_360:
 
 		POSE pose1:
 		rotate your right wrist 15 degrees up,
@@ -20,7 +20,7 @@ APP present:
 		pose2,
 		pose3.
 
-	GESTURE next_3601:
+	GESTURE bnext_3601:
 
 		POSE pose11:
 		rotate your right wrist 15 degrees up,
@@ -36,30 +36,28 @@ APP present:
 		pose11,
 		pose21,
 		pose31.
-		
+			
+GESTURE cnext_360:
+
+	POSE main:
+	put your right wrist to the left of your right shoulder,
+	put your right wrist below your right elbow,
+	put your right wrist in front of your right shoulder.
 	
-//APP present:
-//	GESTURE next_360:
-//
-//		POSE main:
-//		put your right wrist to the left of your right shoulder,
-//		put your right wrist below your right elbow,
-//		put your right wrist in front of your right shoulder.
-//		
-//		POSE round_next_up:
-//		rotate your right wrist 15 degrees to your back,
-//		rotate your right wrist 15 degrees up.
-//		
-//		POSE round_next_down:
-//		rotate your right wrist 30 degrees to your front,
-//		rotate your right wrist 15 degrees down.
-//
-//		EXECUTION:
-//		main,
-//		round_next_up,
-//		main,
-//		round_next_down.
-//
+	POSE round_next_up:
+	rotate your right wrist 15 degrees to your back,
+	rotate your right wrist 15 degrees up.
+	
+	POSE round_next_down:
+	rotate your right wrist 30 degrees to your front,
+	rotate your right wrist 15 degrees down.
+
+	EXECUTION:
+	main,
+	round_next_up,
+	main,
+	round_next_down.
+
 //	GESTURE prev_360:
 //
 //		POSE round_prev_up:

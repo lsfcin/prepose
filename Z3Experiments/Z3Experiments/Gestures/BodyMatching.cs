@@ -302,18 +302,10 @@ namespace PreposeGestures
 
             result.Name = this.Gesture.Name;
 
-            string stepName = "";
-
-            if (this.GetCurrentStep().MotionRestriction != MotionRestriction.None)
-                stepName += this.GetCurrentStep().MotionRestriction + " ";
-
-            stepName += this.GetCurrentStep().Pose.Name + " ";
-
-            if (this.GetCurrentStep().HoldRestriction > 0)
-                stepName += "by " + this.GetCurrentStep().HoldRestriction + " seconds";
-
             foreach (var step in this.Gesture.Steps)
-                result.StepNames.Add(step.ToString());
+                result.StepNamesAndDescriptions.Add(new Tuple<string, string>(
+                    this.GetCurrentStep().Pose.Name,
+                    this.GetCurrentStep().Pose.ToString()));
 
             result.Percentage = this.LastPercentage;
             result.DistanceVectors = this.LastDistanceVectors;
@@ -388,7 +380,7 @@ namespace PreposeGestures
         public GestureStatus()
         {
             Name = "";
-            StepNames = new List<string>();
+            StepNamesAndDescriptions = new List<Tuple<string,string>>();
             CurrentStep = 0;
             Percentage = 0;
             DistanceVectors = new Dictionary<JointType, Point3D>();
@@ -397,7 +389,7 @@ namespace PreposeGestures
 
         public string Name { get; set; }
 
-        public List<string> StepNames { get; set; }
+        public List<Tuple<string,string>> StepNamesAndDescriptions { get; set; }
 
         public double Percentage { get; set; }
 

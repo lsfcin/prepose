@@ -80,7 +80,7 @@ namespace PreposeGestures
         {
             get
             {
-                return this.mTransform.TransformCount;
+                return this.mTransform.GetTransformCount();
             }
         }
 
@@ -223,7 +223,22 @@ namespace PreposeGestures
 
 		public override string ToString()
 		{
-			return string.Format("POSE {0} : {1}", this.Name, this.mRestriction);
+            this.Delayed.ToString();
+            var jumpTransform = this.mTransform.GetTransformCount() > 0 ? "\n" : "";
+            var jumpRestriction = this.mRestriction.GetRestrictionCount() > 0 ? "\n" : "";
+            var jumpDelayed = this.Delayed.Statements.Count > 0 ? "\n" : "";
+
+            var result = string.Format(
+                "{0} : " +
+                jumpTransform + "{1}" +
+                jumpRestriction + "{2}" +
+                jumpDelayed + "{3}",
+                this.Name,
+                this.mTransform,
+                this.mRestriction,
+                this.Delayed);
+
+            return result.ToLower();
 		}
 
         // returns the min percentage of completion from all restrictions
