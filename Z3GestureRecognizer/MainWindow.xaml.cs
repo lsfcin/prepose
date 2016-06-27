@@ -575,18 +575,6 @@ namespace PreposeGestureRecognizer
             var statuses = this.matcher.TestBody(body);
 
             jumpToNextPose = false;
-
-            //if(statuses.Count >= 2)
-            //{
-            //    if (statuses[0].succeededDetection)
-            //    {
-            //        SendKeys.SendWait("{RIGHT}");
-            //    }
-            //    if (statuses[1].succeededDetection)
-            //    {
-            //        SendKeys.SendWait("{LEFT}");
-            //    }
-            //}
             
             // match the status return with the feedback UI controls
             // and to send the proper events

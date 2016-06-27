@@ -74,7 +74,7 @@
 
         <Button x:Name="OpenButton" Content=" open " Margin="95,0,0,21" Grid.Row="1" Click="OpenButton_Click" Grid.Column="0" Width="68" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial"/>
         
-        <ScrollViewer x:Name="GesturesProgressViewer" Visibility="Visible" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.333,75.667" Grid.Row="1">
+        <ScrollViewer x:Name="GesturesProgressViewer" Visibility="Hidden" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.333,75.667" Grid.Row="1">
             <StackPanel x:Name="GesturesProgressPanel" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="605" RenderTransformOrigin="0.5,0.5"/>
         </ScrollViewer>
     </Grid>
