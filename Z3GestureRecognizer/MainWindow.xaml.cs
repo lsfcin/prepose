@@ -589,6 +589,7 @@ namespace PreposeGestureRecognizer
             //}
             
             // match the status return with the feedback UI controls
+            // and to send the proper events
             foreach(var status in statuses)
             {
                 foreach(var panelChild in this.GesturesProgressPanel.Children)
@@ -598,7 +599,14 @@ namespace PreposeGestureRecognizer
                         var gestureProgress = (GestureProgress)panelChild;
                         var gestureName = gestureProgress.Gesture.Name;
                         if (gestureName.CompareTo(status.Name) == 0)
+                        {
                             gestureProgress.RenderFeedback(status);
+                            if(status.succeededDetection)
+                            {
+                                var code = gestureProgress.TriggeredEvents.GetEvent().MakeCode();
+                                SendKeys.SendWait(code);
+                            }
+                        }
                     }
                 }
             }

@@ -229,7 +229,7 @@ namespace PreposeGestures
             var jumpDelayed = this.Delayed.Statements.Count > 0 ? "\n" : "";
 
             var result = string.Format(
-                "{0} : " +
+                "{0} " +
                 jumpTransform + "{1}" +
                 jumpRestriction + "{2}" +
                 jumpDelayed + "{3}",

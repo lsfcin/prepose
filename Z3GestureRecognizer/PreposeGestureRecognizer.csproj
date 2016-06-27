@@ -93,9 +93,16 @@
     <Compile Include="Controls\GestureProgress.xaml.cs">
       <DependentUpon>GestureProgress.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TriggeredEvents.xaml.cs">
+      <DependentUpon>TriggeredEvents.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PreposeSyntaxCompletionData.cs" />
     <Compile Include="Z3KinectConverter.cs" />
     <Page Include="Controls\GestureProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TriggeredEvents.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
