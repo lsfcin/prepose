@@ -4,7 +4,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-namespace BodyBasicsWPF
+namespace PreposeGestureRecognizer
 {
     using System;
     using System.Windows;
@@ -14,5 +14,13 @@ namespace BodyBasicsWPF
     /// </summary>
     public partial class App : Application
     {
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            if (e.Args.Length == 1) //make sure an argument is passed
+            {
+                var filename = e.Args[0];
+                this.Properties["InputFilename"] = filename;
+            }
+        }
     }
 }

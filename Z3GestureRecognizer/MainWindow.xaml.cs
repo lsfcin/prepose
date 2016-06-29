@@ -158,9 +158,11 @@ namespace PreposeGestureRecognizer
         private CompletionWindow completionWindow;
 
         /// <summary>
-        /// path of root folder for gesture apps and evnts
+        /// paths of root folder and gesture apps and evnts default files
         /// </summary>
-        private string rootPath = "";
+        private string basePath = "";
+        private string gesturesPath = "";
+        private string eventsPath = "";
         #endregion
 
         #region MainWindow Management
@@ -232,8 +234,20 @@ namespace PreposeGestureRecognizer
             this.DataContext = this;
 
             // set root path
-            var index = AppDomain.CurrentDomain.BaseDirectory.IndexOf("prepose") + "prepose".Length;
-            rootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory.Substring(0, index), "Samples");
+            // check if there is an input filename from the application startup
+            if (System.Windows.Application.Current.Properties["InputFilename"] != null)
+            {
+                gesturesPath = System.Windows.Application.Current.Properties["InputFilename"].ToString();
+            }
+            // if not then try the default rootpath
+            else
+            {
+                var index = AppDomain.CurrentDomain.BaseDirectory.IndexOf("prepose") + "prepose".Length;
+                gesturesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory.Substring(0, index), "Samples\\sample.app");
+            }
+            basePath = Path.GetDirectoryName(gesturesPath);
+            var filename = Path.GetFileNameWithoutExtension(gesturesPath);
+            eventsPath = basePath + "\\" + filename + ".evnt";
 
             // initialize the components (controls) of the window
             this.InitializeComponent();
@@ -835,8 +849,8 @@ namespace PreposeGestureRecognizer
             this.ScriptTextBox.TextArea.TextEntering += ScriptTextBox_TextEntering;
             this.ScriptTextBox.TextArea.TextEntered += ScriptTextBox_TextEntered;
             
-            var gesturesPath = Path.Combine(rootPath, "sample.app");
-            var eventsPath = Path.Combine(rootPath, "sample.evnt");
+            
+            
 
             var text = "";
             try
@@ -1035,7 +1049,7 @@ namespace PreposeGestureRecognizer
             // Create OpenFileDialog 
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
 
-            dialog.InitialDirectory = rootPath;// (System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+            dialog.InitialDirectory = basePath;// (System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
 
             // Set filter for file extension and default file extension 
             dialog.DefaultExt = ".app";
@@ -1073,7 +1087,7 @@ namespace PreposeGestureRecognizer
         {
             var text = this.ScriptTextBox.Text;
             var dialog = new Microsoft.Win32.SaveFileDialog();
-            dialog.InitialDirectory = rootPath;
+            dialog.InitialDirectory = basePath;
             dialog.Filter = "Gesture APP files (*.app)|*.app";
             dialog.FilterIndex = 1;
             dialog.RestoreDirectory = true;
@@ -1090,7 +1104,7 @@ namespace PreposeGestureRecognizer
         {
             // Create OpenFileDialog 
             var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.InitialDirectory = rootPath;
+            dialog.InitialDirectory = basePath;
 
             // Set filter for file extension and default file extension 
             dialog.DefaultExt = ".evnt";
@@ -1180,7 +1194,7 @@ namespace PreposeGestureRecognizer
             }
 
             var dialog = new Microsoft.Win32.SaveFileDialog();
-            dialog.InitialDirectory = rootPath;
+            dialog.InitialDirectory = basePath;
             dialog.Filter = "Gesture EVNT files (*.evnt)|*.evnt";
             dialog.FilterIndex = 1;
             dialog.RestoreDirectory = true;

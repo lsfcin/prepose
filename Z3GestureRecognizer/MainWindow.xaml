@@ -82,8 +82,8 @@
         </Grid>
 
 
-        <ScrollViewer x:Name="GesturesFeedbackViewer" Visibility="Hidden" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.333,75.667" Grid.Row="1">
-            <StackPanel x:Name="GesturesFeedbackPanel" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="605" RenderTransformOrigin="0.5,0.5"/>
+        <ScrollViewer x:Name="GesturesFeedbackViewer" Visibility="Visible" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.667,100" Grid.Row="1">
+            <StackPanel x:Name="GesturesFeedbackPanel" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="590" RenderTransformOrigin="0.5,0.5"/>
         </ScrollViewer>
 
         <Button x:Name="OpenGesturesButton" Content="load&#xD;&#xA;gestures" Margin="95,0,0,41" Grid.Row="1" Click="OpenGesturesButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
