@@ -29,6 +29,7 @@ namespace PreposeGestureRecognizer
     using ICSharpCode.AvalonEdit.CodeCompletion;
     using System.Reflection;
     using PreposeGestureRecognizer.Controls;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -155,6 +156,11 @@ namespace PreposeGestureRecognizer
         /// Helper window to autocompletion while coding
         /// </summary>
         private CompletionWindow completionWindow;
+
+        /// <summary>
+        /// path of root folder for gesture apps and evnts
+        /// </summary>
+        private string rootPath = "";
         #endregion
 
         #region MainWindow Management
@@ -224,6 +230,10 @@ namespace PreposeGestureRecognizer
 
             // use the window object as the view model in this simple example
             this.DataContext = this;
+
+            // set root path
+            var index = AppDomain.CurrentDomain.BaseDirectory.IndexOf("prepose") + "prepose".Length;
+            rootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory.Substring(0, index), "Samples");
 
             // initialize the components (controls) of the window
             this.InitializeComponent();
@@ -561,10 +571,11 @@ namespace PreposeGestureRecognizer
         #endregion
 
         #region Z3 Gestures Management
-        // Gestures logic
+        // Gestures and events logic
         private static bool playingGesture = false;
         private static string parsedText = "";
-        private PreposeGestures.BodyMatcher matcher;
+        private BodyMatcher matcher;
+        private List<Tuple<string, GestureEvent>> gestureNamedEvents = new List<Tuple<string,GestureEvent>>();
 
         private void ManageGestureApp(
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints,
@@ -580,11 +591,11 @@ namespace PreposeGestureRecognizer
             // and to send the proper events
             foreach(var status in statuses)
             {
-                foreach(var panelChild in this.GesturesProgressPanel.Children)
+                foreach(var panelChild in this.GesturesFeedbackPanel.Children)
                 {
-                    if (panelChild is GestureProgress)
+                    if (panelChild is GestureFeedback)
                     {
-                        var gestureProgress = (GestureProgress)panelChild;
+                        var gestureProgress = (GestureFeedback)panelChild;
                         var gestureName = gestureProgress.Gesture.Name;
                         if (gestureName.CompareTo(status.Name) == 0)
                         {
@@ -768,79 +779,77 @@ namespace PreposeGestureRecognizer
                     matcher = new BodyMatcher(app, (int)PrecisionSlider.Value);
                     Debug.WriteLine(app);
 
-                    // get the main gesture
-                    foreach (var gesture in app.Gestures)
-                    {
-                        var progress = new PreposeGestureRecognizer.Controls.GestureProgress(gesture);
-                        this.GesturesProgressPanel.Children.Add(progress);
-                        this.GesturesProgressPanel.Height += progress.Height;
-                    }
-                    this.GesturesProgressViewer.Visibility = System.Windows.Visibility.Visible;
+                    ShowGesturesFeedback(app);
 
                     this.ScriptTextBox.Visibility = System.Windows.Visibility.Hidden;
-                    this.ScriptTextBox.IsReadOnly = true;
-                    this.ScriptTextBox.Background = Brushes.WhiteSmoke;
-                    this.ScriptTextBox.Foreground = Brushes.DarkGray;
                     this.StartButton.Content = "ll";
-                    this.compileStatus.Text = "OK";
+                    this.OpenGesturesButton.Visibility = System.Windows.Visibility.Hidden;
+                    this.SaveGesturesButton.Visibility = System.Windows.Visibility.Hidden;
+                    this.OpenEventsButton.Visibility = System.Windows.Visibility.Visible;
+                    this.SaveEventsButton.Visibility = System.Windows.Visibility.Visible;
+                    this.CompileStatus.Text = "OK";
                     playingGesture = true;
                 }
                 catch
                 {
-                    this.compileStatus.Text = "Script compilation error";
+                    this.CompileStatus.Text = "Script compilation error";
                 }
             }
             else
             {
-                this.GesturesProgressPanel.Children.Clear();
-                this.GesturesProgressViewer.Visibility = System.Windows.Visibility.Hidden;
+                this.GesturesFeedbackPanel.Children.Clear();
+                this.GesturesFeedbackViewer.Visibility = System.Windows.Visibility.Hidden;
                 
                 this.ScriptTextBox.Visibility = System.Windows.Visibility.Visible;
-                this.ScriptTextBox.IsReadOnly = false;
-                this.ScriptTextBox.Background = Brushes.White;
-                this.ScriptTextBox.Foreground = Brushes.Black;
-                this.ScriptTextBox.Text = parsedText;
                 this.StartButton.Content = " ► ";
-                this.compileStatus.Text = "";
+                this.OpenGesturesButton.Visibility = System.Windows.Visibility.Visible;
+                this.SaveGesturesButton.Visibility = System.Windows.Visibility.Visible;
+                this.OpenEventsButton.Visibility = System.Windows.Visibility.Hidden;
+                this.SaveEventsButton.Visibility = System.Windows.Visibility.Hidden;
+                this.CompileStatus.Text = "";
                 playingGesture = false;
             }
+        }
+
+        private void ShowGesturesFeedback(PreposeGestures.App app)
+        {
+            foreach (var gesture in app.Gestures)
+            {
+                var progress = new PreposeGestureRecognizer.Controls.GestureFeedback(gesture);
+
+                foreach (var evt in gestureNamedEvents)
+                {
+                    if(evt.Item1.CompareTo(gesture.Name) == 0)
+                    {
+                        progress.TriggeredEvents.SetEvent(evt.Item2);
+                    }
+                }
+                this.GesturesFeedbackPanel.Children.Add(progress);
+                this.GesturesFeedbackPanel.Height += progress.Height;
+            }
+            this.GesturesFeedbackViewer.Visibility = System.Windows.Visibility.Visible;            
         }
 
         private void ScriptTextBox_Loaded(object sender, RoutedEventArgs e)
         {
             this.ScriptTextBox.TextArea.TextEntering += ScriptTextBox_TextEntering;
             this.ScriptTextBox.TextArea.TextEntered += ScriptTextBox_TextEntered;
+            
+            var gesturesPath = Path.Combine(rootPath, "sample.app");
+            var eventsPath = Path.Combine(rootPath, "sample.evnt");
 
-            int index = AppDomain.CurrentDomain.BaseDirectory.IndexOf("prepose") + "prepose".Length;
-            string testPath = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory.Substring(0, index), "Z3Experiments\\Z3Experiments"), "Tests");
-            testPath = Path.Combine(testPath, "presentation.app");
-            string text = System.IO.File.ReadAllText(testPath);
-            this.ScriptTextBox.Text = text;
-        }
-
-        private void OpenButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Create OpenFileDialog 
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            dlg.InitialDirectory = (System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-
-            // Set filter for file extension and default file extension 
-            dlg.DefaultExt = ".app";
-            dlg.Filter = "Gesture APP Files (*.app)|*.app|Text Files (*.txt)|*.txt";
-
-            // Display OpenFileDialog by calling ShowDialog method 
-            Nullable<bool> result = dlg.ShowDialog();
-
-            // Get the selected file name and display in a TextBox 
-            if (result == true)
+            var text = "";
+            try
             {
-                // Open document 
-                string filename = dlg.FileName;
-                string content = File.ReadAllText(filename);
-                this.ScriptTextBox.Text = content;
-                //textBox1.Text = filename;
+                text = System.IO.File.ReadAllText(gesturesPath);
+                var eventsContent = File.ReadAllText(eventsPath);
+                gestureNamedEvents = ReadEvents(eventsContent);
             }
+            catch(Exception exception)
+            {
+                Debug.WriteLine("An error occurred while reading input files.");
+            }
+            this.ScriptTextBox.Text = text;
         }
         #endregion
 
@@ -1015,10 +1024,159 @@ namespace PreposeGestureRecognizer
         }
         #endregion
 
+        #region Open, Save and Dump Buttons
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             GestureStatistics.DumpStatisticsToFile("matchstats.csv");
         }
+
+        private void OpenGesturesButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+
+            dialog.InitialDirectory = rootPath;// (System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+
+            // Set filter for file extension and default file extension 
+            dialog.DefaultExt = ".app";
+            dialog.Filter = "Gesture APP Files (*.app)|*.app|Text Files (*.txt)|*.txt";
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dialog.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string filename = dialog.FileName;
+                string content = File.ReadAllText(filename);
+                this.ScriptTextBox.Text = content;
+            }
+        }
+        private void SaveGesturesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var text = this.ScriptTextBox.Text;
+            var dialog = new Microsoft.Win32.SaveFileDialog();
+            dialog.InitialDirectory = rootPath;
+            dialog.Filter = "Gesture APP files (*.app)|*.app";
+            dialog.FilterIndex = 1;
+            dialog.RestoreDirectory = true;
+
+            Nullable<bool> result = dialog.ShowDialog();
+            if (result == true)
+            {
+                var filename = dialog.FileName;
+                File.WriteAllText(filename, text);
+            }
+        }
+
+        private void OpenEventsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.InitialDirectory = rootPath;
+
+            // Set filter for file extension and default file extension 
+            dialog.DefaultExt = ".evnt";
+            dialog.Filter = "Gesture Events (EVNT) Files (*.evnt)|*.evnt|Text Files (*.txt)|*.txt";
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dialog.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                var filename = dialog.FileName;
+                var content = File.ReadAllText(filename);
+                gestureNamedEvents = ReadEvents(content);
+                SetGesturesEvents();
+            }
+        }
+
+        private void SetGesturesEvents()
+        {
+            foreach (var panelChild in this.GesturesFeedbackPanel.Children)
+            {
+                if (panelChild is GestureFeedback)
+                {
+                    var gestureProgress = (GestureFeedback)panelChild;
+                    foreach (var evt in gestureNamedEvents)
+                    {
+                        if (evt.Item1.CompareTo(gestureProgress.Gesture.Name) == 0)
+                        {
+                            gestureProgress.TriggeredEvents.SetEvent(evt.Item2);
+                        }
+                    }
+                }
+            }
+        }
+
+        private List<Tuple<string, GestureEvent>> ReadEvents(string content)
+        {
+            var result = new List<Tuple<string, GestureEvent>>();
+
+            var regex = new Regex(@"\b[\s,\.-:;]*");
+            var words = regex.Split(content).Where(x => !string.IsNullOrEmpty(x));
+
+            try
+            {
+                var i = 0;
+                var word = "";
+                while(i < words.Count<string>())
+                {
+                    word = words.ElementAt<string>(i);
+                    while(word.CompareTo("GESTURE") != 0)
+                    {                        
+                        ++i;
+                        word = words.ElementAt<string>(i);
+                    }
+
+                    ++i;
+                    var name = words.ElementAt<string>(i);
+                    ++i;
+                    var evt1String = words.ElementAt<string>(i);
+                    ++i;
+                    var evt2String = words.ElementAt<string>(i);
+                    ++i;
+
+                    result.Add(new Tuple<string, GestureEvent>(name, new GestureEvent(evt1String, evt2String)));
+                }
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine("An error occurred while reading the gesture events file.");
+            }
+
+            return result;
+        }
+
+        private void SaveEventsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var text = "";
+            foreach (var panelChild in this.GesturesFeedbackPanel.Children)
+            {
+                if (panelChild is GestureFeedback)
+                {
+                    var gestureProgress = (GestureFeedback)panelChild;
+                    text += "GESTURE " + gestureProgress.Gesture.Name;
+                    text += "\n\t" + gestureProgress.TriggeredEvents.GetEvent().ToString() + "\n\n";
+                }
+            }
+
+            var dialog = new Microsoft.Win32.SaveFileDialog();
+            dialog.InitialDirectory = rootPath;
+            dialog.Filter = "Gesture EVNT files (*.evnt)|*.evnt";
+            dialog.FilterIndex = 1;
+            dialog.RestoreDirectory = true;
+
+            Nullable<bool> result = dialog.ShowDialog();
+            if (result == true)
+            {
+                var filename = dialog.FileName;
+                File.WriteAllText(filename, text);
+            }
+        }
+        #endregion
     }
 
     public static class CompletionHelper

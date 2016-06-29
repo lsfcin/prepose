@@ -34,7 +34,18 @@
             <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
         </Viewbox>
 
-        <StatusBar Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" x:Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
+        <TextBlock x:Name="CompileStatus" HorizontalAlignment="Left" Margin="10,0,0,3" TextWrapping="Wrap" Width="360" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}"><Run Text="Compile result will show here..."/></TextBlock>
+        <Separator Margin="11,0,20.667,9" Grid.Row="1" Background="#FFDDDDDD" Height="4" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5">
+            <Separator.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Separator.RenderTransform>
+        </Separator>
+        <StatusBar Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" x:Name="statusBar2" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem Content="{Binding StatusText}" />
         </StatusBar>
 
@@ -43,7 +54,7 @@
 			x:Name="ScriptTextBox" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"
 			FontFamily="Consolas"
 			Text="Code here..."
-			Margin="10,1.333,10.333,75"
+			Margin="10,1.333,10.667,100"
 			MinHeight="300"
 			Loaded="ScriptTextBox_Loaded" 
 			Foreground="#FF282828"
@@ -51,12 +62,12 @@
 			SyntaxHighlighting="Custom Highlighting" Background="#FFFDFDFD" Grid.Row="1"/>
 
         <TextBlock Margin="10,0,10,10" MinWidth="150" Foreground="{DynamicResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" Height="28" VerticalAlignment="Bottom" Text="Prepose application..."/>
-        <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,21" Grid.Row="1" Click="StartButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial"/>
+        <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,41" Grid.Row="1" Click="StartButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
         <Button x:Name="NextButton" Visibility="Hidden"  Content=" ►l " Margin="95,0,0,38.2" Grid.Row="1" Click="NextButton_Click" Grid.Column="0" Width="47" HorizontalAlignment="Left" MinWidth="60" MinHeight="30" Height="32" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontFamily="Arial"/>
         <CheckBox Content="synthetic" Visibility="Hidden" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="163,0,0,35.4" VerticalAlignment="Bottom" Checked="SyntheticCheckBox_Checked" Unchecked="SyntheticCheckBox_Unchecked"/>
-        
-        <Grid HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="194,0,0,44" VerticalAlignment="Bottom" Height="26" Width="223">
-            <Slider x:Name="PrecisionSlider" HorizontalAlignment="Left" Grid.Column="0" Margin="55,-1,0,9" VerticalAlignment="Bottom" Height="18" Width="133" Maximum="30" Minimum="5" RenderTransformOrigin="0.5,0.5" Loaded="PrecisionSlider_Loaded" ValueChanged="PrecisionSlider_ValueChanged" LargeChange="0" Value="30">
+
+        <Grid HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="95,0,0,16" VerticalAlignment="Bottom" Height="22" Width="175">
+            <Slider x:Name="PrecisionSlider" Grid.Column="0" Margin="50,2,30,0" Maximum="30" Minimum="5" RenderTransformOrigin="0.5,0.5" Loaded="PrecisionSlider_Loaded" ValueChanged="PrecisionSlider_ValueChanged" LargeChange="0" Value="30" Height="18" VerticalAlignment="Top">
                 <Slider.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
@@ -66,16 +77,29 @@
                     </TransformGroup>
                 </Slider.RenderTransform>
             </Slider>
-            <TextBlock HorizontalAlignment="Left" Grid.Column="0" VerticalAlignment="Bottom" TextWrapping="Wrap" Text="precision" Margin="0,0,0,10"/>
-            <TextBlock x:Name="PrecisionTextBlock" HorizontalAlignment="Left" Grid.Column="0" Margin="193,0,0,10" VerticalAlignment="Bottom" TextWrapping="Wrap" Text="30°" Width="63" Foreground="#FF535353"/>
-            <TextBlock x:Name="compileStatus" HorizontalAlignment="Left" Margin="0,35,0,-25" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="206"/>
-            <Button Content="DumpStatistics" HorizontalAlignment="Left" Margin="256,0,-128,-19" VerticalAlignment="Top" Width="95" Height="45" Click="Button_Click"/>
-        </Grid>        
+            <TextBlock HorizontalAlignment="Left" Grid.Column="0" TextWrapping="Wrap" Text="precision" Height="16" VerticalAlignment="Top" Margin="0,3,0,0" Foreground="{StaticResource MediumGreyBrush}"/>
+            <TextBlock x:Name="PrecisionTextBlock" Grid.Column="0" Margin="0,3,7,0" TextWrapping="Wrap" Text="30°" Foreground="{StaticResource MediumGreyBrush}" Height="16" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20"/>
+        </Grid>
 
-        <Button x:Name="OpenButton" Content=" open " Margin="95,0,0,21" Grid.Row="1" Click="OpenButton_Click" Grid.Column="0" Width="68" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial"/>
-        
-        <ScrollViewer x:Name="GesturesProgressViewer" Visibility="Hidden" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.333,75.667" Grid.Row="1">
-            <StackPanel x:Name="GesturesProgressPanel" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="605" RenderTransformOrigin="0.5,0.5"/>
+
+        <ScrollViewer x:Name="GesturesFeedbackViewer" Visibility="Hidden" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.333,75.667" Grid.Row="1">
+            <StackPanel x:Name="GesturesFeedbackPanel" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="605" RenderTransformOrigin="0.5,0.5"/>
         </ScrollViewer>
+
+        <Button x:Name="OpenGesturesButton" Content="load&#xD;&#xA;gestures" Margin="95,0,0,41" Grid.Row="1" Click="OpenGesturesButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
+        <Button x:Name="SaveGesturesButton" Content="save&#xD;&#xA;gestures" Margin="185,0,0,41" Grid.Row="1" Click="SaveGesturesButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
+        <Button x:Name="OpenEventsButton" Visibility="Hidden" Content="load&#xA;events   " Margin="95,0,0,41" Grid.Row="1" Click="OpenEventsButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
+        <Button x:Name="SaveEventsButton" Visibility="Hidden" Content="save&#xA;events   " Margin="185,0,0,41" Grid.Row="1" Click="SaveEventsButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
+        <Button Content="dump stats" HorizontalAlignment="Left" Margin="10,0,0,16" Width="80" Click="Button_Click" Grid.Row="1" Height="22" VerticalAlignment="Bottom" BorderBrush="{x:Null}" Foreground="{StaticResource MediumGreyBrush}"/>
+        <Separator Margin="0.333,0,12,9" Grid.Row="1" Background="#FFDDDDDD" Height="4" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5" Grid.Column="1">
+            <Separator.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Separator.RenderTransform>
+        </Separator>
     </Grid>
 </Window>

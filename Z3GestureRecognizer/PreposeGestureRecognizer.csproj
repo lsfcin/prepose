@@ -90,15 +90,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\GestureProgress.xaml.cs">
-      <DependentUpon>GestureProgress.xaml</DependentUpon>
+    <Compile Include="Controls\GestureFeedback.xaml.cs">
+      <DependentUpon>GestureFeedback.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TriggeredEvents.xaml.cs">
       <DependentUpon>TriggeredEvents.xaml</DependentUpon>
     </Compile>
     <Compile Include="PreposeSyntaxCompletionData.cs" />
     <Compile Include="Z3KinectConverter.cs" />
-    <Page Include="Controls\GestureProgress.xaml">
+    <Page Include="Controls\GestureFeedback.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

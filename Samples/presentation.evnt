@@ -1,0 +1,6 @@
+GESTURE next_360
+	PGDN NONE
+
+GESTURE prev_360
+	PGUP NONE
+
