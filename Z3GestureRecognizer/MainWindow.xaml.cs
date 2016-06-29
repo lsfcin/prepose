@@ -1048,9 +1048,25 @@ namespace PreposeGestureRecognizer
             if (result == true)
             {
                 // Open document 
-                string filename = dialog.FileName;
-                string content = File.ReadAllText(filename);
+                var filepath = dialog.FileName;
+                var content = File.ReadAllText(filepath);
                 this.ScriptTextBox.Text = content;
+
+                // Try to open corresponding .evnt file
+                try
+                {
+                    // Split the folder and the filename part
+                    var filename = Path.GetFileNameWithoutExtension(filepath);
+                    var folder = Path.GetDirectoryName(filepath);
+                    var evtsfile = folder + "\\" + filename + ".evnt";
+                    content = File.ReadAllText(evtsfile);
+                    gestureNamedEvents = ReadEvents(content);
+                    SetGesturesEvents();
+                }
+                catch(Exception exception)
+                {
+                    Debug.Write("A corresponding .evnt file was not found.");
+                }
             }
         }
         private void SaveGesturesButton_Click(object sender, RoutedEventArgs e)
@@ -1065,8 +1081,8 @@ namespace PreposeGestureRecognizer
             Nullable<bool> result = dialog.ShowDialog();
             if (result == true)
             {
-                var filename = dialog.FileName;
-                File.WriteAllText(filename, text);
+                var filepath = dialog.FileName;
+                File.WriteAllText(filepath, text);
             }
         }
 
@@ -1086,8 +1102,8 @@ namespace PreposeGestureRecognizer
             // Get the selected file name and display in a TextBox 
             if (result == true)
             {
-                var filename = dialog.FileName;
-                var content = File.ReadAllText(filename);
+                var filepath = dialog.FileName;
+                var content = File.ReadAllText(filepath);
                 gestureNamedEvents = ReadEvents(content);
                 SetGesturesEvents();
             }
@@ -1172,8 +1188,8 @@ namespace PreposeGestureRecognizer
             Nullable<bool> result = dialog.ShowDialog();
             if (result == true)
             {
-                var filename = dialog.FileName;
-                File.WriteAllText(filename, text);
+                var filepath = dialog.FileName;
+                File.WriteAllText(filepath, text);
             }
         }
         #endregion
