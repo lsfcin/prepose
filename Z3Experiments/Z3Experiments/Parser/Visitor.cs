@@ -294,7 +294,8 @@ namespace PreposeGestures.Parser
 		//put_restriction :  'put' 'your'? body_part relative_direction body_part;
 		public override Wrapper VisitPut_restriction(PreposeGesturesParser.Put_restrictionContext context)
 		{
-			var target = (JointGroup)this.Visit(context.body_part()[context.body_part().Count - 1]);            
+            var test = context.exception;
+			var target = (JointGroup)this.Visit(context.body_part()[context.body_part().Count - 1]);
 
 			var direction = (RelativeDirection)this.Visit(context.relative_direction());
 

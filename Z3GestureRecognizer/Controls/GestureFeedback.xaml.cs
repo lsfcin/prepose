@@ -25,7 +25,7 @@ namespace PreposeGestureRecognizer.Controls
         {
             InitializeComponent();
             this.Gesture = gesture;
-            this.CurrentStepTextBlock.Text = gesture.DeclaredPoses[0].ToString();//gesture.Steps[0].Pose.Name;
+            this.CurrentStepTextBlock.Text = gesture.Steps[0].Pose.ToString();
             this.MainGestureAndPoseNameTextBlock.Text = gesture.Name;
         }
 

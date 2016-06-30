@@ -796,17 +796,20 @@ namespace PreposeGestureRecognizer
                     ShowGesturesFeedback(app);
 
                     this.ScriptTextBox.Visibility = System.Windows.Visibility.Hidden;
+                    this.CaretStatus.Visibility = System.Windows.Visibility.Hidden;
                     this.StartButton.Content = "ll";
                     this.OpenGesturesButton.Visibility = System.Windows.Visibility.Hidden;
                     this.SaveGesturesButton.Visibility = System.Windows.Visibility.Hidden;
                     this.OpenEventsButton.Visibility = System.Windows.Visibility.Visible;
                     this.SaveEventsButton.Visibility = System.Windows.Visibility.Visible;
-                    this.CompileStatus.Text = "OK";
+                    this.CompileStatus.Text = "Compilation succeeded!";
+                    this.CompileStatus.Foreground = Brushes.DarkGreen;
                     playingGesture = true;
                 }
-                catch
+                catch(Exception exception)
                 {
-                    this.CompileStatus.Text = "Script compilation error";
+                    this.CompileStatus.Text = "ERROR: " + exception.Message;
+                    this.CompileStatus.Foreground = Brushes.DarkRed;
                 }
             }
             else
@@ -815,12 +818,14 @@ namespace PreposeGestureRecognizer
                 this.GesturesFeedbackViewer.Visibility = System.Windows.Visibility.Hidden;
                 
                 this.ScriptTextBox.Visibility = System.Windows.Visibility.Visible;
+                this.CaretStatus.Visibility = System.Windows.Visibility.Visible;
                 this.StartButton.Content = " ► ";
                 this.OpenGesturesButton.Visibility = System.Windows.Visibility.Visible;
                 this.SaveGesturesButton.Visibility = System.Windows.Visibility.Visible;
                 this.OpenEventsButton.Visibility = System.Windows.Visibility.Hidden;
                 this.SaveEventsButton.Visibility = System.Windows.Visibility.Hidden;
-                this.CompileStatus.Text = "";
+                this.CompileStatus.Text = "Compile result will show here..."; 
+                this.CompileStatus.Foreground = Brushes.Gray;
                 playingGesture = false;
             }
         }
@@ -848,11 +853,10 @@ namespace PreposeGestureRecognizer
         {
             this.ScriptTextBox.TextArea.TextEntering += ScriptTextBox_TextEntering;
             this.ScriptTextBox.TextArea.TextEntered += ScriptTextBox_TextEntered;
-            
-            
-            
 
-            var text = "";
+            this.ScriptTextBox.TextArea.Caret.PositionChanged += Caret_PositionChanged;
+
+            var text = "Code here...";
             try
             {
                 text = System.IO.File.ReadAllText(gesturesPath);
@@ -864,6 +868,14 @@ namespace PreposeGestureRecognizer
                 Debug.WriteLine("An error occurred while reading input files.");
             }
             this.ScriptTextBox.Text = text;
+        }
+
+        private void Caret_PositionChanged(object sender, EventArgs e)
+        {
+            var caret = (ICSharpCode.AvalonEdit.Editing.Caret)sender;
+            var line = caret.Line;
+            var column = caret.Column;
+            this.CaretStatus.Text = "ln " + line + "\tcol " + column;
         }
         #endregion
 

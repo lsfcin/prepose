@@ -5,6 +5,22 @@ using System.Collections.Generic;
 
 namespace PreposeGestures
 {
+    public class SyntaxErrorException : Exception
+    {
+        public SyntaxErrorException(string message)
+        : base(message)
+        {
+        }
+    }
+
+	public class ParserErrorListener <Symbol> : IAntlrErrorListener<Symbol>
+    {
+        public virtual void SyntaxError(IRecognizer recognizer, Symbol offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+        {
+            throw new SyntaxErrorException("[line " + line + ", column " + (charPositionInLine + 1) + "] " + msg);
+        }
+    }
+
     /// <summary>
     /// Representation of the parsed code 
     /// </summary>
@@ -31,32 +47,32 @@ namespace PreposeGestures
 
 		public static App ReadApp(string filename)
 		{
-			var input = new Antlr4.Runtime.AntlrFileStream(filename);    //"..\\..\\Tests\\simple.app"
-			//var input = new Antlr4.Runtime.AntlrInputStream(inputString);    //"..\\..\\Tests\\simple.app"
-			var lexer = new PreposeGesturesLexer(input);
-			var tokens = new CommonTokenStream(lexer);
-			var parser = new PreposeGesturesParser(tokens);
-			var tree = parser.app(); // parse
-			var visitor = new AppConverter();
-			var app = (App)visitor.Visit(tree);
+			var input = new Antlr4.Runtime.AntlrFileStream(filename);
+            var app = GestureAppFromAntlrInput(input);
 
 			return app;
 		}
 
 		public static App ReadAppText(string inputString)
 		{
-			//var input = new Antlr4.Runtime.AntlrFileStream(filename);    //"..\\..\\Tests\\simple.app"
-			var input = new Antlr4.Runtime.AntlrInputStream(inputString);    //"..\\..\\Tests\\simple.app"
-			var lexer = new PreposeGesturesLexer(input);
-			var tokens = new CommonTokenStream(lexer);
-			var parser = new PreposeGesturesParser(tokens);
-			var tree = parser.app(); // parse
-			var visitor = new AppConverter();
-			var app = (App)visitor.Visit(tree);
+			var input = new Antlr4.Runtime.AntlrInputStream(inputString);
+            var app = GestureAppFromAntlrInput(input);
 
 			return app;
 		}
-    }
 
-	
+        private static App GestureAppFromAntlrInput(ICharStream input)
+        {
+            var lexer = new PreposeGesturesLexer(input);
+            var tokens = new CommonTokenStream(lexer);
+            var parser = new PreposeGesturesParser(tokens);
+            parser.AddErrorListener((IAntlrErrorListener<IToken>)new ParserErrorListener<IToken>());
+
+            var tree = parser.app(); // parse
+            var visitor = new AppConverter();
+            var app = (App)visitor.Visit(tree);
+           
+            return app;
+        }
+    }
 }

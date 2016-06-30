@@ -34,7 +34,7 @@
             <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
         </Viewbox>
 
-        <TextBlock x:Name="CompileStatus" HorizontalAlignment="Left" Margin="10,0,0,3" TextWrapping="Wrap" Width="360" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}"><Run Text="Compile result will show here..."/></TextBlock>
+        <TextBlock x:Name="CompileStatus" Margin="10,0,119.667,3" TextWrapping="Wrap" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}"><Run Text="Compile result will show here..."/></TextBlock>
         <Separator Margin="11,0,20.667,9" Grid.Row="1" Background="#FFDDDDDD" Height="4" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5">
             <Separator.RenderTransform>
                 <TransformGroup>
@@ -51,7 +51,9 @@
 
         <avalonEdit:TextEditor
 			xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
-			x:Name="ScriptTextBox" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"
+			x:Name="ScriptTextBox" 
+            ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
 			FontFamily="Consolas"
 			Text="Code here..."
 			Margin="10,1.333,10.667,100"
@@ -59,7 +61,9 @@
 			Loaded="ScriptTextBox_Loaded" 
 			Foreground="#FF282828"
 			FontSize="13"
-			SyntaxHighlighting="Custom Highlighting" Background="#FFFDFDFD" Grid.Row="1"/>
+			SyntaxHighlighting="Custom Highlighting" 
+            Background="#FFFDFDFD" 
+            Grid.Row="1"/>
 
         <TextBlock Margin="10,0,10,10" MinWidth="150" Foreground="{DynamicResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" Height="28" VerticalAlignment="Bottom" Text="Prepose application..."/>
         <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,41" Grid.Row="1" Click="StartButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
@@ -82,7 +86,7 @@
         </Grid>
 
 
-        <ScrollViewer x:Name="GesturesFeedbackViewer" Visibility="Visible" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.667,100" Grid.Row="1">
+        <ScrollViewer x:Name="GesturesFeedbackViewer" Visibility="Hidden" VerticalScrollBarVisibility="Auto" Margin="10,1.333,10.667,100" Grid.Row="1">
             <StackPanel x:Name="GesturesFeedbackPanel" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="590" RenderTransformOrigin="0.5,0.5"/>
         </ScrollViewer>
 
@@ -101,5 +105,6 @@
                 </TransformGroup>
             </Separator.RenderTransform>
         </Separator>
+        <TextBlock x:Name="CaretStatus" Margin="0,0,10.667,3" TextWrapping="Wrap" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" HorizontalAlignment="Right" Width="104"/>
     </Grid>
 </Window>
