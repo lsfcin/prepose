@@ -7,7 +7,7 @@
 		Loaded="MainWindow_Loaded"
 		Closing="MainWindow_Closing"
         WindowState="Maximized" 
-		WindowStartupLocation="Manual" Left="30" Top="30" Background="White">
+		WindowStartupLocation="Manual" Left="30" Top="30" Background="White" KeyDown="Window_KeyDown">
 
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
@@ -66,9 +66,7 @@
             Grid.Row="1"/>
 
         <TextBlock Margin="10,0,10,10" MinWidth="150" Foreground="{DynamicResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" Height="28" VerticalAlignment="Bottom" Text="Prepose application..."/>
-        <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,41" Grid.Row="1" Click="StartButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
-        <Button x:Name="NextButton" Visibility="Hidden"  Content=" ►l " Margin="95,0,0,38.2" Grid.Row="1" Click="NextButton_Click" Grid.Column="0" Width="47" HorizontalAlignment="Left" MinWidth="60" MinHeight="30" Height="32" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontFamily="Arial"/>
-        <CheckBox Content="synthetic" Visibility="Hidden" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="163,0,0,35.4" VerticalAlignment="Bottom" Checked="SyntheticCheckBox_Checked" Unchecked="SyntheticCheckBox_Unchecked"/>
+        <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,41" Grid.Row="1" Click="StartPauseButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="F5 or Ctrl + B to run, ESC or PAUSE to stop"/>
 
         <Grid HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="95,0,0,16" VerticalAlignment="Bottom" Height="22" Width="175">
             <Slider x:Name="PrecisionSlider" Grid.Column="0" Margin="50,2,30,0" Maximum="30" Minimum="5" RenderTransformOrigin="0.5,0.5" Loaded="PrecisionSlider_Loaded" ValueChanged="PrecisionSlider_ValueChanged" LargeChange="0" Value="30" Height="18" VerticalAlignment="Top">

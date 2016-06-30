@@ -31,6 +31,7 @@ namespace PreposeGestureRecognizer
     using PreposeGestureRecognizer.Controls;
     using System.Text.RegularExpressions;
     using System.Runtime.InteropServices;
+    using System.Windows.Input;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -585,95 +586,6 @@ namespace PreposeGestureRecognizer
 
         #endregion
 
-        #region Mouse Input
-        const int INPUT_MOUSE = 0;
-        const int INPUT_KEYBOARD = 1;
-        const int INPUT_HARDWARE = 2;
-        const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
-        const uint KEYEVENTF_KEYUP = 0x0002;
-        const uint KEYEVENTF_UNICODE = 0x0004;
-        const uint KEYEVENTF_SCANCODE = 0x0008;
-
-        struct INPUT
-        {
-            public int type;
-            public InputUnion u;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        struct InputUnion
-        {
-            [FieldOffset(0)]
-            public MOUSEINPUT mi;
-            [FieldOffset(0)]
-            public KEYBDINPUT ki;
-            [FieldOffset(0)]
-            public HARDWAREINPUT hi;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct MOUSEINPUT
-        {
-            public int dx;
-            public int dy;
-            public uint mouseData;
-            public uint dwFlags;
-            public uint time;
-            public IntPtr dwExtraInfo;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct KEYBDINPUT
-        {
-            /*Virtual Key code.  Must be from 1-254.  If the dwFlags member specifies KEYEVENTF_UNICODE, wVk must be 0.*/
-            public ushort wVk;
-            /*A hardware scan code for the key. If dwFlags specifies KEYEVENTF_UNICODE, wScan specifies a Unicode character which is to be sent to the foreground application.*/
-            public ushort wScan;
-            /*Specifies various aspects of a keystroke.  See the KEYEVENTF_ constants for more information.*/
-            public uint dwFlags;
-            /*The time stamp for the event, in milliseconds. If this parameter is zero, the system will provide its own time stamp.*/
-            public uint time;
-            /*An additional value associated with the keystroke. Use the GetMessageExtraInfo function to obtain this information.*/
-            public IntPtr dwExtraInfo;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct HARDWAREINPUT
-        {
-            public uint uMsg;
-            public ushort wParamL;
-            public ushort wParamH;
-        }
-
-        [DllImport("user32.dll")]
-        static extern IntPtr GetMessageExtraInfo();
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
-
-        //private void SetMousePos(int iX, int iY)
-        //{
-        //    double MOUSE_MOVE_FACTOR = 102.4;
-
-        //    iX = (int)((double)iX * MOUSE_MOVE_FACTOR);
-        //    iY = (int)((double)iY * MOUSE_MOVE_FACTOR);
-
-        //    var buffer = new INPUT[1];
-
-        //    buffer.type = INPUT_MOUSE;
-        //    buffer.mi.dx = iX;
-        //    buffer.mi.dy = iY;
-        //    buffer.mi.mouseData = 0;
-        //    buffer.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
-        //    buffer.mi.time = 0;
-        //    buffer.mi.dwExtraInfo = 0;
-
-        //    SendInput(1, buffer, Marshal.SizeOf(typeof(INPUT)));
-
-        //    //Sleep(1 + (rand() % 5));
-        //}
-        #endregion
-
         #region Z3 Gestures Management
         // Gestures and events logic
         private static bool playingGesture = false;
@@ -686,10 +598,8 @@ namespace PreposeGestureRecognizer
             DrawingContext dc)
         {
             // convert Kinect.Body to Z3Body
-            var body = ConvertBody(kinectJoints);
+            var body = Z3KinectConverter.CreateZ3Body(kinectJoints);
             var statuses = this.matcher.TestBody(body);
-
-            jumpToNextPose = false;
             
             // match the status return with the feedback UI controls
             // and to send the proper events
@@ -716,23 +626,6 @@ namespace PreposeGestureRecognizer
             this.DrawTarget(kinectJoints, dc);
         }
 
-
-        private Z3Body ConvertBody(IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints)
-        {
-            var body = new Z3Body();
-            if (!jumpToNextPose)
-            {
-                body = Z3KinectConverter.CreateZ3Body(kinectJoints);
-            }
-            else
-            {
-                //body = GetCopiedBodyValues(this.Gestures[this.GetMostAdvancedGesturesIDs()[0]].GetTarget().Body);
-                var firstGestureBody = matcher.GetLastGestureTarget().Body;
-                body = new Z3Body(firstGestureBody);
-            }
-            return body;
-        }
-
         private void PrecisionSlider_Loaded(object sender, RoutedEventArgs e)
         {
             this.PrecisionSlider.Value = 30;
@@ -748,14 +641,6 @@ namespace PreposeGestureRecognizer
             if (this.PrecisionTextBlock != null)
                 this.PrecisionTextBlock.Text = ((int)(this.PrecisionSlider.Value)).ToString() + "°";
         }
-
-        private void NextButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (jumpToNextPose == false)
-                jumpToNextPose = true;
-        }
-
-        public bool jumpToNextPose { get; set; }
 
         public bool useSyntheticData { get; set; }
 
@@ -872,7 +757,7 @@ namespace PreposeGestureRecognizer
         #endregion
 
         #region Script Compiling
-        private void StartButton_Click(object sender, RoutedEventArgs e)
+        private void StartPauseButton_Click(object sender, RoutedEventArgs e)
         {            
             if (!playingGesture)
             {
@@ -1326,6 +1211,19 @@ namespace PreposeGestureRecognizer
             }
         }
         #endregion
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if ((e.Key == Key.F5 || (e.Key == Key.B && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)) && !playingGesture)
+            {
+                this.StartPauseButton_Click(sender, null);
+            }
+
+            if ((e.Key == Key.Escape || e.Key == Key.Pause) && playingGesture)
+            {
+                this.StartPauseButton_Click(sender, null);
+            }
+        }
     }
 
     public static class CompletionHelper
