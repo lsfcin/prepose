@@ -30,6 +30,7 @@ namespace PreposeGestureRecognizer
     using System.Reflection;
     using PreposeGestureRecognizer.Controls;
     using System.Text.RegularExpressions;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -584,6 +585,95 @@ namespace PreposeGestureRecognizer
 
         #endregion
 
+        #region Mouse Input
+        const int INPUT_MOUSE = 0;
+        const int INPUT_KEYBOARD = 1;
+        const int INPUT_HARDWARE = 2;
+        const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+        const uint KEYEVENTF_KEYUP = 0x0002;
+        const uint KEYEVENTF_UNICODE = 0x0004;
+        const uint KEYEVENTF_SCANCODE = 0x0008;
+
+        struct INPUT
+        {
+            public int type;
+            public InputUnion u;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        struct InputUnion
+        {
+            [FieldOffset(0)]
+            public MOUSEINPUT mi;
+            [FieldOffset(0)]
+            public KEYBDINPUT ki;
+            [FieldOffset(0)]
+            public HARDWAREINPUT hi;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct MOUSEINPUT
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct KEYBDINPUT
+        {
+            /*Virtual Key code.  Must be from 1-254.  If the dwFlags member specifies KEYEVENTF_UNICODE, wVk must be 0.*/
+            public ushort wVk;
+            /*A hardware scan code for the key. If dwFlags specifies KEYEVENTF_UNICODE, wScan specifies a Unicode character which is to be sent to the foreground application.*/
+            public ushort wScan;
+            /*Specifies various aspects of a keystroke.  See the KEYEVENTF_ constants for more information.*/
+            public uint dwFlags;
+            /*The time stamp for the event, in milliseconds. If this parameter is zero, the system will provide its own time stamp.*/
+            public uint time;
+            /*An additional value associated with the keystroke. Use the GetMessageExtraInfo function to obtain this information.*/
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct HARDWAREINPUT
+        {
+            public uint uMsg;
+            public ushort wParamL;
+            public ushort wParamH;
+        }
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetMessageExtraInfo();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+        //private void SetMousePos(int iX, int iY)
+        //{
+        //    double MOUSE_MOVE_FACTOR = 102.4;
+
+        //    iX = (int)((double)iX * MOUSE_MOVE_FACTOR);
+        //    iY = (int)((double)iY * MOUSE_MOVE_FACTOR);
+
+        //    var buffer = new INPUT[1];
+
+        //    buffer.type = INPUT_MOUSE;
+        //    buffer.mi.dx = iX;
+        //    buffer.mi.dy = iY;
+        //    buffer.mi.mouseData = 0;
+        //    buffer.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+        //    buffer.mi.time = 0;
+        //    buffer.mi.dwExtraInfo = 0;
+
+        //    SendInput(1, buffer, Marshal.SizeOf(typeof(INPUT)));
+
+        //    //Sleep(1 + (rand() % 5));
+        //}
+        #endregion
+
         #region Z3 Gestures Management
         // Gestures and events logic
         private static bool playingGesture = false;
@@ -617,7 +707,7 @@ namespace PreposeGestureRecognizer
                             if(status.succeededDetection)
                             {
                                 var code = gestureProgress.TriggeredEvents.GetEvent().MakeCode();
-                                SendKeys.SendWait(code);
+                                SendKeys.SendWait(code);                                
                             }
                         }
                     }
@@ -625,6 +715,7 @@ namespace PreposeGestureRecognizer
             }
             this.DrawTarget(kinectJoints, dc);
         }
+
 
         private Z3Body ConvertBody(IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints)
         {
@@ -1087,7 +1178,7 @@ namespace PreposeGestureRecognizer
                     var evtsfile = folder + "\\" + filename + ".evnt";
                     content = File.ReadAllText(evtsfile);
                     gestureNamedEvents = ReadEvents(content);
-                    SetGesturesEvents();
+                    UpdateRunningGesturesEventsFromStored();
                 }
                 catch(Exception exception)
                 {
@@ -1131,11 +1222,11 @@ namespace PreposeGestureRecognizer
                 var filepath = dialog.FileName;
                 var content = File.ReadAllText(filepath);
                 gestureNamedEvents = ReadEvents(content);
-                SetGesturesEvents();
+                UpdateRunningGesturesEventsFromStored();
             }
         }
 
-        private void SetGesturesEvents()
+        private void UpdateRunningGesturesEventsFromStored()
         {
             foreach (var panelChild in this.GesturesFeedbackPanel.Children)
             {
@@ -1149,6 +1240,21 @@ namespace PreposeGestureRecognizer
                             gestureProgress.TriggeredEvents.SetEvent(evt.Item2);
                         }
                     }
+                }
+            }
+        }
+
+        private void UpdateStoredGesturesEventsFromRunning()
+        {
+            gestureNamedEvents.Clear();
+            foreach (var panelChild in this.GesturesFeedbackPanel.Children)
+            {
+                if (panelChild is GestureFeedback)
+                {
+                    var gestureProgress = (GestureFeedback)panelChild;
+                    gestureNamedEvents.Add(new Tuple<string, GestureEvent>(
+                        gestureProgress.Gesture.Name,
+                        gestureProgress.TriggeredEvents.GetEvent()));
                 }
             }
         }
@@ -1216,6 +1322,7 @@ namespace PreposeGestureRecognizer
             {
                 var filepath = dialog.FileName;
                 File.WriteAllText(filepath, text);
+                UpdateStoredGesturesEventsFromRunning();
             }
         }
         #endregion
