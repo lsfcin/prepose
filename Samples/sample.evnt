@@ -1,6 +1,6 @@
 GESTURE generic_left_punch
-	ENTER NONE
+	MOUSE_X_MOVE NONE
 
 GESTURE wave
-	o i
+	NONE NONE
 

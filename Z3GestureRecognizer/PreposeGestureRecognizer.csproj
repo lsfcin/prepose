@@ -101,6 +101,7 @@
     <Compile Include="Controls\TriggeredEvents.xaml.cs">
       <DependentUpon>TriggeredEvents.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EventsSender.cs" />
     <Compile Include="PreposeSyntaxCompletionData.cs" />
     <Compile Include="Z3KinectConverter.cs" />
     <Page Include="Controls\GestureFeedback.xaml">

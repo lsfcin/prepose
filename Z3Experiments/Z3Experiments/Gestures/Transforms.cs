@@ -130,6 +130,7 @@ namespace PreposeGestures
             return this.TransformFunc.Target.GetType().DeclaringType.ToString();
         }
 
+        public JointType JointType;
         private Func<Z3Point3D, Z3Point3D> TransformFunc { get; set; }
     }
 
@@ -142,6 +143,12 @@ namespace PreposeGestures
         public SetJointDirectionTransform(Z3Point3D jointToSet)
             : base(joint => jointToSet)
         { }
+
+        public override string ToString()
+        {
+            var result = "point";
+            return result;
+        }
     }
 
     public class RotateJointTransform : JointTransform
@@ -496,6 +503,12 @@ namespace PreposeGestures
                 return result;
             })
         { }
+
+        public override string ToString()
+        {
+            var result = "rotate";
+            return result;
+        }
     }
 
     public class CompositeBodyTransform
@@ -680,7 +693,7 @@ namespace PreposeGestures
                 {
                     if (count > 0)
                         buf.AppendFormat("\n");
-                    buf.AppendFormat("\t{0}: {1}", EnumUtil.GetDescription<JointType>(jointType), this.JointTransforms[jointType]);
+                    buf.AppendFormat("\t{0} your {1}", this.JointTransforms[jointType], EnumUtil.GetDescription<JointType>(jointType));
                     count++;
                 }
             }

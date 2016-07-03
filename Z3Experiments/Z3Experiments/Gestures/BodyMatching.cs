@@ -139,13 +139,9 @@ namespace PreposeGestures
             this.LastDistanceVectors = this.UpdateDistanceVectors(body, localContext);
 
             // Check distance to target transformed joints and if body satisfies restrictions
-            var transformsPercentage = 1.0;
-            if (this.Target.TransformedJoints.Count > 0)
-            {
-                transformsPercentage = 1.0 - 
-                    CalcMaxDistance(this.LastDistanceVectors, this.Target.TransformedJoints) / 2;
-            }
-            var restrictionsPercentage = this.Gesture.Steps[CurrentStep].Pose.CalcMinPercentage(body);
+            double transformsPercentage;
+            double restrictionsPercentage;
+            CalcPercentages(body, out transformsPercentage, out restrictionsPercentage);
             var percentage = Math.Min(transformsPercentage, restrictionsPercentage);
 
             // here elapsedTimeErrorIncrement is a fixed increment to represent that error accumulates as time passes
@@ -174,12 +170,16 @@ namespace PreposeGestures
                 // Check if gesture is completed (all steps are finished)
                 if (this.CurrentStep >= this.Gesture.Steps.Count)
                 {
-                    this.Reset(body);
+                    this.Reset(body);                    
                     this.CompletedCount += 1;
                     overallSucceeded = true;
                 }
 
                 this.UpdateTargetBody(body);
+                
+                // immediatilly update percentage
+                CalcPercentages(body, out transformsPercentage, out restrictionsPercentage);
+                this.LastPercentage = Math.Min(transformsPercentage, restrictionsPercentage);
             }
 
             // If body was not accepted then check if error is higher than threshold
@@ -222,6 +222,17 @@ namespace PreposeGestures
 
             // Record the statistics entry here 
             return result;
+        }
+
+        private void CalcPercentages(Z3Body body, out double transformsPercentage, out double restrictionsPercentage)
+        {
+            transformsPercentage = 1.0;
+            if (this.Target.TransformedJoints.Count > 0)
+            {
+                transformsPercentage = 1.0 -
+                    CalcMaxDistance(this.LastDistanceVectors, this.Target.TransformedJoints) / 2;
+            }
+            restrictionsPercentage = this.Gesture.Steps[CurrentStep].Pose.CalcMinPercentage(body);
         }
 
         internal void UpdateTargetBody(Z3Body startBody)

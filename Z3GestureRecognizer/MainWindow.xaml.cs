@@ -603,6 +603,10 @@ namespace PreposeGestureRecognizer
             
             // match the status return with the feedback UI controls
             // and to send the proper events
+
+            // gather current mouse state
+            var mouseMotions = MouseEventsHelper.GetCurrentMouseInput();
+
             foreach(var status in statuses)
             {
                 foreach(var panelChild in this.GesturesFeedbackPanel.Children)
@@ -614,15 +618,24 @@ namespace PreposeGestureRecognizer
                         if (gestureName.CompareTo(status.Name) == 0)
                         {
                             gestureProgress.RenderFeedback(status);
-                            if(status.succeededDetection)
+
+                            // handling events
+                            var completed = status.succeededDetection;
+                            if(completed)
                             {
-                                var code = gestureProgress.TriggeredEvents.GetEvent().MakeCode();
-                                SendKeys.SendWait(code);                                
+                                gestureProgress.TriggeredEvents.GetEvent().SendKeyboardEvents();
+                                gestureProgress.TriggeredEvents.GetEvent().SendMouseButtonsInput();
                             }
+                            
+                            var progress = gestureProgress.ProgressBar.Value / 100.0;
+                            gestureProgress.TriggeredEvents.GetEvent().UpdateMouseMotionInput(progress, ref mouseMotions);
                         }
                     }
                 }
             }
+
+            MouseEventsHelper.SendMouseInput(mouseMotions);
+
             this.DrawTarget(kinectJoints, dc);
         }
 
@@ -1244,7 +1257,7 @@ namespace PreposeGestureRecognizer
                                                         "to your front",
                                                         "to your back",
                                                         "to your left",
-                                                        "to your righ",
+                                                        "to your right",
                                                         "in front of" };
 
         public static readonly string[] RelativeDirections = { "behind",
