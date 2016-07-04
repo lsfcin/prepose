@@ -1,6 +1,6 @@
 GESTURE generic_left_punch
-	NONE NONE
+	TRIGGERED BY anything MOUSE_LEFT_CLICK NONE
 
 GESTURE wave
-	NONE NONE
+	TRIGGERED BY anything h i
 

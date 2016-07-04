@@ -29,6 +29,7 @@ namespace PreposeGestureRecognizer.Controls
 
             this.Event1ComboBox.ItemsSource = Enum.GetValues(typeof(GestureEventType)).Cast<GestureEventType>();
             this.Event2ComboBox.ItemsSource = Enum.GetValues(typeof(GestureEventType)).Cast<GestureEventType>();
+            this.TriggerGestureTextBox.Text = "anything";
         }
 
         public GestureEvent GetEvent()
@@ -39,6 +40,9 @@ namespace PreposeGestureRecognizer.Controls
             result.EventPart2 = (GestureEventType) this.Event2ComboBox.SelectedValue;
             result.TriggerGestureName = this.TriggerGestureTextBox.Text;
 
+            if (result.TriggerGestureName.CompareTo("") == 0)
+                result.TriggerGestureName = "anything";
+
             return result;
         }
 
@@ -46,6 +50,7 @@ namespace PreposeGestureRecognizer.Controls
         {
             this.Event1ComboBox.SelectedValue = gestureEvent.EventPart1;
             this.Event2ComboBox.SelectedValue = gestureEvent.EventPart2;
+            this.TriggerGestureTextBox.Text = gestureEvent.TriggerGestureName;
         }
     }
 }

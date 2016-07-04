@@ -272,6 +272,9 @@ namespace PreposeGestureRecognizer
 
         public override string ToString()
         {
+            if (TriggerGestureName.CompareTo("") == 0)
+                TriggerGestureName = "anything";
+
             var result = "";
             result += "TRIGGERED BY " + TriggerGestureName;
             result += " " + EventPart1.ToString() + " " + EventPart2.ToString();
