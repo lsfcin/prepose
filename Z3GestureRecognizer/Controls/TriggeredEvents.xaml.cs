@@ -37,6 +37,7 @@ namespace PreposeGestureRecognizer.Controls
 
             result.EventPart1 = (GestureEventType) this.Event1ComboBox.SelectedValue;
             result.EventPart2 = (GestureEventType) this.Event2ComboBox.SelectedValue;
+            result.TriggerGestureName = this.TriggerGestureTextBox.Text;
 
             return result;
         }

@@ -212,12 +212,14 @@ namespace PreposeGestureRecognizer
         {
             EventPart1 = GestureEventType.NONE;
             EventPart2 = GestureEventType.NONE;
+            TriggerGestureName = "anything";
         }
 
-        public GestureEvent(string part1String, string part2String)
+        public GestureEvent(string part1String, string part2String, string trigger)
         {
             EventPart1 = (GestureEventType)Enum.Parse(typeof(GestureEventType), part1String);
             EventPart2 = (GestureEventType)Enum.Parse(typeof(GestureEventType), part2String);
+            TriggerGestureName = trigger;
         }
 
         public string MakeKeyboardCode(GestureEventType gestureEventType)
@@ -271,8 +273,8 @@ namespace PreposeGestureRecognizer
         public override string ToString()
         {
             var result = "";
-
-            result += EventPart1.ToString() + " " + EventPart2.ToString();
+            result += "TRIGGERED BY " + TriggerGestureName;
+            result += " " + EventPart1.ToString() + " " + EventPart2.ToString();
 
             return result;
         }
@@ -300,6 +302,7 @@ namespace PreposeGestureRecognizer
 
         public GestureEventType EventPart1;
         public GestureEventType EventPart2;
+        public string TriggerGestureName;
 
         internal void SendMouseButtonsInput()
         {

@@ -2,7 +2,13 @@
 // sample gestures using prepose language
 //////////////////////////////////////////////////////////////////////
 
-APP sample:         
+APP sample:
+	GESTURE trigger_test :
+		POSE always_true :
+			put your right wrist in front of your left hip.
+		EXECUTION:
+			always_true.
+			
     GESTURE generic_left_punch : 
         POSE prepare_punch :
             put your left elbow behind your neck,

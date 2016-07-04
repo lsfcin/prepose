@@ -3,10 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" Height="65" Width="88.334">
+             mc:Ignorable="d" Height="70.111" Width="88.334">
     <Grid>
-        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="events" VerticalAlignment="Top" FontSize="14" Margin="3,0,0,0" Foreground="#FFACACAC"/>
-        <ComboBox x:Name="Event1ComboBox" HorizontalAlignment="Left" Margin="4,19,0,0" VerticalAlignment="Top" Width="80" Height="20" SelectedIndex="0"/>
-        <ComboBox x:Name="Event2ComboBox" HorizontalAlignment="Left" Margin="4,43,0,0" VerticalAlignment="Top" Width="80" Height="20" SelectedIndex="0"/>
+        <TextBox x:Name="TriggerGestureTextBox" HorizontalAlignment="Left" Margin="18,2,0,0" VerticalAlignment="Top" Width="66" Height="20" Text="anything" Foreground="#FFACACAC" SelectionBrush="#FF336AFF" ToolTip="You may choose another gesture as a trigger in order to to send the events."/>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="send" VerticalAlignment="Top" FontSize="14" Margin="-6,37,0,0" Foreground="#FFACACAC" RenderTransformOrigin="0.5,0.5">
+            <TextBlock.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-90"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </TextBlock.RenderTransform>
+        </TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="if" VerticalAlignment="Top" FontSize="14" Margin="5,4,0,0" Foreground="#FFACACAC" RenderTransformOrigin="0.5,0.5">
+            <TextBlock.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-90"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </TextBlock.RenderTransform>
+        </TextBlock>
+        <ComboBox x:Name="Event1ComboBox" HorizontalAlignment="Left" Margin="18,26,0,0" VerticalAlignment="Top" Width="66" Height="20" SelectedIndex="0" ToolTip="Here you may choose to send a specific event related to this gesture progress or completion."/>
+        <ComboBox x:Name="Event2ComboBox" HorizontalAlignment="Left" Margin="18,47,0,0" VerticalAlignment="Top" Width="66" Height="20" SelectedIndex="0" ToolTip="A second event may be sent, this second option is useful for combined key strokes such as Alt + Tab."/>
     </Grid>
 </UserControl>

@@ -2,7 +2,7 @@
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="PreposeGestureRecognizer.MainWindow"
-		Title="PrePose: Gesture Coding"
+		Title="Prepose IDE"
 		Height="738.179" Width="1257.558" 
 		Loaded="MainWindow_Loaded"
 		Closing="MainWindow_Closing"
@@ -27,14 +27,14 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Row="0" Grid.Column="1" Margin="0,20,0,0">
-            <Image Source="Images\Status.png" Stretch="None" Margin="10,0,10,5" RenderTransformOrigin="2.11,0.64" />
+            <Image Source="Images\Status.png" Stretch="None" Margin="10,0,10,5" RenderTransformOrigin="2.11,0.64" ToolTip="Sensor skeleton feedback below." />
         </Grid>
 
         <Viewbox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">
             <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
         </Viewbox>
 
-        <TextBlock x:Name="CompileStatus" Margin="10,0,119.667,3" TextWrapping="Wrap" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}"><Run Text="Compile result will show here..."/></TextBlock>
+        <TextBlock x:Name="CompileStatus" Margin="10,0,119.667,3" TextWrapping="Wrap" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" ToolTip="Compilation result."><Run Text="Compile result will show here..."/></TextBlock>
         <Separator Margin="11,0,20.667,9" Grid.Row="1" Background="#FFDDDDDD" Height="4" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5">
             <Separator.RenderTransform>
                 <TransformGroup>
@@ -46,7 +46,7 @@
             </Separator.RenderTransform>
         </Separator>
         <StatusBar Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" x:Name="statusBar2" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
-            <StatusBarItem Content="{Binding StatusText}" />
+            <StatusBarItem Content="{Binding StatusText}" ToolTip="Status of sensor initialization and streaming." />
         </StatusBar>
 
         <avalonEdit:TextEditor
@@ -63,13 +63,13 @@
 			FontSize="13"
 			SyntaxHighlighting="Custom Highlighting" 
             Background="#FFFDFDFD" 
-            Grid.Row="1"/>
+            Grid.Row="1" ToolTip="Write your code here."/>
 
-        <TextBlock Margin="10,0,10,10" MinWidth="150" Foreground="{DynamicResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" Height="28" VerticalAlignment="Bottom" Text="Prepose application..."/>
+        <TextBlock Margin="10,0,10,10" MinWidth="150" Foreground="{DynamicResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" Height="28" VerticalAlignment="Bottom" Text="Prepose Code"/>
         <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,41" Grid.Row="1" Click="StartPauseButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="F5 or Ctrl + B to run, ESC or PAUSE to stop"/>
 
         <Grid HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="95,0,0,16" VerticalAlignment="Bottom" Height="22" Width="175">
-            <Slider x:Name="PrecisionSlider" Grid.Column="0" Margin="50,2,30,0" Maximum="30" Minimum="5" RenderTransformOrigin="0.5,0.5" Loaded="PrecisionSlider_Loaded" ValueChanged="PrecisionSlider_ValueChanged" LargeChange="0" Value="30" Height="18" VerticalAlignment="Top">
+            <Slider x:Name="PrecisionSlider" Grid.Column="0" Margin="50,2,30,0" Maximum="30" Minimum="5" RenderTransformOrigin="0.5,0.5" Loaded="PrecisionSlider_Loaded" ValueChanged="PrecisionSlider_ValueChanged" LargeChange="0" Value="30" Height="18" VerticalAlignment="Top" ToolTip="Set the precision for the user in order to fit specific body positions written with the point and rotate actions.">
                 <Slider.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
@@ -88,11 +88,11 @@
             <StackPanel x:Name="GesturesFeedbackPanel" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="590" RenderTransformOrigin="0.5,0.5"/>
         </ScrollViewer>
 
-        <Button x:Name="OpenGesturesButton" Content="load&#xD;&#xA;gestures" Margin="95,0,0,41" Grid.Row="1" Click="OpenGesturesButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
-        <Button x:Name="SaveGesturesButton" Content="save&#xD;&#xA;gestures" Margin="185,0,0,41" Grid.Row="1" Click="SaveGesturesButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
-        <Button x:Name="OpenEventsButton" Visibility="Hidden" Content="load&#xA;events   " Margin="95,0,0,41" Grid.Row="1" Click="OpenEventsButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
-        <Button x:Name="SaveEventsButton" Visibility="Hidden" Content="save&#xA;events   " Margin="185,0,0,41" Grid.Row="1" Click="SaveEventsButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}"/>
-        <Button Content="dump stats" HorizontalAlignment="Left" Margin="10,0,0,16" Width="80" Click="Button_Click" Grid.Row="1" Height="22" VerticalAlignment="Bottom" BorderBrush="{x:Null}" Foreground="{StaticResource MediumGreyBrush}"/>
+        <Button x:Name="OpenGesturesButton" Content="load&#xD;&#xA;gestures" Margin="95,0,0,41" Grid.Row="1" Click="OpenGesturesButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="Click to load gestural application files (.app)."/>
+        <Button x:Name="SaveGesturesButton" Content="save&#xD;&#xA;gestures" Margin="185,0,0,41" Grid.Row="1" Click="SaveGesturesButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="Click to save the current gesture application in a file (.app)."/>
+        <Button x:Name="OpenEventsButton" Visibility="Hidden" Content="load&#xA;events   " Margin="95,0,0,41" Grid.Row="1" Click="OpenEventsButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="Click to load a events (.evnt) file for the current gestures."/>
+        <Button x:Name="SaveEventsButton" Visibility="Hidden" Content="save&#xA;events   " Margin="185,0,0,41" Grid.Row="1" Click="SaveEventsButton_Click" Grid.Column="0" Width="85" HorizontalAlignment="Left" MinWidth="70" MinHeight="30" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="16" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="Click to save the current used events in a file (.evnt)."/>
+        <Button Content="dump stats" HorizontalAlignment="Left" Margin="10,0,0,16" Width="80" Click="Button_Click" Grid.Row="1" Height="22" VerticalAlignment="Bottom" BorderBrush="{x:Null}" Foreground="{StaticResource MediumGreyBrush}" ToolTip="Click to create a file called &quot;matchstats.csv&quot; with all the statistics about the current gestural application."/>
         <Separator Margin="0.333,0,12,9" Grid.Row="1" Background="#FFDDDDDD" Height="4" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5" Grid.Column="1">
             <Separator.RenderTransform>
                 <TransformGroup>
@@ -103,6 +103,6 @@
                 </TransformGroup>
             </Separator.RenderTransform>
         </Separator>
-        <TextBlock x:Name="CaretStatus" Margin="0,0,10.667,3" TextWrapping="Wrap" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" HorizontalAlignment="Right" Width="104"/>
+        <TextBlock x:Name="CaretStatus" Margin="0,0,10.667,3" TextWrapping="Wrap" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" HorizontalAlignment="Right" Width="104" ToolTip="Current caret position (line and column)."/>
     </Grid>
 </Window>

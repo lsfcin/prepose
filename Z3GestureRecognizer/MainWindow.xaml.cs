@@ -617,18 +617,32 @@ namespace PreposeGestureRecognizer
                         var gestureName = gestureProgress.Gesture.Name;
                         if (gestureName.CompareTo(status.Name) == 0)
                         {
-                            gestureProgress.RenderFeedback(status);
-
-                            // handling events
-                            var completed = status.succeededDetection;
-                            if(completed)
+                            // now check if the gesture is triggered only once another gesture is completed
+                            var trigger = gestureProgress.TriggeredEvents.GetEvent().TriggerGestureName;
+                            var gestureShouldBeTriggered = true;
+                            var index = statuses.FindIndex(s => s.Name.CompareTo(trigger) == 0);
+                            if (index > -1 && // found trigger among statuses
+                                trigger.CompareTo(status.Name) != 0 && // trigger is a valid gesture (different from current status)
+                                statuses[index].Percentage < 1.0) // trigger is statuses[index] and is not completed (percentage < 1)
                             {
-                                gestureProgress.TriggeredEvents.GetEvent().SendKeyboardEvents();
-                                gestureProgress.TriggeredEvents.GetEvent().SendMouseButtonsInput();
+                                gestureShouldBeTriggered = false;
                             }
+
+                            if (gestureShouldBeTriggered)
+                            {
+                                gestureProgress.RenderFeedback(status);
+
+                                // handling events
+                                var completed = status.succeededDetection;
+                                if(completed)
+                                {
+                                    gestureProgress.TriggeredEvents.GetEvent().SendKeyboardEvents();
+                                    gestureProgress.TriggeredEvents.GetEvent().SendMouseButtonsInput();
+                                }
                             
-                            var progress = gestureProgress.ProgressBar.Value / 100.0;
-                            gestureProgress.TriggeredEvents.GetEvent().UpdateMouseMotionInput(progress, ref mouseMotions);
+                                var progress = status.Percentage;
+                                gestureProgress.TriggeredEvents.GetEvent().UpdateMouseMotionInput(progress, ref mouseMotions);
+                            }
                         }
                     }
                 }
@@ -1177,15 +1191,19 @@ namespace PreposeGestureRecognizer
                         word = words.ElementAt<string>(i);
                     }
 
-                    ++i;
-                    var name = words.ElementAt<string>(i);
-                    ++i;
+                    ++i; // gesture name
+                    var name = words.ElementAt<string>(i); 
+                    ++i; // TRIGGERED
+                    ++i; // BY
+                    ++i; // trigger name
+                    var trigger = words.ElementAt<string>(i); 
+                    ++i; // first event
                     var evt1String = words.ElementAt<string>(i);
-                    ++i;
+                    ++i; // second event
                     var evt2String = words.ElementAt<string>(i);
-                    ++i;
+                    ++i; // next
 
-                    result.Add(new Tuple<string, GestureEvent>(name, new GestureEvent(evt1String, evt2String)));
+                    result.Add(new Tuple<string, GestureEvent>(name, new GestureEvent(evt1String, evt2String, trigger)));
                 }
             }
             catch(Exception e)
