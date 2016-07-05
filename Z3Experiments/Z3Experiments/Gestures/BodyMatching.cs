@@ -318,7 +318,7 @@ namespace PreposeGestures
                     this.GetCurrentStep().Pose.Name,
                     this.GetCurrentStep().Pose.ToString()));
 
-            result.Percentage = this.LastPercentage;
+            result.StepPercentage = this.LastPercentage;
             result.DistanceVectors = this.LastDistanceVectors;
             result.CompletedCount = this.CompletedCount;
             result.CurrentStep = this.CurrentStep;
@@ -393,16 +393,33 @@ namespace PreposeGestures
             Name = "";
             StepNamesAndDescriptions = new List<Tuple<string,string>>();
             CurrentStep = 0;
-            Percentage = 0;
+            StepPercentage = 0;
             DistanceVectors = new Dictionary<JointType, Point3D>();
             CompletedCount = 0;
+        }
+
+        public double GetGesturePercentage()
+        {
+            var result = 
+                (double) CurrentStep /
+                NumSteps +
+                StepPercentage /
+                NumSteps;
+
+            // adjusting precision errors
+            if(result > 0.999)
+            {
+                result = 1.0;
+            }
+
+            return result;
         }
 
         public string Name { get; set; }
 
         public List<Tuple<string,string>> StepNamesAndDescriptions { get; set; }
 
-        public double Percentage { get; set; }
+        public double StepPercentage { get; set; }
 
         public Dictionary<JointType, Point3D> DistanceVectors { get; set; }
         public int CompletedCount { get; set; }

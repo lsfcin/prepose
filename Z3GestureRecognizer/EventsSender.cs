@@ -11,12 +11,12 @@ namespace PreposeGestureRecognizer
 {
     public enum GestureEventType
     {
-        NONE,
-        MOUSE_LEFT_CLICK, MOUSE_MIDDLE_CLICK, MOUSE_RIGHT_CLICK,
-        MOUSE_X_ABSOLUTE, MOUSE_Y_ABSOLUTE, MOUSE_X_MOVE, MOUSE_Y_MOVE, MOUSE_WHEEL, 
-        SHIFT, CTRL, ALT, BACKSPACE, CAPSLOCK, DELETE, ENTER, ESC, TAB, UP, DOWN, LEFT, RIGHT, HOME, END, PGUP, PGDN,
-        F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
-        a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, y, x, w, z
+        NONE, // no event
+        MOUSE_LEFT_CLICK, MOUSE_MIDDLE_CLICK, MOUSE_RIGHT_CLICK, // mouse click events
+        MOUSE_X_ABSOLUTE, MOUSE_Y_ABSOLUTE, MOUSE_X_MOVE, MOUSE_Y_MOVE, MOUSE_WHEEL, // mouse motion events
+        SHIFT, CTRL, ALT, BACKSPACE, CAPSLOCK, DELETE, ENTER, ESC, TAB, UP, DOWN, LEFT, RIGHT, HOME, END, PGUP, PGDN, // control keys
+        F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, // function keys
+        a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, y, x, w, z // chars
     };
 
     public static class MouseEventsHelper

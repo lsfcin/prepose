@@ -623,7 +623,7 @@ namespace PreposeGestureRecognizer
                             var index = statuses.FindIndex(s => s.Name.CompareTo(trigger) == 0);
                             if (index > -1 && // found trigger among statuses
                                 trigger.CompareTo(status.Name) != 0 && // trigger is a valid gesture (different from current status)
-                                statuses[index].Percentage < 1.0) // trigger is statuses[index] and is not completed (percentage < 1)
+                                statuses[index].GetGesturePercentage() < 1.0) // trigger is statuses[index] and is not completed (percentage < 1)
                             {
                                 gestureShouldBeTriggered = false;
                             }
@@ -640,7 +640,7 @@ namespace PreposeGestureRecognizer
                                     gestureProgress.TriggeredEvents.GetEvent().SendMouseButtonsInput();
                                 }
                             
-                                var progress = status.Percentage;
+                                var progress = status.GetGesturePercentage();
                                 gestureProgress.TriggeredEvents.GetEvent().UpdateMouseMotionInput(progress, ref mouseMotions);
                             }
                         }
