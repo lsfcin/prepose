@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PreposeGestures", "Z3Experiments\Z3Experiments\PreposeGestures.csproj", "{AEB28AC8-F6AE-4689-89AF-E090B698A7E2}"
 EndProject
@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README-MIT-open-source.txt = README-MIT-open-source.txt
 		README.docx = README.docx
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PreposeGestureRecorder", "PreposeGesturesRecorder\PreposeGestureRecorder.csproj", "{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +74,16 @@ Global
 		{8309A1CE-DB5E-49D6-9ED3-73FCB5BD3701}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{8309A1CE-DB5E-49D6-9ED3-73FCB5BD3701}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8309A1CE-DB5E-49D6-9ED3-73FCB5BD3701}.Release|x64.ActiveCfg = Release|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Release|Any CPU.Build.0 = Release|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{269A7B21-FBFE-4E7A-8BBE-C8DE2EC0D833}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

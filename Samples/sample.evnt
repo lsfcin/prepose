@@ -1,5 +1,5 @@
 GESTURE generic_left_punch
-	TRIGGERED BY anything MOUSE_X_ABSOLUTE NONE
+	TRIGGERED BY anything NONE NONE
 
 GESTURE wave
 	TRIGGERED BY anything h i

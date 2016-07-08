@@ -413,7 +413,7 @@ namespace PreposeGestureRecognizer
                                     // TODO: We are considering only one body
                                     if (playingGesture)
                                     {
-                                        this.ManageGestureApp(joints, dc);
+                                        this.UpdateGestures(joints, dc);
                                     }
                                 }
                             }
@@ -593,7 +593,7 @@ namespace PreposeGestureRecognizer
         private BodyMatcher matcher;
         private List<Tuple<string, GestureEvent>> gestureNamedEvents = new List<Tuple<string,GestureEvent>>();
 
-        private void ManageGestureApp(
+        private void UpdateGestures(
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints,
             DrawingContext dc)
         {

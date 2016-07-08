@@ -196,7 +196,15 @@ namespace PreposeGestures
         { 
             get
             {
-                return mTransform.Compose(Delayed.Transform);
+                if (mTransform != null && Delayed.Transform != null)
+                    return mTransform.Compose(Delayed.Transform);
+                else if (mTransform == null && Delayed.Transform != null)
+                    return Delayed.Transform;
+                else if (mTransform != null && Delayed.Transform == null)
+                    return mTransform;
+                else
+                    return null;
+                
             }
             private set
             {
@@ -209,7 +217,14 @@ namespace PreposeGestures
         { 
             get
             {
-                return mRestriction.And(Delayed.Restriction);
+                if (mRestriction != null && Delayed.Restriction != null)
+                    return mRestriction.And(Delayed.Restriction);
+                else if (mRestriction == null && Delayed.Restriction != null)
+                    return Delayed.Restriction;
+                else if (mRestriction != null && Delayed.Restriction == null)
+                    return mRestriction;
+                else
+                    return null;
             }
             private set
             {

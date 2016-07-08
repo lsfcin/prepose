@@ -1,0 +1,96 @@
+﻿<Window x:Class="Microsoft.Samples.Kinect.BodyBasics.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Prepose Recorder Tool" 
+        Height="704" Width="1352.413" 
+        Loaded="MainWindow_Loaded"
+        Closing="MainWindow_Closing"
+        WindowState="Maximized">
+    <Window.Resources>
+        <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
+        <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f" />
+        <SolidColorBrush x:Key="KinectBlueBrush" Color="#ff00BCF2" />
+    </Window.Resources>
+    <Grid Margin="10 0 10 0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TabControl x:Name="MainTabControl" Margin="10,10.333,10.667,81" Grid.Row="1">
+            <TabItem x:Name="SettingsTab" Header="Settings">
+                <Grid x:Name="RecordingSettingsGrid"  Margin="10,2" Grid.Row="1" Background="White">
+                    <Image Source="Images\BodyJoints.png" HorizontalAlignment="Left" Height="431" Margin="31,0,0,0" VerticalAlignment="Top" Width="249"/>
+
+                    <TextBlock HorizontalAlignment="Left" Height="18" Margin="10,21,0,0" TextWrapping="Wrap" Text="Recorded Joints" VerticalAlignment="Top" Width="97" FontWeight="Bold"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="Head"        HorizontalAlignment="Left" Height="16" Margin="10,43,0,0" VerticalAlignment="Top" Width="66"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="Neck"        HorizontalAlignment="Left" Height="16" Margin="227,98,0,0" VerticalAlignment="Top" Width="64" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="M. Shoulder" HorizontalAlignment="Left" Height="16" Margin="10,85,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Shoulder" HorizontalAlignment="Left" Height="16" Margin="10,123,0,0" VerticalAlignment="Top" Width="86" IsChecked="True"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Shoulder" HorizontalAlignment="Left" Height="16" Margin="208,122,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft" IsChecked="True"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Elbow"    HorizontalAlignment="Left" Height="16" Margin="208,181,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft" IsChecked="True"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Hip"      HorizontalAlignment="Left" Height="16" Margin="208,204,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Wrist"    HorizontalAlignment="Left" Height="16" Margin="208,230,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft" IsChecked="True"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Hand"     HorizontalAlignment="Left" Height="16" Margin="208,245,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Hand Tip" HorizontalAlignment="Left" Height="16" Margin="208,259,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Knee"     HorizontalAlignment="Left" Height="16" Margin="208,316,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Ankle"    HorizontalAlignment="Left" Height="16" Margin="208,377,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Foot"     HorizontalAlignment="Left" Height="16" Margin="208,405,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="L. Thumb"    HorizontalAlignment="Left" Height="16" Margin="208,284,0,0" VerticalAlignment="Top" Width="83" FlowDirection="RightToLeft"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="M. Spine"    HorizontalAlignment="Left" Height="16" Margin="10,155,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Elbow"    HorizontalAlignment="Left" Height="16" Margin="10,183,0,0" VerticalAlignment="Top" Width="86" IsChecked="True"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Hip"      HorizontalAlignment="Left" Height="16" Margin="10,203,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Wrist"    HorizontalAlignment="Left" Height="16" Margin="10,233,0,0" VerticalAlignment="Top" Width="86" IsChecked="True"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Hand"     HorizontalAlignment="Left" Height="16" Margin="10,248,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Hand Tip" HorizontalAlignment="Left" Height="16" Margin="10,263,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Thumb"    HorizontalAlignment="Left" Height="16" Margin="10,284,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Knee"     HorizontalAlignment="Left" Height="16" Margin="10,314,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Ankle"    HorizontalAlignment="Left" Height="16" Margin="10,377,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="R. Foot"     HorizontalAlignment="Left" Height="16" Margin="10,405,0,0" VerticalAlignment="Top" Width="86"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="M. Hip"      HorizontalAlignment="Left" Height="16" Margin="130,436,0,0" VerticalAlignment="Top" Width="58"/>
+
+                    <TextBlock HorizontalAlignment="Left" Height="18" Margin="356,21,0,0" TextWrapping="Wrap" Text="Recorded Actions" VerticalAlignment="Top" Width="114" FontWeight="Bold"/>
+                    <RadioButton x:Name="RestrictionsRadioButton" GroupName="Actions" Content="Generic Restrictions" HorizontalAlignment="Left" Height="15" Margin="358,44,0,0" VerticalAlignment="Top" Width="131" IsChecked="True" Click="RestrictionsRadioButton_Click"/>
+                    <CheckBox x:Name="PutRestrictionCheckBox" Content="Put" HorizontalAlignment="Left" Height="16" Margin="378,64,0,0" VerticalAlignment="Top" Width="66" IsChecked="True" Click="ActionCheckBox_Click"/>
+                    <CheckBox x:Name="AlignRestrictionCheckBox" Content="Align" HorizontalAlignment="Left" Height="16" Margin="378,85,0,0" VerticalAlignment="Top" Width="66" Click="ActionCheckBox_Click"/>
+                    <CheckBox x:Name="TouchRestrictionCheckBox" Content="Touch" HorizontalAlignment="Left" Height="16" Margin="378,106,0,0" VerticalAlignment="Top" Width="66" Click="ActionCheckBox_Click"/>
+                    <RadioButton x:Name="TransformsRadioButton" GroupName="Actions" Content="Specific Transformations" HorizontalAlignment="Left" Height="15" Margin="358,140,0,0" VerticalAlignment="Top" Width="158" Click="TransformsRadioButton_Click"/>
+                    <CheckBox x:Name="PointTransformCheckBox" Content="Point" HorizontalAlignment="Left" Height="16" Margin="378,160,0,0" VerticalAlignment="Top" Width="66" IsChecked="False" IsEnabled="False" Click="ActionCheckBox_Click"/>
+                    <CheckBox x:Name="RotateTransformCheckBox" Content="Rotate" HorizontalAlignment="Left" Height="16" Margin="378,181,0,0" VerticalAlignment="Top" Width="66" IsChecked="False" IsEnabled="False" Click="ActionCheckBox_Click"/>
+                    <TextBlock HorizontalAlignment="Left" Height="18" Margin="357,239,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" FontWeight="Bold"><Run FontWeight="Normal" Text="Start After"/></TextBlock>
+                    <TextBox x:Name="StartAfterTextBox" TextWrapping="Wrap" Text="3" Height="18" Width="20" Margin="378,257,0,0" HorizontalContentAlignment="Right" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <TextBlock HorizontalAlignment="Left" Height="18" Margin="403,257,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50" Text="seconds"/>
+                    <TextBlock HorizontalAlignment="Left" Height="18" Margin="357,280,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" FontWeight="Bold"><Run FontWeight="Normal" Text="Record for"/></TextBlock>
+                    <TextBox x:Name="RecordForTextBox" TextWrapping="Wrap" Text="10" Height="18" Width="20" Margin="378,298,0,0" HorizontalContentAlignment="Right" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <TextBlock HorizontalAlignment="Left" Height="18" Margin="403,298,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50" Text="seconds"/>
+                    <TextBlock HorizontalAlignment="Left" Height="18" Margin="356,218,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" FontWeight="Bold" Text="Timing"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="CodeTab" Header="Code">
+                <TextBox x:Name="RecordedCodeTextBox" Margin="10,10,9,10" TextWrapping="Wrap" Text="Recorded code will show up here..." Grid.Row="1" IsReadOnly="True" FontSize="14" Foreground="#FF212121" Background="#FFF3F3F3" FontFamily="Consolas" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+            </TabItem>
+        </TabControl>
+
+
+        <Grid Grid.Row="0" Grid.Column="1" Margin="0,20,0,0">
+            <Image Source="Images\Status.png" Stretch="None" Margin="10,0,10,5" RenderTransformOrigin="2.11,0.64" ToolTip="Sensor skeleton feedback below." />
+        </Grid>
+
+        <Viewbox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
+        </Viewbox>
+
+        <StatusBar Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" x:Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
+            <StatusBarItem Content="{Binding StatusText}" />
+        </StatusBar>
+        <TextBlock Margin="10,0,10.333,9.667" MinWidth="150" Foreground="{DynamicResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" Height="28" VerticalAlignment="Bottom" Text="Prepose Recorder"/>
+        <Button x:Name="StopButton" Visibility="Hidden" Content=" ◾ " Margin="10,0,0,26" Grid.Row="1" Grid.Column="0" Width="90" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="41" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="Click to start recording." Click="StopButton_Click"/>
+        <Button x:Name="RecordButton" Visibility="Visible" Content=" 🌑 " Margin="10,0,0,26" Grid.Row="1" Grid.Column="0" Width="90" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="22" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="Click to start recording." Click="RecordButton_Click"/>
+        <TextBlock x:Name="RecordingStatus" Margin="10,0,99.333,4.667" TextWrapping="Wrap" Grid.Row="2" Grid.Column="0" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" ToolTip="Compilation result." Text="Recording result will show here..."/>
+    </Grid>
+</Window>
