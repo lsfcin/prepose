@@ -54,17 +54,17 @@ namespace PreposeGestureRecognizer
             jointVectors.Add(Microsoft.Kinect.JointType.FootRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.FootRight], kinectJoints[Microsoft.Kinect.JointType.AnkleRight]));
 
             var rotationMatrix = new Matrix3D();
-
             InitMatrix(out rotationMatrix, kinectJoints);
-
-            rotationMatrix.Invert();            
+            rotationMatrix.Invert();
 
             var jointTypes = EnumUtil.GetValues<Microsoft.Kinect.JointType>();
             foreach (var jointType in jointTypes)
             {
                 if (jointType != Microsoft.Kinect.JointType.SpineBase)
                 {
-                    jointVectors[jointType] = jointVectors[jointType] * rotationMatrix;                    
+                    var current = jointVectors[jointType];
+                    var rotated = current * rotationMatrix;
+                    jointVectors[jointType] = rotated;
                 }
             }
 
@@ -119,8 +119,6 @@ namespace PreposeGestureRecognizer
 
             return new Z3Body(joints, norms);
 		}
-
-
 
         /// <summary>
         /// This maps a Z3 body to Kinect joints. 
@@ -177,44 +175,20 @@ namespace PreposeGestureRecognizer
 			InitMatrix(out rotationMatrix, baseJoints);
 
 			// Rotate all vectors to the current base body coordinate system
+            // Add base body position (spineBase position) to translate result
+            // The operations order matter in this case
 			var kinectJointTypes = EnumUtil.GetValues<Microsoft.Kinect.JointType>();
 			foreach (var jointType in kinectJointTypes)
 			{
 				if (jointType != Microsoft.Kinect.JointType.SpineBase &&
                     targetJoints.Contains((PreposeGestures.JointType)jointType))
 				{
-					jointVectors[jointType] *= rotationMatrix;				
+					jointVectors[jointType] *= rotationMatrix;
+                    SumWithFatherPosition(jointVectors, jointType);		
 				}
 			}
 
-			// Add base body position (spineBase position) to translate result
-			// The operations order matter in this case			
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.SpineMid);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.SpineShoulder);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.Neck);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.Head);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.ShoulderLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.ElbowLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.WristLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.HandLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.HandTipLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.ThumbLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.ShoulderRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.ElbowRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.WristRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.HandRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.HandTipRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.ThumbRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.HipLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.KneeLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.AnkleLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.FootLeft);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.HipRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.KneeRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.AnkleRight);
-            SumWithFatherPosition(jointVectors, targetJoints, Microsoft.Kinect.JointType.FootRight);
-
-			// Filling the results
+            // Filling the results
 			var result = new Dictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint>();
 
 			foreach (var jointType in kinectJointTypes)
@@ -453,10 +427,8 @@ namespace PreposeGestureRecognizer
 
 		private static void SumWithFatherPosition(
 			Dictionary<Microsoft.Kinect.JointType, Vector3D> jointVectors,
-			List<PreposeGestures.JointType> targetCalculatedJoints,
 			Microsoft.Kinect.JointType jointType)
 		{
-			if (targetCalculatedJoints.Contains((PreposeGestures.JointType)jointType))
 				jointVectors[jointType] +=
 					jointVectors[(Microsoft.Kinect.JointType)JointTypeHelper.GetFather((PreposeGestures.JointType)jointType)];
 		}
@@ -511,7 +483,6 @@ namespace PreposeGestureRecognizer
 			rotationMatrix.M32 = k.Y;
 			rotationMatrix.M33 = k.Z;
 		}
-
 
         private static Vector3D SubtractJoints(Joint j1, Joint j2)
         {

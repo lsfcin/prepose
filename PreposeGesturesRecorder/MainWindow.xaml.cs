@@ -354,28 +354,28 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         case "Head": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
                         case "Neck": selectedJoints[JointType.Neck] = (bool)checkbox.IsChecked; break;
                         case "M. Shoulder": selectedJoints[JointType.SpineShoulder] = (bool)checkbox.IsChecked; break;
-                        case "R. Shoulder": selectedJoints[JointType.ShoulderRight] = (bool)checkbox.IsChecked; break;
+                        case "M. Hip": selectedJoints[JointType.SpineBase] = (bool)checkbox.IsChecked; break;
+                        case "M. Spine": selectedJoints[JointType.SpineMid] = (bool)checkbox.IsChecked; break;
                         case "L. Shoulder": selectedJoints[JointType.ShoulderLeft] = (bool)checkbox.IsChecked; break;
-                        case "L. Elbow": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Hip": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Wrist": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Hand": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Hand Tip": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Knee": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Ankle": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Foot": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "L. Thumb": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "M. Spine": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Elbow": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Hip": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Wrist": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Hand": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Hand Tip": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Thumb": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Knee": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Ankle": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "R. Foot": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
-                        case "M. Hip": selectedJoints[JointType.Head] = (bool)checkbox.IsChecked; break;
+                        case "L. Elbow": selectedJoints[JointType.ElbowLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Hip": selectedJoints[JointType.HipLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Wrist": selectedJoints[JointType.WristLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Hand": selectedJoints[JointType.HandLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Hand Tip": selectedJoints[JointType.HandTipLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Knee": selectedJoints[JointType.KneeLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Ankle": selectedJoints[JointType.AnkleLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Foot": selectedJoints[JointType.FootLeft] = (bool)checkbox.IsChecked; break;
+                        case "L. Thumb": selectedJoints[JointType.ThumbLeft] = (bool)checkbox.IsChecked; break;
+                        case "R. Shoulder": selectedJoints[JointType.ShoulderRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Elbow": selectedJoints[JointType.ElbowRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Hip": selectedJoints[JointType.HipRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Wrist": selectedJoints[JointType.WristRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Hand": selectedJoints[JointType.HandRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Hand Tip": selectedJoints[JointType.HandTipRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Thumb": selectedJoints[JointType.ThumbRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Knee": selectedJoints[JointType.KneeRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Ankle": selectedJoints[JointType.AnkleRight] = (bool)checkbox.IsChecked; break;
+                        case "R. Foot": selectedJoints[JointType.FootRight] = (bool)checkbox.IsChecked; break;
                     }
                 }
             }
@@ -507,12 +507,14 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             {
                 var remaining = start - elapsed;
                 RecordingStatus.Text = "Recording in " + remaining + " seconds...";
+                RecordedCodeTextBox.Text = "Recording in " + remaining + " seconds...";
 
             }
             else if (elapsed >= start && elapsed < start + length)
             {
                 var remaining = (start + length) - elapsed;
                 RecordingStatus.Text = "Recording will finish in " + remaining + " seconds...";
+                RecordedCodeTextBox.Text = "Recording will finish in " + remaining + " seconds...";
 
                 UpdateCheckpoints(body);
             }
@@ -537,19 +539,98 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 {
                     foreach(var selectedAction in selectedActions)
                     {
-
+                        if(selectedAction.Value)
+                        {
+                            switch(selectedAction.Key)
+                            {
+                                case ActionType.Put:
+                                    WritePutAction(checkpoint, selectedJoint);
+                                    break;
+                                case ActionType.Align:
+                                    break;
+                                case ActionType.Touch:
+                                    break;
+                                case ActionType.Point:
+                                    break;
+                                case ActionType.Rotate:
+                                    break;
+                            }
+                        }
                     }
                 }
             }
         }
 
+        private string WritePutAction(Dictionary<JointType, Vector3D> bodyVectors, KeyValuePair<JointType, bool> currentJoint)
+        {
+            var result = "";
+
+            foreach(var selectedJoint in selectedJoints)
+            {
+                // selectedJoint must be active
+                // and in order to relate joints in only one way
+                // currentJoint key must be greater than selectedJoint key
+                if(selectedJoint.Value && currentJoint.Key > selectedJoint.Key)
+                {
+                    // get both joints positions
+                    var currentPosition = CalcPosition(bodyVectors, currentJoint);
+
+                    result += "put " + WriteJoint(currentJoint.Key);
+
+                }
+            }
+
+            return result;
+        }
+
+        private Vector3D CalcPosition(Dictionary<JointType, Vector3D> bodyVectors, KeyValuePair<JointType, bool> currentJoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string WriteJoint(JointType jointType)
+        {
+            var result = "";
+
+            switch(jointType)
+            {
+                case JointType.Neck: result += "your neck"; break;
+                case JointType.Head: result += "your head"; break;
+                case JointType.SpineMid: result += "your spine mid"; break;
+                case JointType.SpineBase: result += "your spine base"; break;
+                case JointType.SpineShoulder: result += "your spine shoulder"; break;
+                case JointType.ShoulderLeft: result += "your left shoulder"; break;
+                case JointType.ElbowLeft: result += "your left elbow"; break;
+                case JointType.WristLeft: result += "your left wrist"; break;
+                case JointType.HandLeft: result += "your left hand"; break;
+                case JointType.HandTipLeft: result += "your left hand tip"; break;
+                case JointType.ThumbLeft: result += "your left thumb"; break;
+                case JointType.HipLeft: result += "your left hip"; break;
+                case JointType.KneeLeft: result += "your left knee"; break;
+                case JointType.AnkleLeft: result += "your left ankle"; break;
+                case JointType.FootLeft: result += "your left foot"; break;
+                case JointType.ShoulderRight: result += "your right shoulder"; break;
+                case JointType.ElbowRight: result += "your right elbow"; break;
+                case JointType.WristRight: result += "your right wrist"; break;
+                case JointType.HandRight: result += "your right hand"; break;
+                case JointType.HandTipRight: result += "your right hand tip"; break;
+                case JointType.ThumbRight: result += "your right thumb"; break;
+                case JointType.HipRight: result += "your right hip"; break;
+                case JointType.KneeRight: result += "your right knee"; break;
+                case JointType.AnkleRight: result += "your right ankle"; break;
+                case JointType.FootRight: result += "your right foot"; break;
+            }
+
+            return result;
+        }
+
         private void UpdateCheckpoints(Body body)
         {
             // maximum accepted angle in degrees
-            var maxAngle = 30;
+            var maxAngle = 45.0;
 
-            var joints = new Dictionary<Microsoft.Kinect.JointType, Vector3D>();
-                //Z3KinectConverter.KinectToHipsSpineCoordinateSystem(body.Joints);
+            var joints =
+                Z3KinectConverter.KinectToHipsSpineCoordinateSystem(body.Joints);
 
             // if there is no checkpoint recorded add joints as the first one
             if (checkpoints.Count == 0)
@@ -558,6 +639,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             }
             else
             {
+                RecordedCodeTextBox.Text = "joints feedbacks\n";
+
                 // check if current joints are accepted
                 // by the last checkpoint
                 foreach(var selectedJoint in selectedJoints)
@@ -565,11 +648,11 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     if(selectedJoint.Value)
                     {
                         var jointType = selectedJoint.Key;
-                        var angle = 0;
-                            //Vector3D.AngleBetween(
-                            //checkpoints.Last()[jointType],
-                            //joints[jointType]);
+                        var v1 = checkpoints.Last()[jointType];
+                        var v2 = joints[jointType];
+                        var angle = Vector3D.AngleBetween(v1, v2);
                         
+                        RecordedCodeTextBox.Text += "j " + jointType + " angle: " + angle + "\n";
                         // if a single selected joint is too far
                         // than create a new checkpoint
                         if(angle > maxAngle)
@@ -747,7 +830,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
         private void RecordButton_Click(object sender, RoutedEventArgs e)
         {
-            RecordingStatus.Text = "Recording in " + StartAfterTextBox.Text + " seconds..."; 
+            RecordingStatus.Text = "Recording in " + StartAfterTextBox.Text + " seconds...";
+            RecordedCodeTextBox.Text = "Recording in " + StartAfterTextBox.Text + " seconds..."; 
             RecordButton.Visibility = System.Windows.Visibility.Hidden;
             StopButton.Visibility = System.Windows.Visibility.Visible;
             RecordingSettingsGrid.IsEnabled = false;
