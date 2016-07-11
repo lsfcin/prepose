@@ -170,44 +170,66 @@ namespace PreposeGestureRecognizer
 				}
 			}
 
-			// Calc base rotation matrix
-			var rotationMatrix = new Matrix3D();
-			InitMatrix(out rotationMatrix, baseJoints);
+            var result = HipsSpineToKinectCoordinateSystem(jointVectors, baseJoints, targetJoints);
 
-			// Rotate all vectors to the current base body coordinate system
+            return result;
+		}
+
+        private static Dictionary<Microsoft.Kinect.JointType, Joint> HipsSpineToKinectCoordinateSystem(
+            Dictionary<Microsoft.Kinect.JointType, Vector3D> jointVectors, 
+            IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> baseJoints, 
+            List<PreposeGestures.JointType> selectedJoints = null)
+        {
+            // Calc base rotation matrix
+            var rotationMatrix = new Matrix3D();
+            InitMatrix(out rotationMatrix, baseJoints);
+
+            // Rotate all vectors to the current base body coordinate system
             // Add base body position (spineBase position) to translate result
             // The operations order matter in this case
-			var kinectJointTypes = EnumUtil.GetValues<Microsoft.Kinect.JointType>();
-			foreach (var jointType in kinectJointTypes)
-			{
-				if (jointType != Microsoft.Kinect.JointType.SpineBase &&
-                    targetJoints.Contains((PreposeGestures.JointType)jointType))
-				{
-					jointVectors[jointType] *= rotationMatrix;
-                    SumWithFatherPosition(jointVectors, jointType);		
-				}
-			}
+            var kinectJointTypes = EnumUtil.GetValues<Microsoft.Kinect.JointType>();
+            foreach (var jointType in kinectJointTypes)
+            {
+                if (jointType != Microsoft.Kinect.JointType.SpineBase &&
+                    (selectedJoints == null || selectedJoints.Contains((PreposeGestures.JointType)jointType)))
+                {
+                    jointVectors[jointType] *= rotationMatrix;
+                    SumWithFatherPosition(jointVectors, jointType);
+                }
+            }
 
             // Filling the results
-			var result = new Dictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint>();
+            var result = new Dictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint>();
 
-			foreach (var jointType in kinectJointTypes)
-			{
-				var joint = new Joint();
+            foreach (var jointType in kinectJointTypes)
+            {
+                var joint = new Joint();
                 var position = new CameraSpacePoint();
                 position.X = (float)jointVectors[jointType].X;
                 position.Y = (float)jointVectors[jointType].Y;
                 position.Z = (float)jointVectors[jointType].Z;
 
-				joint.Position = position;
-				joint.TrackingState = TrackingState.Tracked;
+                joint.Position = position;
+                joint.TrackingState = TrackingState.Tracked;
 
-				result.Add(jointType, joint);
-			}
+                result.Add(jointType, joint);
+            }
 
-			return result;
-		}
+            return result;
+        }
 
+        //public static IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint>
+        //    KinectToHipsSpineCoordinateSystem(
+        //    Dictionary<Microsoft.Kinect.JointType, Vector3D>
+        //    jointVectors)
+        //{
+        //    var result = new Dictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint>();
+
+
+
+
+        //    return result;
+        //}
 
         /// <summary>
         /// This returns a fake body for testing.
@@ -432,6 +454,19 @@ namespace PreposeGestureRecognizer
 				jointVectors[jointType] +=
 					jointVectors[(Microsoft.Kinect.JointType)JointTypeHelper.GetFather((PreposeGestures.JointType)jointType)];
 		}
+
+        public static Vector3D CalcAbsoluteJointPosition(
+            Dictionary<Microsoft.Kinect.JointType, Vector3D> jointVectors,
+            Microsoft.Kinect.JointType jointType)
+        {
+            var result = jointVectors[jointType];
+            var fatherJointType = (Microsoft.Kinect.JointType)JointTypeHelper.GetFather((PreposeGestures.JointType)jointType);
+
+            if(jointType != Microsoft.Kinect.JointType.SpineBase)
+                result += CalcAbsoluteJointPosition(jointVectors, fatherJointType);
+
+            return result;
+        }
 
 		private static void AddZ3JointToVectors3D(
 			Z3Body targetBody, 

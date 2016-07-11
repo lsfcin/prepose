@@ -174,7 +174,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
         Dictionary<JointType, bool> selectedJoints;
         Dictionary<ActionType, bool> selectedActions;
-        List<Dictionary<JointType, Vector3D>> checkpoints;
+        List<Tuple<string, Dictionary<JointType, Vector3D>>> checkpoints;
+        List<string> steps;
 
 
         /// <summary>
@@ -183,7 +184,10 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         public MainWindow()
         {
             // create a vector of joint sets to store checkpoints
-            this.checkpoints = new List<Dictionary<JointType, Vector3D>>();
+            this.checkpoints = new List<Tuple<string, Dictionary<JointType, Vector3D>>>();
+
+            // create a vector of execution steps of the recorded gesture
+            this.steps = new List<string>();
 
             // create a stopwatch for FPS calculation
             this.stopwatch = new Stopwatch();
@@ -514,37 +518,141 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             {
                 var remaining = (start + length) - elapsed;
                 RecordingStatus.Text = "Recording will finish in " + remaining + " seconds...";
-                RecordedCodeTextBox.Text = "Recording will finish in " + remaining + " seconds...";
+                //RecordedCodeTextBox.Text = "Recording will finish in " + remaining + " seconds...";
 
-                UpdateCheckpoints(body);
+                var changed = UpdateCheckpointsAndSteps(body);
+                if(changed)
+                    RecordedCodeTextBox.Text = WritePreposeCode();
             }
             else
             {
                 StopButton_Click(null, null);
-
-                WritePreposeCode();                
+                RecordedCodeTextBox.Text = WritePreposeCode();
             }
         }
-
-        private void WritePreposeCode()
+        
+        private bool UpdateCheckpointsAndSteps(Body body)
         {
-            RecordedCodeTextBox.Text = "APP app_name:";
-            RecordedCodeTextBox.Text += "\n  GESTURE gesture_name:";
-            var poseCount = 0;
-            foreach(var checkpoint in checkpoints)
+            var result = false;
+            // maximum accepted angle in degrees
+            var maxAngle = 45.0;
+
+            var joints =
+                Z3KinectConverter.KinectToHipsSpineCoordinateSystem(body.Joints);
+
+            var name = "pose_" + (checkpoints.Count + 1);
+
+            // if there is no checkpoint recorded add joints as the first one
+            if (checkpoints.Count == 0)
             {
-                poseCount++;
-                RecordedCodeTextBox.Text += "\n    POSE pose_" + poseCount + ":";
+                result = true;
+                steps.Add(name);
+                checkpoints.Add(
+                    new Tuple<string, Dictionary<JointType, Vector3D>>
+                        (name, joints));
+            }
+            else
+            {                
+                // check if current joints are accepted
+                // by the last checkpoint
                 foreach(var selectedJoint in selectedJoints)
                 {
-                    foreach(var selectedAction in selectedActions)
+                    if(selectedJoint.Value)
                     {
-                        if(selectedAction.Value)
+                        var jointType = selectedJoint.Key;
+                        var v1 = checkpoints.Last().Item2[jointType];
+                        var v2 = joints[jointType];
+                        var angle = Vector3D.AngleBetween(v1, v2);
+
+                        // if a single selected joint is too far
+                        // than create a new checkpoint
+                        if(angle > maxAngle)
                         {
-                            switch(selectedAction.Key)
+                            // now check if there is a previous checkpoint
+                            // that is written in the same way the current would be
+                            var currentCode = WriteActions(joints);
+                            var found = false;
+                            foreach(var checkpoint in checkpoints)
+                            {
+                                var checkpointCode = WriteActions(checkpoint.Item2);
+
+                                if (currentCode.CompareTo(checkpointCode) == 0)
+                                {
+                                    name = checkpoint.Item1;
+                                    found = true;
+                                }
+                            }
+
+                            // only add a new step if the name representing the
+                            // current joints is different from the name of the
+                            // last step, there is no use to add an identical
+                            // execution step
+                            if(name.CompareTo(steps.Last()) != 0)
+                            {
+                                result = true;
+                                steps.Add(name);
+
+                                // if there is no previous checkpoint to represent
+                                // the current joints, than add a new one
+                                if(!found)
+                                    checkpoints.Add(
+                                        new Tuple<string, Dictionary
+                                            <JointType, Vector3D>>
+                                            (name, joints));
+                            }
+
+                            break;
+                        }                        
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private string WritePreposeCode()
+        {
+            var result = "APP app_name:";
+            result += "\n  GESTURE gesture_name:";
+            foreach(var checkpoint in checkpoints)
+            {
+                result += WritePose(checkpoint);
+            }
+
+            result += "\n    EXECUTION:";
+            foreach (var step in steps)
+            {
+                result += "\n      " + step + ",";
+            }
+
+            // replace the last execution step comma for a dot
+            result = result.Remove(result.Length - 1, 1) + ".";
+
+            return result;
+        }
+
+        private string WritePose(Tuple<string, Dictionary<JointType, Vector3D>> checkpoint)
+        {
+            var result = "\n    POSE " + checkpoint.Item1 + ":";
+            result += WriteActions(checkpoint.Item2);
+            return result;
+        }
+
+        private string WriteActions(Dictionary<JointType, Vector3D> joints)
+        {
+            var result = "";
+            foreach (var selectedJoint in selectedJoints)
+            {
+                if (selectedJoint.Value)
+                {
+                    foreach (var selectedAction in selectedActions)
+                    {
+                        if (selectedAction.Value)
+                        {
+                            switch (selectedAction.Key)
                             {
                                 case ActionType.Put:
-                                    WritePutAction(checkpoint, selectedJoint);
+                                    result += WritePutAction(joints, selectedJoint);
                                     break;
                                 case ActionType.Align:
                                     break;
@@ -559,9 +667,12 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     }
                 }
             }
+            // replace the last pose comma for a dot
+            result = result.Remove(result.Length - 1, 1) + ".";
+            return result;
         }
 
-        private string WritePutAction(Dictionary<JointType, Vector3D> bodyVectors, KeyValuePair<JointType, bool> currentJoint)
+        private string WritePutAction(Dictionary<JointType, Vector3D> jointsVectors, KeyValuePair<JointType, bool> currentJoint)
         {
             var result = "";
 
@@ -573,96 +684,33 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 if(selectedJoint.Value && currentJoint.Key > selectedJoint.Key)
                 {
                     // get both joints positions
-                    var currentPosition = CalcPosition(bodyVectors, currentJoint);
+                    var currentPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, currentJoint.Key);
+                    var selectedPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, selectedJoint.Key);
 
-                    result += "put " + WriteJoint(currentJoint.Key);
-
+                    if(currentPosition.X > selectedPosition.X)
+                        result += "\n      put " + WriteJoint(currentJoint.Key) + " to the right of " + WriteJoint(selectedJoint.Key) + ",";
+                    else
+                        result += "\n      put " + WriteJoint(currentJoint.Key) + " to the left of " + WriteJoint(selectedJoint.Key) + ",";
+                    if(currentPosition.Y > selectedPosition.Y)
+                        result += "\n      put " + WriteJoint(currentJoint.Key) + " above " + WriteJoint(selectedJoint.Key) + ",";
+                    else
+                        result += "\n      put " + WriteJoint(currentJoint.Key) + " below " + WriteJoint(selectedJoint.Key) + ",";
+                    if(currentPosition.Z > selectedPosition.Z)
+                        result += "\n      put " + WriteJoint(currentJoint.Key) + " behind " + WriteJoint(selectedJoint.Key) + ",";
+                    else
+                        result += "\n      put " + WriteJoint(currentJoint.Key) + " in front of " + WriteJoint(selectedJoint.Key) + ",";
                 }
             }
 
             return result;
-        }
-
-        private Vector3D CalcPosition(Dictionary<JointType, Vector3D> bodyVectors, KeyValuePair<JointType, bool> currentJoint)
-        {
-            throw new NotImplementedException();
         }
 
         private string WriteJoint(JointType jointType)
         {
-            var result = "";
-
-            switch(jointType)
-            {
-                case JointType.Neck: result += "your neck"; break;
-                case JointType.Head: result += "your head"; break;
-                case JointType.SpineMid: result += "your spine mid"; break;
-                case JointType.SpineBase: result += "your spine base"; break;
-                case JointType.SpineShoulder: result += "your spine shoulder"; break;
-                case JointType.ShoulderLeft: result += "your left shoulder"; break;
-                case JointType.ElbowLeft: result += "your left elbow"; break;
-                case JointType.WristLeft: result += "your left wrist"; break;
-                case JointType.HandLeft: result += "your left hand"; break;
-                case JointType.HandTipLeft: result += "your left hand tip"; break;
-                case JointType.ThumbLeft: result += "your left thumb"; break;
-                case JointType.HipLeft: result += "your left hip"; break;
-                case JointType.KneeLeft: result += "your left knee"; break;
-                case JointType.AnkleLeft: result += "your left ankle"; break;
-                case JointType.FootLeft: result += "your left foot"; break;
-                case JointType.ShoulderRight: result += "your right shoulder"; break;
-                case JointType.ElbowRight: result += "your right elbow"; break;
-                case JointType.WristRight: result += "your right wrist"; break;
-                case JointType.HandRight: result += "your right hand"; break;
-                case JointType.HandTipRight: result += "your right hand tip"; break;
-                case JointType.ThumbRight: result += "your right thumb"; break;
-                case JointType.HipRight: result += "your right hip"; break;
-                case JointType.KneeRight: result += "your right knee"; break;
-                case JointType.AnkleRight: result += "your right ankle"; break;
-                case JointType.FootRight: result += "your right foot"; break;
-            }
-
+            var result = "your " +
+                EnumUtil.GetDescription<PreposeGestures.JointType>(
+                (PreposeGestures.JointType)jointType);
             return result;
-        }
-
-        private void UpdateCheckpoints(Body body)
-        {
-            // maximum accepted angle in degrees
-            var maxAngle = 45.0;
-
-            var joints =
-                Z3KinectConverter.KinectToHipsSpineCoordinateSystem(body.Joints);
-
-            // if there is no checkpoint recorded add joints as the first one
-            if (checkpoints.Count == 0)
-            {
-                checkpoints.Add(joints);
-            }
-            else
-            {
-                RecordedCodeTextBox.Text = "joints feedbacks\n";
-
-                // check if current joints are accepted
-                // by the last checkpoint
-                foreach(var selectedJoint in selectedJoints)
-                {
-                    if(selectedJoint.Value)
-                    {
-                        var jointType = selectedJoint.Key;
-                        var v1 = checkpoints.Last()[jointType];
-                        var v2 = joints[jointType];
-                        var angle = Vector3D.AngleBetween(v1, v2);
-                        
-                        RecordedCodeTextBox.Text += "j " + jointType + " angle: " + angle + "\n";
-                        // if a single selected joint is too far
-                        // than create a new checkpoint
-                        if(angle > maxAngle)
-                        {
-                            checkpoints.Add(joints);
-                            break;
-                        }                        
-                    }
-                }
-            }
         }
 
         private Body GetNearestBody()
@@ -841,6 +889,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 this.stopwatch.Reset();
 
             checkpoints.Clear();
+            steps.Clear();
 
             this.stopwatch.Start();
         }
