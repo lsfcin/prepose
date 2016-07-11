@@ -390,7 +390,8 @@ namespace PreposeGestureRecognizer
                             // those body objects will be re-used.
                             frame.GetAndRefreshBodyData(this.bodies);
 
-                            foreach (var body in this.bodies)
+                            var body = GetNearestBody();
+                            if (body != null)
                             {
                                 if (useSyntheticData || body.IsTracked)
                                 {
@@ -429,6 +430,23 @@ namespace PreposeGestureRecognizer
                 Debug.WriteLine("An error occurred: '{0}'", ex);
                 // ignore if the frame is no longer available
             }
+        }
+
+        private Body GetNearestBody()
+        {
+            Body result = null;
+            foreach (var body in this.bodies)
+            {
+                if (body.IsTracked)
+                {
+                    if (result == null)
+                        result = body;
+                    else if (body.Joints[Microsoft.Kinect.JointType.SpineBase].Position.Z <
+                        result.Joints[Microsoft.Kinect.JointType.SpineBase].Position.Z)
+                        result = body;
+                }
+            }
+            return result;
         }
         #endregion
 

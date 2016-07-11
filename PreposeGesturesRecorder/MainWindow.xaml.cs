@@ -518,7 +518,6 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             {
                 var remaining = (start + length) - elapsed;
                 RecordingStatus.Text = "Recording will finish in " + remaining + " seconds...";
-                //RecordedCodeTextBox.Text = "Recording will finish in " + remaining + " seconds...";
 
                 var changed = UpdateCheckpointsAndSteps(body);
                 if(changed)
