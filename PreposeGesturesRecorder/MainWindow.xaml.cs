@@ -520,7 +520,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 RecordingStatus.Text = "Recording will finish in " + remaining + " seconds...";
 
                 var changed = UpdateCheckpointsAndSteps(body);
-                if(changed)
+                if (changed)
                     RecordedCodeTextBox.Text = WritePreposeCode();
             }
             else
@@ -529,12 +529,12 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 RecordedCodeTextBox.Text = WritePreposeCode();
             }
         }
-        
+
         private bool UpdateCheckpointsAndSteps(Body body)
         {
             var result = false;
             // maximum accepted angle in degrees
-            var maxAngle = 45.0;
+            var maxAngle = 5.0;
 
             var joints =
                 Z3KinectConverter.KinectToHipsSpineCoordinateSystem(body.Joints);
@@ -551,12 +551,12 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         (name, joints));
             }
             else
-            {                
+            {
                 // check if current joints are accepted
                 // by the last checkpoint
-                foreach(var selectedJoint in selectedJoints)
+                foreach (var selectedJoint in selectedJoints)
                 {
-                    if(selectedJoint.Value)
+                    if (selectedJoint.Value)
                     {
                         var jointType = selectedJoint.Key;
                         var v1 = checkpoints.Last().Item2[jointType];
@@ -565,13 +565,13 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
                         // if a single selected joint is too far
                         // than create a new checkpoint
-                        if(angle > maxAngle)
+                        if (angle > maxAngle)
                         {
                             // now check if there is a previous checkpoint
                             // that is written in the same way the current would be
                             var currentCode = WriteActions(joints);
                             var found = false;
-                            foreach(var checkpoint in checkpoints)
+                            foreach (var checkpoint in checkpoints)
                             {
                                 var checkpointCode = WriteActions(checkpoint.Item2);
 
@@ -586,14 +586,14 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                             // current joints is different from the name of the
                             // last step, there is no use to add an identical
                             // execution step
-                            if(name.CompareTo(steps.Last()) != 0)
+                            if (name.CompareTo(steps.Last()) != 0)
                             {
                                 result = true;
                                 steps.Add(name);
 
                                 // if there is no previous checkpoint to represent
                                 // the current joints, than add a new one
-                                if(!found)
+                                if (!found)
                                     checkpoints.Add(
                                         new Tuple<string, Dictionary
                                             <JointType, Vector3D>>
@@ -601,7 +601,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                             }
 
                             break;
-                        }                        
+                        }
                     }
                 }
             }
@@ -609,6 +609,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             return result;
         }
 
+        #region Writing Prepose Code
         private string WritePreposeCode()
         {
             var result = "APP app_name:";
@@ -651,15 +652,17 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                             switch (selectedAction.Key)
                             {
                                 case ActionType.Put:
-                                    result += WritePutAction(joints, selectedJoint);
+                                    result += WritePutAction(selectedJoint.Key, joints);
                                     break;
                                 case ActionType.Align:
+                                    result += WriteAlignAction(selectedJoint.Key, joints);
                                     break;
                                 case ActionType.Touch:
+                                    result += WriteTouchAction(selectedJoint.Key, joints);
                                     break;
                                 case ActionType.Point:
-                                    break;
                                 case ActionType.Rotate:
+                                    result += WritePointRotateActions(selectedJoint.Key, joints);
                                     break;
                             }
                         }
@@ -671,7 +674,128 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             return result;
         }
 
-        private string WritePutAction(Dictionary<JointType, Vector3D> jointsVectors, KeyValuePair<JointType, bool> currentJoint)
+        private string WritePointRotateActions(JointType currentJoint, Dictionary<JointType, Vector3D> jointsVectors)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string WriteTouchAction(JointType currentJoint, Dictionary<JointType, Vector3D> jointsVectors)
+        {
+            var result = "";
+
+            var maxDistance = 0.2;
+
+            var currentPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, currentJoint);
+            var leftHandPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, JointType.HandLeft);
+            var rightHandPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, JointType.HandRight);
+            
+
+            // if some of the left hand joints are nearby the currentPosition it means the left hand is touching the currentJoint
+            var distance = 1000.0;
+
+            distance = Vector3D.Subtract(currentPosition, leftHandPosition).Length;
+            if(currentJoint != JointType.HandLeft &&
+                currentJoint != JointType.HandTipLeft &&
+                currentJoint != JointType.ThumbLeft &&
+                currentJoint != JointType.WristLeft &&
+                currentJoint != JointType.ElbowLeft)
+            {
+                if(distance < maxDistance)
+                {
+                    result +=
+                        "\n      touch " + 
+                        WriteJoint(currentJoint) + 
+                        " with " + 
+                        WriteJoint(JointType.HandLeft) + 
+                        ",";
+                }
+                else
+                {
+                    result +=
+                        "\n      don't touch " +
+                        WriteJoint(currentJoint) +
+                        " with " +
+                        WriteJoint(JointType.HandLeft) +
+                        ",";
+                }
+            }
+
+            distance = Vector3D.Subtract(currentPosition, rightHandPosition).Length;
+            if (currentJoint != JointType.HandRight &&
+                currentJoint != JointType.HandTipRight &&
+                currentJoint != JointType.ThumbRight &&
+                currentJoint != JointType.WristRight &&
+                currentJoint != JointType.ElbowRight)
+            {
+                if (distance < maxDistance)
+                {
+                    result +=
+                        "\n      touch " +
+                        WriteJoint(currentJoint) +
+                        " with " +
+                        WriteJoint(JointType.HandRight) +
+                        ",";
+                }
+                else
+                {
+                    result +=
+                        "\n      don't touch " +
+                        WriteJoint(currentJoint) +
+                        " with " +
+                        WriteJoint(JointType.HandRight) +
+                        ",";
+                }
+            }
+
+            return result;
+        }
+
+        private string WriteAlignAction(JointType currentJoint, Dictionary<JointType, Vector3D> jointsVectors)
+        {
+            var maxAngle = 20;
+            var result = "";
+
+            foreach (var selectedJoint in selectedJoints)
+            {
+                // selectedJoint must be active
+                // and in order to relate joints in only one way
+                // currentJoint key must be greater than selectedJoint key
+                if (selectedJoint.Value && currentJoint > selectedJoint.Key)
+                {
+
+                    // get angle between joints
+                    var jointType = selectedJoint.Key;
+                    var v1 = jointsVectors[currentJoint];
+                    var v2 = jointsVectors[selectedJoint.Key];
+                    var angle = Vector3D.AngleBetween(v1, v2);
+
+                    // if a single selected joint is too far
+                    // than create a new checkpoint
+                    if (angle < maxAngle)
+                    {
+                        result += 
+                            "\n      align " + 
+                            WriteJoint(currentJoint) + 
+                            " with " + 
+                            WriteJoint(selectedJoint.Key) + 
+                            ",";
+                    }
+                    else
+                    {
+                        result += 
+                            "\n      don't align " + 
+                            WriteJoint(currentJoint) + 
+                            " with " + 
+                            WriteJoint(selectedJoint.Key) + 
+                            ",";
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private string WritePutAction(JointType currentJoint, Dictionary<JointType, Vector3D> jointsVectors)
         {
             var result = "";
 
@@ -679,25 +803,25 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             {
                 // selectedJoint must be active
                 // and in order to relate joints in only one way
-                // currentJoint key must be greater than selectedJoint key
-                if(selectedJoint.Value && currentJoint.Key > selectedJoint.Key)
+                // currentJoint must be greater than selectedJoint key
+                if(selectedJoint.Value && currentJoint > selectedJoint.Key)
                 {
                     // get both joints positions
-                    var currentPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, currentJoint.Key);
+                    var currentPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, currentJoint);
                     var selectedPosition = Z3KinectConverter.CalcAbsoluteJointPosition(jointsVectors, selectedJoint.Key);
 
                     if(currentPosition.X > selectedPosition.X)
-                        result += "\n      put " + WriteJoint(currentJoint.Key) + " to the right of " + WriteJoint(selectedJoint.Key) + ",";
+                        result += "\n      put " + WriteJoint(currentJoint) + " to the right of " + WriteJoint(selectedJoint.Key) + ",";
                     else
-                        result += "\n      put " + WriteJoint(currentJoint.Key) + " to the left of " + WriteJoint(selectedJoint.Key) + ",";
+                        result += "\n      put " + WriteJoint(currentJoint) + " to the left of " + WriteJoint(selectedJoint.Key) + ",";
                     if(currentPosition.Y > selectedPosition.Y)
-                        result += "\n      put " + WriteJoint(currentJoint.Key) + " above " + WriteJoint(selectedJoint.Key) + ",";
+                        result += "\n      put " + WriteJoint(currentJoint) + " above " + WriteJoint(selectedJoint.Key) + ",";
                     else
-                        result += "\n      put " + WriteJoint(currentJoint.Key) + " below " + WriteJoint(selectedJoint.Key) + ",";
+                        result += "\n      put " + WriteJoint(currentJoint) + " below " + WriteJoint(selectedJoint.Key) + ",";
                     if(currentPosition.Z > selectedPosition.Z)
-                        result += "\n      put " + WriteJoint(currentJoint.Key) + " behind " + WriteJoint(selectedJoint.Key) + ",";
+                        result += "\n      put " + WriteJoint(currentJoint) + " behind " + WriteJoint(selectedJoint.Key) + ",";
                     else
-                        result += "\n      put " + WriteJoint(currentJoint.Key) + " in front of " + WriteJoint(selectedJoint.Key) + ",";
+                        result += "\n      put " + WriteJoint(currentJoint) + " in front of " + WriteJoint(selectedJoint.Key) + ",";
                 }
             }
 
@@ -711,6 +835,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 (PreposeGestures.JointType)jointType);
             return result;
         }
+
+        #endregion Writing Prepose Code
 
         private Body GetNearestBody()
         {

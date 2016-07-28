@@ -458,7 +458,7 @@ namespace test_mapi
 			{
 				X[i] = new IntExpr[9];
 				for (uint j = 0; j < 9; j++)
-					X[i][j] = (IntExpr)ctx.MkConst(ctx.MkSymbol("x_" + (i + 1) + "_" + (j + 1)), ctx.IntSort);
+					X[i][j] = (IntExpr)ctx.MkConst(ctx.MkSymbol("x_" + (i + 1) + " " + (j + 1)), ctx.IntSort);
 			}
 
 			// each cell contains a value in {1, ..., 9}
