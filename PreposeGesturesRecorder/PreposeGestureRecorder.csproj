@@ -124,6 +124,10 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PreposeKinectCore\PreposeKinectCore.csproj">
+      <Project>{7517a8ea-d4d7-4523-a645-37da009009a2}</Project>
+      <Name>PreposeKinectCore</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Z3Experiments\Z3Experiments\PreposeGestures.csproj">
       <Project>{aeb28ac8-f6ae-4689-89af-e090b698a7e2}</Project>
       <Name>PreposeGestures</Name>

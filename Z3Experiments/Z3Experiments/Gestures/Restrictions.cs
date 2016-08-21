@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace PreposeGestures
 {
@@ -347,8 +348,8 @@ namespace PreposeGestures
             {
                 JointType sidedHandType = JointTypeHelper.GetSidedJointType(SidedJointName.Hand, handSide);
 
-                Z3Point3D joint1Position = body.GetJointPosition(jointType);
-                Z3Point3D joint2Position = body.GetJointPosition(sidedHandType);
+                Z3Point3D joint1Position = body.GetJointZ3Position(jointType);
+                Z3Point3D joint2Position = body.GetJointZ3Position(sidedHandType);
 
                 BoolExpr expr = joint1Position.IsNearerThan(joint2Position, distanceThreshold);
                 if (dont)
@@ -360,20 +361,12 @@ namespace PreposeGestures
             },
             body =>
             {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
                 var sidedHandType = JointTypeHelper.GetSidedJointType(SidedJointName.Hand, handSide);
 
-                var joint1Position = body.GetJointPosition(jointType);
-                var joint2Position = body.GetJointPosition(sidedHandType);
-
-                var p1 = new Point3D(
-                    joint1Position.GetXValue(), 
-                    joint1Position.GetYValue(), 
-                    joint1Position.GetZValue());
-
-                var p2 = new Point3D(
-                    joint2Position.GetXValue(),
-                    joint2Position.GetYValue(),
-                    joint2Position.GetZValue());
+                var p1 = body.Positions[jointType];
+                var p2 = body.Positions[sidedHandType];
 
                 var distance = Math.Max(0.00000001, p1.DistanceTo(p2));
                 var percentage = Math.Min(1.0, distanceThreshold / distance);
@@ -381,6 +374,7 @@ namespace PreposeGestures
                 if (dont)
                     percentage = Math.Min(1.0, distance / distanceThreshold);
 
+                //Console.WriteLine("tch " + stopwatch.ElapsedTicks);
                 return percentage;
             },
             jointType,
@@ -555,8 +549,8 @@ namespace PreposeGestures
             {
                 var distanceThreshold = Z3Math.Real(0.01);
                 
-                var joint1Position = body.GetJointPosition(jointType1);
-                var joint2Position = body.GetJointPosition(jointType2);
+                var joint1Position = body.GetJointZ3Position(jointType1);
+                var joint2Position = body.GetJointZ3Position(jointType2);
 
                 var expr = Z3.Context.MkTrue();
 
@@ -592,20 +586,12 @@ namespace PreposeGestures
             },
             body =>
             {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
                 var distanceThreshold = 0.01;
 
-                var joint1Position = body.GetJointPosition(jointType1);
-                var joint2Position = body.GetJointPosition(jointType2);
-                
-                var point1 = new Point3D(
-                    joint1Position.GetXValue(),
-                    joint1Position.GetYValue(),
-                    joint1Position.GetZValue());
-
-                var point2 = new Point3D(
-                    joint2Position.GetXValue(),
-                    joint2Position.GetYValue(),
-                    joint2Position.GetZValue());
+                var point1 = body.Positions[jointType1];
+                var point2 = body.Positions[jointType2];
 
                 var targetValue = 1.0;
                 var currentValue = 1.0;
@@ -664,7 +650,8 @@ namespace PreposeGestures
                         break;
                 }
 
-                var percentage = PercentageCalculator.calc(lowerBound, targetValue, currentValue);                
+                var percentage = PercentageCalculator.calc(lowerBound, targetValue, currentValue);
+                //Console.WriteLine("put " + stopwatch.ElapsedTicks);
                 return percentage;
             },
             jointType1,
@@ -714,11 +701,10 @@ namespace PreposeGestures
              }),
             (body =>
              {
-                 var joint1 = body.Joints[jointType1];
-                 var joint2 = body.Joints[jointType2];
-
-                 var vec1 = new Point3D(joint1.GetXValue(), joint1.GetYValue(), joint1.GetZValue());
-                 var vec2 = new Point3D(joint2.GetXValue(), joint2.GetYValue(), joint2.GetZValue());
+                 var stopwatch = new Stopwatch();
+                 stopwatch.Start();
+                 var vec1 = body.Vectors[jointType1];
+                 var vec2 = body.Vectors[jointType2];
 
                  var degrees = Math.Abs(vec1.RadiansTo(vec2) * 180/Math.PI);
 
@@ -727,6 +713,7 @@ namespace PreposeGestures
 
                  percentage = Math.Max(0.0, Math.Min(1.0, percentage));
 
+                 //Console.WriteLine("alg " + stopwatch.ElapsedTicks);
                  return percentage;
              }),
             jointType1, jointType2)

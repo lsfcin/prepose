@@ -21,7 +21,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
     using System.Windows.Media.Media3D;
     using PreposeGestureRecognizer;
 
-    public enum ActionType { Put, Align, Touch, Point, Rotate }
+    public enum ActionType { Put, Align, Touch, PointRotate }
 
     public static class EnumUtil
     {
@@ -397,8 +397,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         case "Put": selectedActions[ActionType.Put] = (bool)checkbox.IsChecked; break;
                         case "Align": selectedActions[ActionType.Align] = (bool)checkbox.IsChecked; break;
                         case "Touch": selectedActions[ActionType.Touch] = (bool)checkbox.IsChecked; break;
-                        case "Point": selectedActions[ActionType.Point] = (bool)checkbox.IsChecked; break;
-                        case "Rotate": selectedActions[ActionType.Rotate] = (bool)checkbox.IsChecked; break;
+                        case "Point and Rotate": selectedActions[ActionType.PointRotate] = (bool)checkbox.IsChecked; break;
                     }
                 }
             }
@@ -641,31 +640,36 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         private string WriteActions(Dictionary<JointType, Vector3D> joints)
         {
             var result = "";
-            foreach (var selectedJoint in selectedJoints)
+            foreach (var selectedAction in selectedActions)
             {
-                if (selectedJoint.Value)
+                if (selectedAction.Value)
                 {
-                    foreach (var selectedAction in selectedActions)
+                    switch (selectedAction.Key)
                     {
-                        if (selectedAction.Value)
-                        {
-                            switch (selectedAction.Key)
-                            {
-                                case ActionType.Put:
-                                    result += WritePutAction(selectedJoint.Key, joints);
-                                    break;
-                                case ActionType.Align:
-                                    result += WriteAlignAction(selectedJoint.Key, joints);
-                                    break;
-                                case ActionType.Touch:
-                                    result += WriteTouchAction(selectedJoint.Key, joints);
-                                    break;
-                                case ActionType.Point:
-                                case ActionType.Rotate:
-                                    result += WritePointRotateActions(selectedJoint.Key, joints);
-                                    break;
-                            }
-                        }
+                        case ActionType.Put:
+                            foreach (var selectedJoint in selectedJoints)
+                                if (selectedJoint.Value)
+                                    result += 
+                                        WritePutAction(selectedJoint.Key, joints);
+                            break;
+                        case ActionType.Align:
+                            foreach (var selectedJoint in selectedJoints)
+                                if (selectedJoint.Value)
+                                    result += 
+                                        WriteAlignAction(selectedJoint.Key, joints);
+                            break;
+                        case ActionType.Touch:
+                            foreach (var selectedJoint in selectedJoints)
+                                if (selectedJoint.Value)
+                                    result += 
+                                        WriteTouchAction(selectedJoint.Key, joints);
+                            break;
+                        case ActionType.PointRotate:
+                            foreach (var selectedJoint in selectedJoints)
+                                if (selectedJoint.Value)
+                                    result += 
+                                        WritePointRotateActions(selectedJoint.Key, joints);
+                            break;
                     }
                 }
             }
@@ -676,7 +680,162 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
         private string WritePointRotateActions(JointType currentJoint, Dictionary<JointType, Vector3D> jointsVectors)
         {
-            throw new NotImplementedException();
+            var result = "";
+
+            // choose the max as the point direction
+            var currentVector = jointsVectors[currentJoint];
+            var x = currentVector.X;
+            var y = currentVector.Y;
+            var z = currentVector.Z;
+
+            // grab main direction
+            var direction = FindMainDirection(x, y, z);
+
+            // build point phrase
+            result += 
+                "\n      point " + 
+                WriteJoint(currentJoint) + " " + 
+                WriteDirection(direction) + ",";
+
+            var angle = 0.0;
+
+            // rotate towards the current vector by calculating the two angles
+            // and rotating on the correct rotation direction
+            switch(direction)
+            {
+                case PreposeGestures.Direction.Front:
+                    angle = Vector3D.AngleBetween(new Vector3D(0, 0, 1), new Vector3D(x, 0, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (x > 0) result += WriteDirection(PreposeGestures.Direction.Right) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Left) + ",";
+                    }
+                    angle = Vector3D.AngleBetween(new Vector3D(0, 0, 1), new Vector3D(0, y, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (y > 0) result += WriteDirection(PreposeGestures.Direction.Up) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Down) + ",";
+                    }
+                    break;
+                case PreposeGestures.Direction.Back:
+                    angle = Vector3D.AngleBetween(new Vector3D(0, 0, -1), new Vector3D(x, 0, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (x > 0) result += WriteDirection(PreposeGestures.Direction.Right) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Left) + ",";
+                    }
+                    angle = Vector3D.AngleBetween(new Vector3D(0, 0, -1), new Vector3D(0, y, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (y > 0) result += WriteDirection(PreposeGestures.Direction.Up) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Down) + ",";
+                    }
+                    break;
+                case PreposeGestures.Direction.Right:
+                    angle = Vector3D.AngleBetween(new Vector3D(1, 0, 0), new Vector3D(x, 0, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if(angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (z > 0) result += WriteDirection(PreposeGestures.Direction.Front) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Back) + ",";
+                    }
+                    angle = Vector3D.AngleBetween(new Vector3D(1, 0, 0), new Vector3D(x, y, 0));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (y > 0) result += WriteDirection(PreposeGestures.Direction.Up) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Down) + ",";
+                    }
+                    break;
+                case PreposeGestures.Direction.Left:
+                    angle = Vector3D.AngleBetween(new Vector3D(-1, 0, 0), new Vector3D(x, 0, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (z > 0) result += WriteDirection(PreposeGestures.Direction.Front) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Back) + ",";
+                    }
+                    angle = Vector3D.AngleBetween(new Vector3D(-1, 0, 0), new Vector3D(x, y, 0));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (y > 0) result += WriteDirection(PreposeGestures.Direction.Up) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Down) + ",";
+                    }
+                    break;
+                case PreposeGestures.Direction.Up:
+                    angle = Vector3D.AngleBetween(new Vector3D(0, 1, 0), new Vector3D(x, y, 0));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (x > 0) result += WriteDirection(PreposeGestures.Direction.Right) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Left) + ",";
+                    }
+                    angle = Vector3D.AngleBetween(new Vector3D(0, 1, 0), new Vector3D(0, y, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (z > 0) result += WriteDirection(PreposeGestures.Direction.Front) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Back) + ",";
+                    }
+                    break;
+                case PreposeGestures.Direction.Down: ;
+                    angle = Vector3D.AngleBetween(new Vector3D(0, -1, 0), new Vector3D(x, y, 0));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (x > 0) result += WriteDirection(PreposeGestures.Direction.Right) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Left) + ",";
+                    }
+                    angle = Vector3D.AngleBetween(new Vector3D(0, -1, 0), new Vector3D(0, y, z));
+                    angle = Math.Round(angle / 10.0) * 10.0;
+                    if (angle > 0)
+                    {
+                        result += "\n      rotate " + WriteJoint(currentJoint) + " " + angle + " degrees ";
+                        if (z > 0) result += WriteDirection(PreposeGestures.Direction.Front) + ",";
+                        else result += WriteDirection(PreposeGestures.Direction.Back) + ",";
+                    }
+                    break;
+            }
+
+            return result;
+        }
+
+        private static PreposeGestures.Direction FindMainDirection(double x, double y, double z)
+        {
+            var direction = PreposeGestures.Direction.Front;
+            if (Math.Abs(x) > Math.Abs(y) &&
+                Math.Abs(x) > Math.Abs(z))
+            {
+                if (x > 0) direction = PreposeGestures.Direction.Right;
+                else direction = PreposeGestures.Direction.Left;
+            }
+            else if (Math.Abs(y) > Math.Abs(z))
+            {
+                if (y > 0) direction = PreposeGestures.Direction.Up;
+                else direction = PreposeGestures.Direction.Down;
+            }
+            else
+            {
+                if (z > 0) direction = PreposeGestures.Direction.Front;
+                else direction = PreposeGestures.Direction.Back;
+            }
+            return direction;
         }
 
         private string WriteTouchAction(JointType currentJoint, Dictionary<JointType, Vector3D> jointsVectors)
@@ -762,7 +921,6 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 // currentJoint key must be greater than selectedJoint key
                 if (selectedJoint.Value && currentJoint > selectedJoint.Key)
                 {
-
                     // get angle between joints
                     var jointType = selectedJoint.Key;
                     var v1 = jointsVectors[currentJoint];
@@ -775,19 +933,15 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     {
                         result += 
                             "\n      align " + 
-                            WriteJoint(currentJoint) + 
-                            " with " + 
-                            WriteJoint(selectedJoint.Key) + 
-                            ",";
+                            WriteJoint(currentJoint) + " and " + 
+                            WriteJoint(selectedJoint.Key) + ",";
                     }
                     else
                     {
                         result += 
                             "\n      don't align " + 
-                            WriteJoint(currentJoint) + 
-                            " with " + 
-                            WriteJoint(selectedJoint.Key) + 
-                            ",";
+                            WriteJoint(currentJoint) + " and " + 
+                            WriteJoint(selectedJoint.Key) + ",";
                     }
                 }
             }
@@ -833,6 +987,26 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             var result = "your " +
                 EnumUtil.GetDescription<PreposeGestures.JointType>(
                 (PreposeGestures.JointType)jointType);
+            return result;
+        }
+
+        private string WriteDirection(PreposeGestures.Direction direction)
+        {
+            var result = "";
+            
+            switch(direction)
+            {
+                case PreposeGestures.Direction.Up:
+                case PreposeGestures.Direction.Down:
+                    result = EnumUtil.GetDescription<PreposeGestures.Direction>((PreposeGestures.Direction)direction); break;
+                case PreposeGestures.Direction.Left:
+                case PreposeGestures.Direction.Right:
+                case PreposeGestures.Direction.Front:
+                case PreposeGestures.Direction.Back:
+                    result = "to your " + 
+                        EnumUtil.GetDescription<PreposeGestures.Direction>((PreposeGestures.Direction)direction); break;
+            }
+                 
             return result;
         }
 
@@ -1032,10 +1206,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
         private void TransformsRadioButton_Click(object sender, RoutedEventArgs e)
         {
-            PointTransformCheckBox.IsEnabled = true;
-            PointTransformCheckBox.IsChecked = true;
-            RotateTransformCheckBox.IsEnabled = true;
-            RotateTransformCheckBox.IsChecked = true;
+            PointAndRotateTransformCheckBox.IsEnabled = true;
+            PointAndRotateTransformCheckBox.IsChecked = true;
 
             PutRestrictionCheckBox.IsEnabled = false;
             PutRestrictionCheckBox.IsChecked = false;
@@ -1056,10 +1228,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             TouchRestrictionCheckBox.IsEnabled = true;
             TouchRestrictionCheckBox.IsChecked = false;
 
-            PointTransformCheckBox.IsEnabled = false;
-            PointTransformCheckBox.IsChecked = false;
-            RotateTransformCheckBox.IsEnabled = false;
-            RotateTransformCheckBox.IsChecked = false;
+            PointAndRotateTransformCheckBox.IsEnabled = false;
+            PointAndRotateTransformCheckBox.IsChecked = false;
 
             UpdateSelectedActions();
         }

@@ -52,7 +52,7 @@
                     <CheckBox Click="JointCheckBox_Click" Content="L. Knee"     HorizontalAlignment="Left" Height="16" Margin="10,314,0,0" VerticalAlignment="Top" Width="86"/>
                     <CheckBox Click="JointCheckBox_Click" Content="L. Ankle"    HorizontalAlignment="Left" Height="16" Margin="10,377,0,0" VerticalAlignment="Top" Width="86"/>
                     <CheckBox Click="JointCheckBox_Click" Content="L. Foot"     HorizontalAlignment="Left" Height="16" Margin="10,405,0,0" VerticalAlignment="Top" Width="86"/>
-                    <CheckBox Click="JointCheckBox_Click" Content="M. Hip"      HorizontalAlignment="Left" Height="16" Margin="130,436,0,0" VerticalAlignment="Top" Width="58"/>
+                    <CheckBox Click="JointCheckBox_Click" Content="M. Hip"      HorizontalAlignment="Left" Height="16" Margin="130,431,0,0" VerticalAlignment="Top" Width="58"/>
 
                     <TextBlock HorizontalAlignment="Left" Height="18" Margin="356,16,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" FontWeight="Bold"><Run Text="Active "/><Run Text="Actions"/></TextBlock>
                     <RadioButton x:Name="RestrictionsRadioButton" GroupName="Actions" Content="Generic Restrictions" HorizontalAlignment="Left" Height="15" Margin="358,44,0,0" VerticalAlignment="Top" Width="131" IsChecked="True" Click="RestrictionsRadioButton_Click"/>
@@ -60,8 +60,7 @@
                     <CheckBox x:Name="AlignRestrictionCheckBox" Content="Align" HorizontalAlignment="Left" Height="16" Margin="378,85,0,0" VerticalAlignment="Top" Width="66" Click="ActionCheckBox_Click"/>
                     <CheckBox x:Name="TouchRestrictionCheckBox" Content="Touch" HorizontalAlignment="Left" Height="16" Margin="378,106,0,0" VerticalAlignment="Top" Width="66" Click="ActionCheckBox_Click"/>
                     <RadioButton x:Name="TransformsRadioButton" GroupName="Actions" Content="Specific Transformations" HorizontalAlignment="Left" Height="15" Margin="358,140,0,0" VerticalAlignment="Top" Width="158" Click="TransformsRadioButton_Click"/>
-                    <CheckBox x:Name="PointTransformCheckBox" Content="Point" HorizontalAlignment="Left" Height="16" Margin="378,160,0,0" VerticalAlignment="Top" Width="66" IsChecked="False" IsEnabled="False" Click="ActionCheckBox_Click"/>
-                    <CheckBox x:Name="RotateTransformCheckBox" Content="Rotate" HorizontalAlignment="Left" Height="16" Margin="378,181,0,0" VerticalAlignment="Top" Width="66" IsChecked="False" IsEnabled="False" Click="ActionCheckBox_Click"/>
+                    <CheckBox x:Name="PointAndRotateTransformCheckBox" Content="Point and Rotate" HorizontalAlignment="Left" Height="16" Margin="378,160,0,0" VerticalAlignment="Top" Width="111" IsChecked="False" IsEnabled="False" Click="ActionCheckBox_Click"/>
                     <TextBlock HorizontalAlignment="Left" Height="18" Margin="357,239,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" FontWeight="Bold"><Run FontWeight="Normal" Text="Start After"/></TextBlock>
                     <TextBox x:Name="StartAfterTextBox" TextWrapping="Wrap" Text="3" Height="18" Width="20" Margin="378,257,0,0" HorizontalContentAlignment="Right" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                     <TextBlock HorizontalAlignment="Left" Height="18" Margin="403,257,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50" Text="seconds"/>

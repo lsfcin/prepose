@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.ExceptionServices;
 using Microsoft.Kinect;
+using PreposeGestureRecognizer;
 
 /* This implements a 'PreposeGesturesFrameReader' interface to Prepose. The interface is modeled on the VisualGestureBuilderFrameReader */
 /* found in Public Preview build 1407 of the Kinect for Windows SDK v2. */ 

@@ -396,18 +396,19 @@ namespace PreposeGestures
             return Math.Sqrt(Math.Pow(X - point.X,2) + Math.Pow(Y - point.Y,2) + Math.Pow(Z - point.Z,2));
         }
 
-        private double DotProduct(Point3D vec)
+        private double CosineTo(Point3D vec)
         {
             var p1 = this.NormalizedCopy();
-            var p2 = this.NormalizedCopy();
+            var p2 = vec.NormalizedCopy();
 
-            return p1.X * p2.X + p1.Y * p2.Y + p1.Z * p2.Z;
+            return Math.Min(1.0, Math.Max(-1.0,
+                p1.X * p2.X + p1.Y * p2.Y + p1.Z * p2.Z));
         }
 
         // returns the angle to provided vec in radians
         public double RadiansTo(Point3D vec)
         {
-            return Math.Acos(this.DotProduct(vec));
+            return Math.Acos(this.CosineTo(vec));
         }
     }
 
@@ -797,12 +798,20 @@ namespace PreposeGestures
 	{
 		public Z3Body()
 		{
+            this.Positions = new Dictionary<JointType, Point3D>();
+            this.Vectors = new Dictionary<JointType, Point3D>();
 			this.Joints = new Dictionary<JointType, Z3Point3D>();
 			this.Norms = new Dictionary<JointType, ArithExpr>();
 		}
 
-		public Z3Body(Dictionary<JointType, Z3Point3D> joints, Dictionary<JointType, ArithExpr> norms)
+		public Z3Body(
+            Dictionary<JointType, Point3D> positions,
+            Dictionary<JointType, Point3D> vectors, 
+            Dictionary<JointType, Z3Point3D> joints, 
+            Dictionary<JointType, ArithExpr> norms)
 		{
+            this.Positions = positions;
+            this.Vectors = vectors;
 			this.Joints = joints;
 			this.Norms = norms;
 		}
@@ -811,6 +820,18 @@ namespace PreposeGestures
         {
             foreach (var jointType in baseBody.Joints.Keys)
             {
+                this.Positions.Add(jointType,
+                    new Point3D(
+                        baseBody.Positions[jointType].X,
+                        baseBody.Positions[jointType].Y,
+                        baseBody.Positions[jointType].Z));
+
+                this.Vectors.Add(jointType,
+                    new Point3D(
+                        baseBody.Vectors[jointType].X,
+                        baseBody.Vectors[jointType].Y,
+                        baseBody.Vectors[jointType].Z));
+
                 this.Joints.Add(jointType,
                     new Z3Point3D(
                         Z3Math.GetRealValue(baseBody.Joints[jointType].X),
@@ -836,7 +857,7 @@ namespace PreposeGestures
 
 		public static Z3Body MkZ3Const()
 		{
-			Z3Body result = new Z3Body();
+			var result = new Z3Body();
 
 			var jointTypes = EnumUtil.GetValues<JointType>();
 			foreach (var jointType in jointTypes)
@@ -847,6 +868,12 @@ namespace PreposeGestures
 
 			return result;
 		}
+        public static Z3Body MkZ3ConstJoints(Dictionary<JointType, ArithExpr> norms)
+        {
+            var result = MkZ3Const();
+            result.Norms = norms;
+            return result;
+        }
 
 		public BoolExpr IsNearerThan(Z3Body that, double distanceThreshold)
 		{
@@ -943,23 +970,26 @@ namespace PreposeGestures
 
         //public List<JointType> GetList
 
-		public Z3Point3D GetJointPosition(JointType jointType)
+		public Z3Point3D GetJointZ3Position(JointType jointType)
 		{
-			Z3Point3D result = new Z3Point3D(0, 0, 0);
+            Z3Point3D result = new Z3Point3D(0, 0, 0);
+            JointType currentJointType = jointType;
 
-			JointType currentJointType = jointType;
+            // SpineBase is the root of the coordinate system
+            while (currentJointType != JointType.SpineBase)
+            {
+                result = result + (this.Joints[currentJointType] * this.Norms[currentJointType]);
+                currentJointType = JointTypeHelper.GetFather(currentJointType);
+            }
 
-			// SpineBase is the root of the coordinate system
-			while (currentJointType != JointType.SpineBase)
-			{
-				result = result + (this.Joints[currentJointType] * this.Norms[currentJointType]);
-				currentJointType = JointTypeHelper.GetFather(currentJointType);
-			}
-
-			return result;
+            return result;
 		}
-		
-		public Dictionary<JointType, Z3Point3D> Joints { get; set; }
-		public Dictionary<JointType, ArithExpr> Norms { get; set; }
-	}
+
+        // store original positions to save processing time at runtime matching operations
+        public Dictionary<JointType, Point3D> Positions { get; private set; }
+        // store original vectors to save processing time at runtime matching operations
+        public Dictionary<JointType, Point3D> Vectors { get; private set; }
+        public Dictionary<JointType, Z3Point3D> Joints { get; private set; }
+        public Dictionary<JointType, ArithExpr> Norms { get; private set; }
+    }
 }

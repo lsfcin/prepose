@@ -390,6 +390,7 @@ namespace PreposeGestureRecognizer
                             // those body objects will be re-used.
                             frame.GetAndRefreshBodyData(this.bodies);
 
+                            // We are considering only the nearest body
                             var body = GetNearestBody();
                             if (body != null)
                             {
@@ -411,9 +412,8 @@ namespace PreposeGestureRecognizer
 
                                     this.DrawBody(joints, jointPoints, dc);
 
-                                    // TODO: We are considering only one body
                                     if (playingGesture)
-                                    {
+                                    {                                        
                                         this.UpdateGestures(joints, dc);
                                     }
                                 }
@@ -427,8 +427,8 @@ namespace PreposeGestureRecognizer
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("An error occurred: '{0}'", ex);
                 // ignore if the frame is no longer available
+                Debug.WriteLine("An error occurred: '{0}'", ex);
             }
         }
 
@@ -615,10 +615,11 @@ namespace PreposeGestureRecognizer
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints,
             DrawingContext dc)
         {
+            ConsoleManager.Show();
+
             // convert Kinect.Body to Z3Body
-            var body = Z3KinectConverter.CreateZ3Body(kinectJoints);
+            var body = Z3KinectConverter.CreateZ3Body(kinectJoints);            
             var statuses = this.matcher.TestBody(body);
-            
             // match the status return with the feedback UI controls
             // and to send the proper events
 

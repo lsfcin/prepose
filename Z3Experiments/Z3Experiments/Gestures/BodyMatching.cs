@@ -45,7 +45,7 @@ namespace PreposeGestures
         internal IList<GestureMatcher> Matchers = new List<GestureMatcher>();
 
         public List<GestureStatus> TestBody(Z3Body body)
-        {
+        {            
             var result = new List<GestureStatus>();
 
             // InitBody synthesizes the initial pose to go after. Synthesizing a pose is _not_ parallel-safe because the Z3 context isn't safe to share across threads
@@ -70,7 +70,7 @@ namespace PreposeGestures
             foreach (var matcher in this.Matchers)
             {
                 result.Add(matcher.TestBody(body, this.Precision, Z3.Context));
-            }
+            }            
 
             // Check for each matcher to see if it succeeded. If it did, then synthesize a new target position. 
             foreach (var matcher in this.Matchers)
@@ -79,7 +79,7 @@ namespace PreposeGestures
                 {
                     matcher.UpdateTargetBody(body);
                 }
-            }
+            }            
 
             return result;
         }
@@ -132,17 +132,18 @@ namespace PreposeGestures
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-
             var time0 = stopwatch.ElapsedMilliseconds;
 
             // NOT THREAD SAFE
             this.LastDistanceVectors = this.UpdateDistanceVectors(body, localContext);
+
 
             // Check distance to target transformed joints and if body satisfies restrictions
             double transformsPercentage;
             double restrictionsPercentage;
             CalcPercentages(body, out transformsPercentage, out restrictionsPercentage);
             var percentage = Math.Min(transformsPercentage, restrictionsPercentage);
+
 
             // here elapsedTimeErrorIncrement is a fixed increment to represent that error accumulates as time passes
             var elapsedTimeErrorIncrement = 0.00;
@@ -152,7 +153,7 @@ namespace PreposeGestures
             bool transformSucceeded = transformsPercentage > 1.0 - TrigonometryHelper.GetDistance(precision) / 2.0;
 
             // NOT THREAD SAFE 
-            bool restrictionSucceeded = this.Gesture.Steps[CurrentStep].Pose.IsBodyAccepted(body);
+            bool restrictionSucceeded = restrictionsPercentage >= 1.0;
 
             bool succeeded =
                 (transformSucceeded || this.Target.TransformedJoints.Count == 0) &&
@@ -160,6 +161,7 @@ namespace PreposeGestures
 
             // Overall succeeded represents whether the entire gesture was matched on this test, not just a single pose
             bool overallSucceeded = false;
+
 
             // If body is accepted move to matching the next pose in sequence
             if (succeeded)
@@ -181,6 +183,7 @@ namespace PreposeGestures
                 CalcPercentages(body, out transformsPercentage, out restrictionsPercentage);
                 this.LastPercentage = Math.Min(transformsPercentage, restrictionsPercentage);
             }
+
 
             // If body was not accepted then check if error is higher than threshold
             // If accumulated error is too high the gesture is broken
@@ -216,16 +219,16 @@ namespace PreposeGestures
             matchStat.gestureName = this.Gesture.Name;
             matchStat.uid = frameCount;
             matchStat.poseName = this.Gesture.Steps[CurrentStep].Pose.Name;
-            GestureStatistics.matchTimes.Add(matchStat);
+            // Record the statistics entry here 
+            GestureStatistics.matchTimes.Add(matchStat);           
 
             frameCount++;
 
-            // Record the statistics entry here 
             return result;
         }
 
         private void CalcPercentages(Z3Body body, out double transformsPercentage, out double restrictionsPercentage)
-        {
+        {            
             transformsPercentage = 1.0;
             if (this.Target.TransformedJoints.Count > 0)
             {
@@ -313,11 +316,13 @@ namespace PreposeGestures
 
             result.Name = this.Gesture.Name;
 
-            foreach (var step in this.Gesture.Steps)
-                result.StepNamesAndDescriptions.Add(new Tuple<string, string>(
-                    this.GetCurrentStep().Pose.Name,
-                    this.GetCurrentStep().Pose.ToString()));
+            //result.StepNamesAndDescriptions = new List<Tuple<string, string>>(this.Gesture.Steps.Capacity);
 
+            //foreach (var step in this.Gesture.Steps)
+            //    result.StepNamesAndDescriptions.Add(new Tuple<string, string>(
+            //        this.GetCurrentStep().Pose.Name,
+            //        this.GetCurrentStep().Pose.ToString()));
+            
             result.StepPercentage = this.LastPercentage;
             result.DistanceVectors = this.LastDistanceVectors;
             result.CompletedCount = this.CompletedCount;
@@ -391,7 +396,7 @@ namespace PreposeGestures
         public GestureStatus()
         {
             Name = "";
-            StepNamesAndDescriptions = new List<Tuple<string,string>>();
+            //StepNamesAndDescriptions = new List<Tuple<string,string>>();
             CurrentStep = 0;
             StepPercentage = 0;
             DistanceVectors = new Dictionary<JointType, Point3D>();
@@ -417,7 +422,10 @@ namespace PreposeGestures
 
         public string Name { get; set; }
 
-        public List<Tuple<string,string>> StepNamesAndDescriptions { get; set; }
+        // TODO: this is still a work in progress, 
+        // it was currently consuming too much time
+        // and the description was not complete
+        //public List<Tuple<string,string>> StepNamesAndDescriptions { get; set; }
 
         public double StepPercentage { get; set; }
 
@@ -431,7 +439,5 @@ namespace PreposeGestures
         public bool succeededDetection { get; set; }
         public bool succeededDetectionFirstFrame { get; set; }
         public float confidence { get; set; }
-
-
     }
 }

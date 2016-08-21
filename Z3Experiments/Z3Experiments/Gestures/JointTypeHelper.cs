@@ -224,36 +224,24 @@ namespace PreposeGestures
 			Z3Point3D neck = Z3Point3D.DirectionPoint(Direction.Up);
 			Z3Point3D head = Z3Point3D.DirectionPoint(Direction.Up);
 
-			Z3Point3D shoulderLeft = new Z3Point3D();
-			shoulderLeft.X = Z3Math.Real(-0.7);
-			shoulderLeft.Y = Z3Math.Real(-0.7);
-			shoulderLeft.Z = Z3Math.Zero;
+            Z3Point3D shoulderLeft = Z3Point3D.DirectionPoint(Direction.Left);
 			Z3Point3D elbowLeft = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D wristLeft = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D handLeft = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D handTipLeft = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D thumbLeft = Z3Point3D.DirectionPoint(Direction.Down);
-			Z3Point3D hipLeft = new Z3Point3D();
-			shoulderLeft.X = Z3Math.Real(-0.7);
-			shoulderLeft.Y = Z3Math.Real(-0.7);
-			shoulderLeft.Z = Z3Math.Zero;
+			Z3Point3D hipLeft = Z3Point3D.DirectionPoint(Direction.Left);
 			Z3Point3D kneeLeft = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D ankleLeft = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D footLeft = Z3Point3D.DirectionPoint(Direction.Down);
 
-			Z3Point3D shoulderRight = new Z3Point3D();
-			shoulderRight.X = Z3Math.Real(0.7);
-			shoulderRight.Y = Z3Math.Real(-0.7);
-			shoulderRight.Z = Z3Math.Zero;
+            Z3Point3D shoulderRight = Z3Point3D.DirectionPoint(Direction.Right);
 			Z3Point3D elbowRight = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D wristRight = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D handRight = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D handTipRight = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D thumbRight = Z3Point3D.DirectionPoint(Direction.Down);
-			Z3Point3D hipRight = new Z3Point3D();
-			shoulderRight.X = Z3Math.Real(0.7);
-			shoulderRight.Y = Z3Math.Real(-0.7);
-			shoulderRight.Z = Z3Math.Zero;
+			Z3Point3D hipRight = Z3Point3D.DirectionPoint(Direction.Right);
 			Z3Point3D kneeRight = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D ankleRight = Z3Point3D.DirectionPoint(Direction.Down);
 			Z3Point3D footRight = Z3Point3D.DirectionPoint(Direction.Down);
@@ -348,8 +336,82 @@ namespace PreposeGestures
 
 		internal static Z3Body CreateDefaultZ3Body()
 		{
-			return new Z3Body(JointTypeHelper.CreateSyntheticJoints(), JointTypeHelper.CreateSyntheticNorms());
+            var joints = JointTypeHelper.CreateSyntheticJoints();
+            var norms = JointTypeHelper.CreateSyntheticNorms();
+            var vectors = JointTypeHelper.CreateSyntheticVectors();
+            var positions = JointTypeHelper.CreateSyntheticPositions();
+			return new Z3Body(positions, vectors, joints, norms);
 		}
+
+        private static Dictionary<JointType, Point3D> CreateSyntheticVectors()
+        {
+            var result = new Dictionary<JointType, Point3D>();
+
+            var spineBase = new Point3D(0, 0, 2);
+            var spineMid = new Point3D(0, 0.3, 0);
+            var spineShoulder = new Point3D(0, 0.3, 0);
+            var neck = new Point3D(0, 0.15, 0);
+            var head = new Point3D(0, 0.15, 0);
+
+            var shoulderLeft = new Point3D(-0.25, 0, 0);
+            var elbowLeft = new Point3D(0, -0.25, 0);
+            var wristLeft = new Point3D(0, -0.25, 0);
+            var handLeft = new Point3D(0, -0.05, 0);
+            var handTipLeft = new Point3D(0, -0.05, 0);
+            var thumbLeft = new Point3D(0, -0.05, 0);
+            var hipLeft = new Point3D(-0.25, 0, 0);
+            var kneeLeft = new Point3D(0, -0.35, 0);
+            var ankleLeft = new Point3D(0, -0.35, 0);
+            var footLeft = new Point3D(0, -0.10, 0);
+
+            var shoulderRight = new Point3D(0.25, 0, 0);
+            var elbowRight = new Point3D(0, -0.25, 0);
+            var wristRight = new Point3D(0, -0.25, 0);
+            var handRight = new Point3D(0, -0.05, 0);
+            var handTipRight = new Point3D(0, -0.05, 0);
+            var thumbRight = new Point3D(0, -0.05, 0);
+            var hipRight = new Point3D(0.25, 0, 0);
+            var kneeRight = new Point3D(0, -0.35, 0);
+            var ankleRight = new Point3D(0, -0.35, 0);
+            var footRight = new Point3D(0, -0.10, 0);
+
+            return result;
+        }
+
+        private static Dictionary<JointType, Point3D> CreateSyntheticPositions()
+        {
+            var result = new Dictionary<JointType, Point3D>();
+
+            var spineBase = new Point3D(0, 0, 2);
+            var spineMid = new Point3D(0, 0.3, 0);
+            var spineShoulder = new Point3D(0, 0.6, 0);
+            var neck = new Point3D(0, 0.75, 0);
+            var head = new Point3D(0, 0.90, 0);
+
+            var shoulderLeft = new Point3D(-0.25, 0.6, 0);
+            var elbowLeft = new Point3D(-0.25, 0.35, 0);
+            var wristLeft = new Point3D(-0.25, 0.10, 0);
+            var handLeft = new Point3D(-0.25, 0.05, 0);
+            var handTipLeft = new Point3D(-0.25, 0, 0);
+            var thumbLeft = new Point3D(-0.25, 0.05, 0);
+            var hipLeft = new Point3D(-0.25, 0, 0);
+            var kneeLeft = new Point3D(-0.25, -0.35, 0);
+            var ankleLeft = new Point3D(-0.25, -0.70, 0);
+            var footLeft = new Point3D(-0.25, -0.80, 0);
+
+            var shoulderRight = new Point3D(0.25, 0.6, 0);
+            var elbowRight = new Point3D(0.25, 0.35, 0);
+            var wristRight = new Point3D(0.25, 0.10, 0);
+            var handRight = new Point3D(0.25, 0.05, 0);
+            var handTipRight = new Point3D(0.25, 0, 0);
+            var thumbRight = new Point3D(0.25, 0.05, 0);
+            var hipRight = new Point3D(0.25, 0, 0);
+            var kneeRight = new Point3D(0.25, -0.35, 0);
+            var ankleRight = new Point3D(0.25, -0.70, 0);
+            var footRight = new Point3D(0.25, -0.80, 0);
+
+            return result;
+        }
 
         internal static List<JointType> GetListFromLeafToRoot(JointType leaf)
         {

@@ -123,8 +123,7 @@ namespace PreposeGestures
             Z3Body startBody,
 			int degreesThreshold)
 		{
-			var z3ConstBody = Z3Body.MkZ3Const();
-			z3ConstBody.Norms = startBody.Norms;
+            var z3ConstBody = Z3Body.MkZ3ConstJoints(startBody.Norms);
 			var transformedBody = transform.Transform(startBody);
 
 			var joints = transform.GetJointTypes().Union(restriction.GetJointTypes()).ToList();

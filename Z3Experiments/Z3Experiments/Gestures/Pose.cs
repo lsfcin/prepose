@@ -129,42 +129,56 @@ namespace PreposeGestures
 
 		public Z3Target CalcNearestTargetBody(Z3Body startBody)
 		{
-			// Create binary search to look for nearest body
-			int numSteps = 1;
-			int degreesThreshold = 90;
-			int degreesIncrement = 90;
-			Z3Target target = null;
+            //Z3Target target = null;
 
-			for (int i = 0; i < numSteps; ++i)
-			{
-				// Ask for a witness which is within the range
-				target = Z3AnalysisInterface.GenerateTarget(
-					this.Transform,
-                    this.Restriction,
-					startBody,
-					degreesThreshold);                
+            //// Create binary search to look for nearest body
+            //int numSteps = 1;
+            //int degreesThreshold = 90;
+            //int degreesIncrement = 90;
 
-				// Update degrees threshold
-				degreesIncrement /= 2;
+            //for (int i = 0; i < numSteps; ++i)
+            //{
+            //    // Ask for a witness which is within the range
+            //    target = Z3AnalysisInterface.GenerateTarget(
+            //        this.Transform,
+            //        this.Restriction,
+            //        startBody,
+            //        degreesThreshold);                
 
-				if (target != null)
-				{
-					degreesThreshold -= degreesIncrement;
-				}
-				else
-				{
-					degreesThreshold += degreesIncrement;
-				}
-			}
+            //    // Update degrees threshold
+            //    degreesIncrement /= 2;
 
-            // If target still null it probably means Z3 was unable to solve the restrictions
-            // This way we generate a target using onlye the transforms
-            if(target == null)
-            {
-                target = new Z3Target();
-                target.Body = this.Transform.Transform(startBody);
-                target.TransformedJoints = this.Transform.GetJointTypes();
-            }
+            //    if (target != null)
+            //    {
+            //        degreesThreshold -= degreesIncrement;
+            //    }
+            //    else
+            //    {
+            //        degreesThreshold += degreesIncrement;
+            //    }
+            //}
+
+            //// If target still null it probably means Z3 was unable to solve the restrictions
+            //// This way we generate a target using onlye the transforms
+            //if(target == null)
+            //{
+            //    target = new Z3Target();
+            //    target.Body = this.Transform.Transform(startBody);
+            //    target.TransformedJoints = this.Transform.GetJointTypes();
+            //}
+
+            //// If target still null assign a new body as an error proof policy
+            //if(target == null)
+            //{
+            //    target = new Z3Target();
+            //    target.Body = startBody;
+            //}
+
+            //return target;
+
+            var target = new Z3Target();
+            target.Body = this.Transform.Transform(startBody);
+            target.TransformedJoints = this.Transform.GetJointTypes();
 
             // If target still null assign a new body as an error proof policy
             if(target == null)

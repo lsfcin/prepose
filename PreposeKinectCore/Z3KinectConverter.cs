@@ -24,35 +24,40 @@ namespace PreposeGestureRecognizer
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint>
             kinectJoints)
         {
-            var jointVectors = new Dictionary<Microsoft.Kinect.JointType, Vector3D>();
-            jointVectors.Add(Microsoft.Kinect.JointType.SpineMid, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.SpineMid], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
-            jointVectors.Add(Microsoft.Kinect.JointType.SpineShoulder, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.SpineShoulder], kinectJoints[Microsoft.Kinect.JointType.SpineMid]));
-            jointVectors.Add(Microsoft.Kinect.JointType.ShoulderLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ShoulderLeft], kinectJoints[Microsoft.Kinect.JointType.SpineShoulder]));
-            jointVectors.Add(Microsoft.Kinect.JointType.ElbowLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ElbowLeft], kinectJoints[Microsoft.Kinect.JointType.ShoulderLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.WristLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.WristLeft], kinectJoints[Microsoft.Kinect.JointType.ElbowLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.HandLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandLeft], kinectJoints[Microsoft.Kinect.JointType.WristLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.HandTipLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandTipLeft], kinectJoints[Microsoft.Kinect.JointType.HandLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.ThumbLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ThumbLeft], kinectJoints[Microsoft.Kinect.JointType.HandLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.Neck, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.Neck], kinectJoints[Microsoft.Kinect.JointType.SpineShoulder]));
-            jointVectors.Add(Microsoft.Kinect.JointType.Head, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.Head], kinectJoints[Microsoft.Kinect.JointType.Neck]));
-            jointVectors.Add(Microsoft.Kinect.JointType.ShoulderRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ShoulderRight], kinectJoints[Microsoft.Kinect.JointType.SpineShoulder]));
-            jointVectors.Add(Microsoft.Kinect.JointType.ElbowRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ElbowRight], kinectJoints[Microsoft.Kinect.JointType.ShoulderRight]));
-            jointVectors.Add(Microsoft.Kinect.JointType.WristRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.WristRight], kinectJoints[Microsoft.Kinect.JointType.ElbowRight]));
-            jointVectors.Add(Microsoft.Kinect.JointType.HandRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandRight], kinectJoints[Microsoft.Kinect.JointType.WristRight]));
-            jointVectors.Add(Microsoft.Kinect.JointType.HandTipRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandTipRight], kinectJoints[Microsoft.Kinect.JointType.HandRight]));
-            jointVectors.Add(Microsoft.Kinect.JointType.ThumbRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ThumbRight], kinectJoints[Microsoft.Kinect.JointType.HandRight]));
+            
+            // positions are updated considering the spine base as center and a new coordinate system
+            // with hips (left to right) as the X axis
+            // (0,1,0) based on the senor as the Y axis
+            // and the cross product between X and Y as the Z axis pointing towards the user front
+            var jointPositionsRotated = new Dictionary<Microsoft.Kinect.JointType, Vector3D>();
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.SpineMid, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.SpineMid], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.SpineShoulder, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.SpineShoulder], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.ShoulderLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ShoulderLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.ElbowLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ElbowLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.WristLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.WristLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.HandLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.HandTipLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandTipLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.ThumbLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ThumbLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.Neck, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.Neck], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.Head, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.Head], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.ShoulderRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ShoulderRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.ElbowRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ElbowRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.WristRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.WristRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.HandRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.HandTipRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HandTipRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.ThumbRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.ThumbRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
 
             // Spine base is the root of the system, as it has no direction to store, it stores its own position
-            jointVectors.Add(Microsoft.Kinect.JointType.SpineBase, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.SpineBase], new Joint()));
-            jointVectors.Add(Microsoft.Kinect.JointType.HipLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HipLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
-            jointVectors.Add(Microsoft.Kinect.JointType.KneeLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.KneeLeft], kinectJoints[Microsoft.Kinect.JointType.HipLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.AnkleLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.AnkleLeft], kinectJoints[Microsoft.Kinect.JointType.KneeLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.FootLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.FootLeft], kinectJoints[Microsoft.Kinect.JointType.AnkleLeft]));
-            jointVectors.Add(Microsoft.Kinect.JointType.HipRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HipRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
-            jointVectors.Add(Microsoft.Kinect.JointType.KneeRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.KneeRight], kinectJoints[Microsoft.Kinect.JointType.HipRight]));
-            jointVectors.Add(Microsoft.Kinect.JointType.AnkleRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.AnkleRight], kinectJoints[Microsoft.Kinect.JointType.KneeRight]));
-            jointVectors.Add(Microsoft.Kinect.JointType.FootRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.FootRight], kinectJoints[Microsoft.Kinect.JointType.AnkleRight]));
-
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.SpineBase, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.SpineBase], new Joint()));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.HipLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HipLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.KneeLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.KneeLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.AnkleLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.AnkleLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.FootLeft, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.FootLeft], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.HipRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.HipRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.KneeRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.KneeRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.AnkleRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.AnkleRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            jointPositionsRotated.Add(Microsoft.Kinect.JointType.FootRight, SubtractJoints(kinectJoints[Microsoft.Kinect.JointType.FootRight], kinectJoints[Microsoft.Kinect.JointType.SpineBase]));
+            
             var rotationMatrix = new Matrix3D();
             InitMatrix(out rotationMatrix, kinectJoints);
             rotationMatrix.Invert();
@@ -62,11 +67,46 @@ namespace PreposeGestureRecognizer
             {
                 if (jointType != Microsoft.Kinect.JointType.SpineBase)
                 {
-                    var current = jointVectors[jointType];
+                    var current = jointPositionsRotated[jointType];
                     var rotated = current * rotationMatrix;
-                    jointVectors[jointType] = rotated;
+                    jointPositionsRotated[jointType] = rotated;
                 }
             }
+
+            return jointPositionsRotated;
+        }
+
+        private static Dictionary<Microsoft.Kinect.JointType, Vector3D> CalcBodyVectorsFromPositions(Dictionary<Microsoft.Kinect.JointType, Vector3D> jointPositionsRotated)
+        {
+            var jointVectors = new Dictionary<Microsoft.Kinect.JointType, Vector3D>();
+
+            jointVectors.Add(Microsoft.Kinect.JointType.SpineMid, jointPositionsRotated[Microsoft.Kinect.JointType.SpineMid]);
+            jointVectors.Add(Microsoft.Kinect.JointType.SpineShoulder, jointPositionsRotated[Microsoft.Kinect.JointType.SpineShoulder] - jointPositionsRotated[Microsoft.Kinect.JointType.SpineMid]);
+            jointVectors.Add(Microsoft.Kinect.JointType.ShoulderLeft, jointPositionsRotated[Microsoft.Kinect.JointType.ShoulderLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.SpineShoulder]);
+            jointVectors.Add(Microsoft.Kinect.JointType.ElbowLeft, jointPositionsRotated[Microsoft.Kinect.JointType.ElbowLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.ShoulderLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.WristLeft, jointPositionsRotated[Microsoft.Kinect.JointType.WristLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.ElbowLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.HandLeft, jointPositionsRotated[Microsoft.Kinect.JointType.HandLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.WristLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.HandTipLeft, jointPositionsRotated[Microsoft.Kinect.JointType.HandTipLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.HandLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.ThumbLeft, jointPositionsRotated[Microsoft.Kinect.JointType.ThumbLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.HandLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.Neck, jointPositionsRotated[Microsoft.Kinect.JointType.Neck] - jointPositionsRotated[Microsoft.Kinect.JointType.SpineShoulder]);
+            jointVectors.Add(Microsoft.Kinect.JointType.Head, jointPositionsRotated[Microsoft.Kinect.JointType.Head] - jointPositionsRotated[Microsoft.Kinect.JointType.Neck]);
+            jointVectors.Add(Microsoft.Kinect.JointType.ShoulderRight, jointPositionsRotated[Microsoft.Kinect.JointType.ShoulderRight] - jointPositionsRotated[Microsoft.Kinect.JointType.SpineShoulder]);
+            jointVectors.Add(Microsoft.Kinect.JointType.ElbowRight, jointPositionsRotated[Microsoft.Kinect.JointType.ElbowRight] - jointPositionsRotated[Microsoft.Kinect.JointType.ShoulderRight]);
+            jointVectors.Add(Microsoft.Kinect.JointType.WristRight, jointPositionsRotated[Microsoft.Kinect.JointType.WristRight] - jointPositionsRotated[Microsoft.Kinect.JointType.ElbowRight]);
+            jointVectors.Add(Microsoft.Kinect.JointType.HandRight, jointPositionsRotated[Microsoft.Kinect.JointType.HandRight] - jointPositionsRotated[Microsoft.Kinect.JointType.WristRight]);
+            jointVectors.Add(Microsoft.Kinect.JointType.HandTipRight, jointPositionsRotated[Microsoft.Kinect.JointType.HandTipRight] - jointPositionsRotated[Microsoft.Kinect.JointType.HandRight]);
+            jointVectors.Add(Microsoft.Kinect.JointType.ThumbRight, jointPositionsRotated[Microsoft.Kinect.JointType.ThumbRight] - jointPositionsRotated[Microsoft.Kinect.JointType.HandRight]);
+
+            // Spine base is the root of the system, as it has no direction to store, it stores its own position
+            jointVectors.Add(Microsoft.Kinect.JointType.SpineBase, jointPositionsRotated[Microsoft.Kinect.JointType.SpineBase] - new Vector3D(0, 0, 0));
+            jointVectors.Add(Microsoft.Kinect.JointType.HipLeft, jointPositionsRotated[Microsoft.Kinect.JointType.HipLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.KneeLeft, jointPositionsRotated[Microsoft.Kinect.JointType.KneeLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.HipLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.AnkleLeft, jointPositionsRotated[Microsoft.Kinect.JointType.AnkleLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.KneeLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.FootLeft, jointPositionsRotated[Microsoft.Kinect.JointType.FootLeft] - jointPositionsRotated[Microsoft.Kinect.JointType.AnkleLeft]);
+            jointVectors.Add(Microsoft.Kinect.JointType.HipRight, jointPositionsRotated[Microsoft.Kinect.JointType.HipRight]);
+            jointVectors.Add(Microsoft.Kinect.JointType.KneeRight, jointPositionsRotated[Microsoft.Kinect.JointType.KneeRight] - jointPositionsRotated[Microsoft.Kinect.JointType.HipRight]);
+            jointVectors.Add(Microsoft.Kinect.JointType.AnkleRight, jointPositionsRotated[Microsoft.Kinect.JointType.AnkleRight] - jointPositionsRotated[Microsoft.Kinect.JointType.KneeRight]);
+            jointVectors.Add(Microsoft.Kinect.JointType.FootRight, jointPositionsRotated[Microsoft.Kinect.JointType.FootRight] - jointPositionsRotated[Microsoft.Kinect.JointType.AnkleRight]);
 
             return jointVectors;
         }
@@ -84,8 +124,11 @@ namespace PreposeGestureRecognizer
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> 
             kinectJoints)
 		{
-            var jointVectors = KinectToHipsSpineCoordinateSystem(kinectJoints);
+            var jointPositions = KinectToHipsSpineCoordinateSystem(kinectJoints);
+            var jointVectors = CalcBodyVectorsFromPositions(jointPositions);
 
+            var positions = new Dictionary<PreposeGestures.JointType, PreposeGestures.Point3D>();
+            var vectors = new Dictionary<PreposeGestures.JointType, PreposeGestures.Point3D>();
             var joints = new Dictionary<PreposeGestures.JointType, Z3Point3D>();
             var norms = new Dictionary<PreposeGestures.JointType, ArithExpr>();
 
@@ -102,22 +145,25 @@ namespace PreposeGestureRecognizer
                 if (jointType != Microsoft.Kinect.JointType.SpineBase)
                 {
                     var z3Joint = Convert(jointType);
+                    positions.Add(z3Joint, new PreposeGestures.Point3D(jointPositions[jointType].X,
+                                                                         jointPositions[jointType].Y,
+                                                                         jointPositions[jointType].Z));
+
 
                     norms.Add(z3Joint, Z3Math.Real(jointVectors[jointType].Length));
 
                     var temp = jointVectors[jointType];
                     temp.Normalize();
-
-                    joints.Add(
-                        z3Joint,
-                        new Z3Point3D(
-                        temp.X,
-                        temp.Y,
-                        -temp.Z));
+                    vectors.Add(z3Joint, new PreposeGestures.Point3D(temp.X,
+                                                                     temp.Y,
+                                                                    -temp.Z));
+                    joints.Add(z3Joint, new Z3Point3D(temp.X,
+                                                      temp.Y,
+                                                     -temp.Z));
                 }
             }
 
-            return new Z3Body(joints, norms);
+            return new Z3Body(positions, vectors, joints, norms);
 		}
 
         /// <summary>
@@ -227,7 +273,6 @@ namespace PreposeGestureRecognizer
 
 
 
-
         //    return result;
         //}
 
@@ -235,7 +280,7 @@ namespace PreposeGestureRecognizer
         /// This returns a fake body for testing.
         /// </summary>
         /// <returns></returns>
-        internal static
+        public static
             Dictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint>
             CreateSyntheticJoints()
         {

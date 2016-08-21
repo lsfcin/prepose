@@ -50,7 +50,8 @@ namespace PreposeGestureRecognizer.Controls
             var GesturePercentage = status.GetGesturePercentage();
 
             this.ProgressBar.Value = GesturePercentage * 100;
-            this.CurrentStepTextBlock.Text = status.StepNamesAndDescriptions[status.CurrentStep].Item2;
+            this.CurrentStepTextBlock.Text = status.Name;
+            //this.CurrentStepTextBlock.Text = status.StepNamesAndDescriptions[status.CurrentStep].Item2;
             this.CompletedTimesTextBlock.Text = status.CompletedCount.ToString();
             this.Height = 
                 this.MainGestureAndPoseNameTextBlock.ActualHeight +
