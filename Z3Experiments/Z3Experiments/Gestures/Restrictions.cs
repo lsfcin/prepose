@@ -122,16 +122,24 @@ namespace PreposeGestures
             return result;
         }
 
-        public double CalcPercentage(Z3Body body)
+        public double CalcPercentage(Z3Body body, out string mainRestriction)
         {
-            var result = 1.0;
+            mainRestriction = "";
+
+            var currentResult = 1.0;
+            var returnResult = 1.0;
 
             foreach (var restriction in this.Restrictions)
             {
-                result = Math.Min(result, restriction.Percentage(body));
+                currentResult = restriction.Percentage(body);
+                if(currentResult < returnResult)
+                {
+                    mainRestriction = restriction.ToString();
+                    returnResult = currentResult;
+                }                
             }
 
-            return result;
+            return returnResult;
         }
 
         protected List<SimpleBodyRestriction> Restrictions;

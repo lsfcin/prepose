@@ -146,8 +146,8 @@ namespace PreposeGestureRecognizer
                 {
                     var z3Joint = Convert(jointType);
                     positions.Add(z3Joint, new PreposeGestures.Point3D(jointPositions[jointType].X,
-                                                                         jointPositions[jointType].Y,
-                                                                         jointPositions[jointType].Z));
+                                                                       jointPositions[jointType].Y,
+                                                                      -jointPositions[jointType].Z));
 
 
                     norms.Add(z3Joint, Z3Math.Real(jointVectors[jointType].Length));

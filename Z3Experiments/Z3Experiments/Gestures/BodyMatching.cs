@@ -102,6 +102,9 @@ namespace PreposeGestures
         internal GestureMatcher(Gesture gesture)
         {
             this.Gesture = gesture;
+            this.MainRestriction = "";
+            if(gesture.DeclaredPoses[0].RestrictionCount > 0)
+                this.MainRestriction = gesture.DeclaredPoses[0].Restriction.ToString();
             this.LastPercentage = 0;
             this.CompletedCount = 0;
             this.Target = null;
@@ -141,7 +144,8 @@ namespace PreposeGestures
             // Check distance to target transformed joints and if body satisfies restrictions
             double transformsPercentage;
             double restrictionsPercentage;
-            CalcPercentages(body, out transformsPercentage, out restrictionsPercentage);
+            string mainRestriction;
+            CalcPercentages(body, out transformsPercentage, out restrictionsPercentage, out mainRestriction);
             var percentage = Math.Min(transformsPercentage, restrictionsPercentage);
 
 
@@ -149,6 +153,7 @@ namespace PreposeGestures
             var elapsedTimeErrorIncrement = 0.00;
             this.AccumulatedError += elapsedTimeErrorIncrement;
             this.LastPercentage = percentage;
+            this.MainRestriction = mainRestriction;
 
             bool transformSucceeded = transformsPercentage > 1.0 - TrigonometryHelper.GetDistance(precision) / 2.0;
 
@@ -180,7 +185,7 @@ namespace PreposeGestures
                 this.UpdateTargetBody(body);
                 
                 // immediatilly update percentage
-                CalcPercentages(body, out transformsPercentage, out restrictionsPercentage);
+                CalcPercentages(body, out transformsPercentage, out restrictionsPercentage, out mainRestriction);
                 this.LastPercentage = Math.Min(transformsPercentage, restrictionsPercentage);
             }
 
@@ -227,7 +232,11 @@ namespace PreposeGestures
             return result;
         }
 
-        private void CalcPercentages(Z3Body body, out double transformsPercentage, out double restrictionsPercentage)
+        private void CalcPercentages(
+            Z3Body body, 
+            out double transformsPercentage, 
+            out double restrictionsPercentage,
+            out string mainRestriction)
         {            
             transformsPercentage = 1.0;
             if (this.Target.TransformedJoints.Count > 0)
@@ -235,7 +244,7 @@ namespace PreposeGestures
                 transformsPercentage = 1.0 -
                     CalcMaxDistance(this.LastDistanceVectors, this.Target.TransformedJoints) / 2;
             }
-            restrictionsPercentage = this.Gesture.Steps[CurrentStep].Pose.CalcMinPercentage(body);
+            restrictionsPercentage = this.Gesture.Steps[CurrentStep].Pose.CalcMinPercentage(body, out mainRestriction);
         }
 
         internal void UpdateTargetBody(Z3Body startBody)
@@ -315,6 +324,7 @@ namespace PreposeGestures
             GestureStatus result = new GestureStatus();
 
             result.Name = this.Gesture.Name;
+            result.MainInstruction = this.MainRestriction;
 
             //result.StepNamesAndDescriptions = new List<Tuple<string, string>>(this.Gesture.Steps.Capacity);
 
@@ -369,6 +379,8 @@ namespace PreposeGestures
 
             return result;
         }
+
+        public string MainRestriction { get; set; }
     }
 
 
@@ -422,6 +434,9 @@ namespace PreposeGestures
 
         public string Name { get; set; }
 
+        // represents the main issue the user should solve in order to accomplish the gesture
+        public string MainInstruction { get; set; }
+
         // TODO: this is still a work in progress, 
         // it was currently consuming too much time
         // and the description was not complete
@@ -439,5 +454,6 @@ namespace PreposeGestures
         public bool succeededDetection { get; set; }
         public bool succeededDetectionFirstFrame { get; set; }
         public float confidence { get; set; }
+
     }
 }

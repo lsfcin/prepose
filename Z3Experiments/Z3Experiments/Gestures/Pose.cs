@@ -271,9 +271,9 @@ namespace PreposeGestures
 		}
 
         // returns the min percentage of completion from all restrictions
-        internal double CalcMinPercentage(Z3Body body)
+        internal double CalcMinPercentage(Z3Body body, out string mainRestriction)
         {            
-            var percentage = this.Restriction.CalcPercentage(body);
+            var percentage = this.Restriction.CalcPercentage(body, out mainRestriction);
 
             return percentage;
         }
