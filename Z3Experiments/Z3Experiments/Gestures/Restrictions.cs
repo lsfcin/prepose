@@ -402,9 +402,14 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            return string.Format("touch your {0} with your {1} hand", 
+            var result = string.Format("touch your {0} with your {1} hand", 
                 EnumUtil.GetDescription<JointType>(this.JointType), 
                 EnumUtil.GetDescription<JointSide>(this.HandSide));
+
+            if (this.isNegated)
+                result = "don't " + result;
+
+            return result;
         }
 
         public JointSide HandSide { get; private set; }
@@ -682,10 +687,15 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            return string.Format("put your {0} {1} {2}", 
+            var result = string.Format("put your {0} {1} {2}", 
                 EnumUtil.GetDescription<JointType>(this.JointType1), 
                 EnumUtil.GetDescription<RelativeDirection>(this.Direction),
                 EnumUtil.GetDescription<JointType>(this.JointType2));
+
+            if (this.isNegated)
+                result = "don't " + result;
+
+            return result;
         }
 
         public JointType JointType1 { get; set; }
@@ -740,9 +750,14 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            return string.Format("align your {0} and your {1}", 
+            var result = string.Format("align your {0} and your {1}", 
                 EnumUtil.GetDescription<JointType>(this.JointType1), 
                 EnumUtil.GetDescription<JointType>(this.JointType2));
+
+            if (this.isNegated)
+                result = "don't " + result;
+
+            return result;
         }
 
         public JointType JointType1 { get; set; }

@@ -615,7 +615,7 @@ namespace PreposeGestureRecognizer
             IReadOnlyDictionary<Microsoft.Kinect.JointType, Microsoft.Kinect.Joint> kinectJoints,
             DrawingContext dc)
         {
-            ConsoleManager.Show();
+            //ConsoleManager.Show();
 
             // convert Kinect.Body to Z3Body
             var body = Z3KinectConverter.CreateZ3Body(kinectJoints);            
@@ -652,7 +652,7 @@ namespace PreposeGestureRecognizer
                                 gestureProgress.RenderFeedback(status);
 
                                 // handling events
-                                var completed = status.succeededDetection;
+                                var completed = status.Succeeded;
                                 if(completed)
                                 {
                                     gestureProgress.TriggeredEvents.GetEvent().SendKeyboardEvents();

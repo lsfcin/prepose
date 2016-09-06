@@ -75,7 +75,7 @@ namespace PreposeGestures
             // Check for each matcher to see if it succeeded. If it did, then synthesize a new target position. 
             foreach (var matcher in this.Matchers)
             {
-                if (matcher.GetStatus().succeededDetection)
+                if (matcher.GetStatus().Succeeded)
                 {
                     matcher.UpdateTargetBody(body);
                 }
@@ -150,8 +150,10 @@ namespace PreposeGestures
 
 
             // here elapsedTimeErrorIncrement is a fixed increment to represent that error accumulates as time passes
-            var elapsedTimeErrorIncrement = 0.00;
-            this.AccumulatedError += elapsedTimeErrorIncrement;
+            var elapsedTimeErrorIncrement = 0.015; // step breaks after ~3 seconds
+            var progressError = Math.Max(0.0, this.LastPercentage - percentage) * 2.5; // breaks if 1 step goes 40% wrong
+            this.AccumulatedError += elapsedTimeErrorIncrement + progressError;
+
             this.LastPercentage = percentage;
             this.MainRestriction = mainRestriction;
 
@@ -177,7 +179,7 @@ namespace PreposeGestures
                 // Check if gesture is completed (all steps are finished)
                 if (this.CurrentStep >= this.Gesture.Steps.Count)
                 {
-                    this.Reset(body);                    
+                    this.Reset(body);
                     this.CompletedCount += 1;
                     overallSucceeded = true;
                 }
@@ -203,22 +205,22 @@ namespace PreposeGestures
             // The VisualGestureBuilder API for DiscreteGestureResult cares about whole gestures, 
             // not about individual poses. We need to check for this case explicitly.
             // We then expose succeededDetection in a DiscreteGestureResult . 
-            result.succeededDetection = overallSucceeded;
+            result.Succeeded = overallSucceeded;
 
             // TODO: check the semantics of succeededDetectionFirstFrame in the VisualGestureBuilder API
             // We here are assuming that firstFrame means this is the first frame where we successfully detected the gesture
             // We are assuming that firstFrame does NOT mean this is the first frame where we started tracking the gesture
             if (CompletedCount == 1 & overallSucceeded)
-                result.succeededDetectionFirstFrame = true;
+                result.SucceededFirstFrame = true;
             else
-                result.succeededDetectionFirstFrame = false;
+                result.SucceededFirstFrame = false;
 
             // TODO: check the semantics of confidence in the VisualGestureBuilder API.
             // Here confidence is the same as distance from the target body. 
             // That is NOT the same as if confidence were a probability that we are correct
             // We want to have as close semantics as possible to the VisualGestureBuilder API, 
             // so we need to double check this
-            result.confidence = (float)percentage;
+            result.Confidence = (float)percentage;
 
             matchStat.timeMs = stopwatch.ElapsedMilliseconds - time0;
             matchStat.gestureName = this.Gesture.Name;
@@ -421,10 +423,10 @@ namespace PreposeGestures
                 (double) CurrentStep /
                 NumSteps +
                 StepPercentage /
-                NumSteps;
+                NumSteps;            
 
-            // adjusting precision errors
-            if(result > 0.999)
+            // overriding in case success is known
+            if (Succeeded)
             {
                 result = 1.0;
             }
@@ -451,9 +453,9 @@ namespace PreposeGestures
 
         public int NumSteps { get; set; }
 
-        public bool succeededDetection { get; set; }
-        public bool succeededDetectionFirstFrame { get; set; }
-        public float confidence { get; set; }
+        public bool Succeeded { get; set; }
+        public bool SucceededFirstFrame { get; set; }
+        public float Confidence { get; set; }
 
     }
 }

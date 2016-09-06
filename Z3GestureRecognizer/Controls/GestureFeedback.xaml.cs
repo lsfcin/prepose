@@ -26,7 +26,7 @@ namespace PreposeGestureRecognizer.Controls
         {
             InitializeComponent();
             this.Gesture = gesture;
-            this.CurrentStepTextBlock.Text = gesture.Steps[0].Pose.ToString();
+            this.CurrentStepTextBlock.Text = gesture.Steps[0].Pose.Name;
             this.MainGestureAndPoseNameTextBlock.Text = gesture.Name;            
             this.Stopwatch = new Stopwatch();
             this.Stopwatch.Start();
@@ -50,13 +50,30 @@ namespace PreposeGestureRecognizer.Controls
 
         public void RenderFeedback(GestureStatus status)
         {
-            var GesturePercentage = status.GetGesturePercentage();
 
-            this.ProgressBar.Value = GesturePercentage * 100;
+            // set ProgressBar.Value
+            var GesturePercentage = status.GetGesturePercentage();            
+            if(status.Succeeded)
+            {
+                this.ProgressBar.Value = 100.0; // set to 100% directly
+                this.Stopwatch.Restart(); // also restart MainInstruction cooldown because gesture was completed                
+            }
+            else
+            {
+                if(this.ProgressBar.Value == 100) // it means last frame gesture was completed, then reset .Value
+                {                    
+                    this.ProgressBar.Value = 0;
+                }
+                else
+                {
+                    this.ProgressBar.Value = this.ProgressBar.Value * 0.8 + GesturePercentage * 20.0;
+                }
+            }
 
+            // set MainInstruction
             // MainInstruction is updated only after a cooldown 
-            // this makes it easier for the user to read the instruction
-            var cooldown = 3000;
+            // this makes it easier for the user to read the instruction            
+            var cooldown = 1000;
             var elapsed = this.Stopwatch.ElapsedMilliseconds;
             if(elapsed > cooldown)
             { 
@@ -65,7 +82,7 @@ namespace PreposeGestureRecognizer.Controls
                 this.Stopwatch.Restart();
             }
 
-            //this.CurrentStepTextBlock.Text = status.StepNamesAndDescriptions[status.CurrentStep].Item2;
+            // set CompletedCount            
             this.CompletedTimesTextBlock.Text = status.CompletedCount.ToString();
             this.Height = 
                 this.MainGestureAndPoseNameTextBlock.ActualHeight +

@@ -50,9 +50,9 @@ namespace PreposeGestures
 	/// </summary>
 	public enum JointType
 	{
-        [Description("hips center")]
+        [Description("spine base")]
         SpineBase = 0,
-        [Description("spine")]
+        [Description("spine mid")]
         SpineMid = 1,
         [Description("neck")]
         Neck = 2,
@@ -90,7 +90,7 @@ namespace PreposeGestures
         AnkleRight = 18,
         [Description("right foot")]
         FootRight = 19,
-        [Description("shoulders center")]
+        [Description("spine shoulder")]
         SpineShoulder = 20,
         [Description("left hand tip")]
         HandTipLeft = 21,

@@ -79,9 +79,9 @@ namespace PreposeGestures
             {
                 if (gesture.Name.Equals(gs.Name))
                 {
-                    detected = gs.succeededDetection;
-                    firstFrame = gs.succeededDetectionFirstFrame;
-                    confidence = (float)gs.confidence;
+                    detected = gs.Succeeded;
+                    firstFrame = gs.SucceededFirstFrame;
+                    confidence = (float)gs.Confidence;
 
                 }
             }

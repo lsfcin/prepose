@@ -367,13 +367,16 @@ namespace PreposeGestures.Parser
 			{
 				switch (context.center_joint().GetText())
 				{
+                    case "spinemid": return new Wrapper(JointType.SpineMid);
+                    case "spinebase": return new Wrapper(JointType.SpineBase);
+                    case "spineshoulder": return new Wrapper(JointType.SpineShoulder);
 					case "neck": return new Wrapper(JointType.Neck);
 					case "head": return new Wrapper(JointType.Head);
 					case "hips": return new Wrapper(new JointGroup(new JointType[] { JointTypeHelper.GetSidedJointType(SidedJointName.Hip, JointSide.Left), JointTypeHelper.GetSidedJointType(SidedJointName.Hip, JointSide.Right) }));
 					case "back": return new Wrapper(new JointGroup(JointTypeHelper.GetBack()));
-					case "you": return new Wrapper(new JointGroup(JointTypeHelper.GetYou()));
+                    case "you": return new Wrapper(new JointGroup(JointTypeHelper.GetYou()));
 
-					default: throw new ArgumentException();
+                    default: throw new ArgumentException(context.center_joint().GetText());
 				}
 			}
 		}

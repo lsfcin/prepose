@@ -18,71 +18,79 @@
 		</Span>
 
 		<!-- Transforms -->
-		<Keywords fontWeight="bold" foreground="Red">
+		<Keywords foreground="Gray">
 			<Word>point</Word>
 			<Word>rotate</Word>
 			<!-- ... -->
 		</Keywords>
 
 		<!-- Restrictions -->
-		<Keywords fontWeight="bold" foreground="Red">
+		<Keywords foreground="Gray">
 			<Word>put</Word>
-			<Word>touch</Word>
-			<Word>align</Word>
+      <Word>touch</Word>
+      <Word>with</Word>
+      <Word>align</Word>
+      <Word>and</Word>
       <Word>don't</Word>
 			<!-- ... -->
 		</Keywords>
 
+    <!-- Body Parts Prefix -->
+    <Keywords foreground="MediumSeaGreen">
+      <Word>your</Word>
+    </Keywords>
+    
     <!-- Body Parts -->
-    <Keywords fontWeight="bold" foreground="DarkOrange">
-      <Word>your neck</Word>
-      <Word>your head</Word>
-      <Word>your spine mid</Word>
-      <Word>your spine base</Word>
-      <Word>your spine shoulder</Word>
-      <Word>your left shoulder</Word>
-      <Word>your left elbow</Word>
-      <Word>your left wrist</Word>
-      <Word>your left hand</Word>
-      <Word>your left hand tip</Word>
-      <Word>your left thumb</Word>
-      <Word>your left hip</Word>
-      <Word>your left knee</Word>
-      <Word>your left ankle</Word>
-      <Word>your left foot</Word>
-      <Word>your right shoulder</Word>
-      <Word>your right elbow</Word>
-      <Word>your right wrist</Word>
-      <Word>your right hand</Word>
-      <Word>your right hand tip</Word>
-      <Word>your right thumb</Word>
-      <Word>your right hip</Word>
-      <Word>your right knee</Word>
-      <Word>your right ankle</Word>
-      <Word>your right foot</Word>
-      <Word>your left arm</Word>
-      <Word>your left leg</Word>
-      <Word>your right arm</Word>
-      <Word>your right leg</Word>
-      <Word>your spine</Word>
-      <Word>your back</Word>
-      <Word>your arms</Word>
-      <Word>your legs</Word>
-      <Word>your shoulders</Word>
-      <Word>your wrists</Word>
-      <Word>your elbows</Word>
-      <Word>your hands</Word>
-      <Word>your hands tips</Word>
-      <Word>your thumbs</Word>
-      <Word>your hips</Word>
-      <Word>your knees</Word>
-      <Word>your ankles</Word>
-      <Word>your feet</Word>
+    <Keywords fontWeight="bold" foreground="MediumSeaGreen">
+      <Word>neck</Word>
+      <Word>head</Word>
+      <Word>spine mid</Word>
+      <Word>spine base</Word>
+      <Word>spine shoulder</Word>
+      <Word>left shoulder</Word>
+      <Word>left elbow</Word>
+      <Word>left wrist</Word>
+      <Word>left hand</Word>
+      <Word>left hand tip</Word>
+      <Word>left thumb</Word>
+      <Word>left hip</Word>
+      <Word>left knee</Word>
+      <Word>left ankle</Word>
+      <Word>left foot</Word>
+      <Word>right shoulder</Word>
+      <Word>right elbow</Word>
+      <Word>right wrist</Word>
+      <Word>right hand</Word>
+      <Word>right hand tip</Word>
+      <Word>right thumb</Word>
+      <Word>right hip</Word>
+      <Word>right knee</Word>
+      <Word>right ankle</Word>
+      <Word>right foot</Word>
+      <Word>left arm</Word>
+      <Word>left leg</Word>
+      <Word>right arm</Word>
+      <Word>right leg</Word>
+      <Word>spine</Word>
+      <Word>back</Word>
+      <Word>arms</Word>
+      <Word>legs</Word>
+      <Word>shoulders</Word>
+      <Word>wrists</Word>
+      <Word>elbows</Word>
+      <Word>hands</Word>
+      <Word>hands tips</Word>
+      <Word>thumbs</Word>
+      <Word>hips</Word>
+      <Word>knees</Word>
+      <Word>ankles</Word>
+      <Word>feet</Word>
       <Word>you</Word>
     </Keywords>
 
+
     <!-- Directions -->
-    <Keywords fontWeight="bold" foreground="Green">
+    <Keywords foreground="DodgerBlue">
       <Word>up</Word>
       <Word>down</Word>
       <Word>to your front</Word>
@@ -107,7 +115,7 @@
 			<!-- ... -->
 		</Keywords>
 
-    <Keywords fontWeight="bold" foreground="Blue">
+    <Keywords fontWeight="bold" foreground="SlateBlue">
       <Word>degrees</Word>
     </Keywords>
 		
@@ -116,7 +124,7 @@
 		</Keywords>
 		
 		<!-- Digits -->
-		<Rule fontWeight="bold" foreground="Blue">
+		<Rule fontWeight="bold" foreground="SlateBlue">
 			\b0[xX][0-9a-fA-F]+  # hex number
 		|    \b
 			(    \d+(\.[0-9]+)?   #number with optional floating point
