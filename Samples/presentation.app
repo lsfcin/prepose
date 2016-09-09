@@ -7,7 +7,7 @@ APP app:
 		put your right wrist to the right of your spine mid,
 		put your right wrist below your spine mid,
 		put your right wrist in front of your spine mid,
-		put your right wrist to the left of your right shoulder,
+		//put your right wrist to the left of your right shoulder,
 		put your right wrist below your right shoulder,
 		put your right wrist in front of your right shoulder,
 		put your right wrist to the left of your right elbow,
@@ -15,7 +15,8 @@ APP app:
 		put your right wrist in front of your right elbow,
 		put your right hand below your spine mid,
 		put your right hand in front of your spine mid,
-		put your right hand to the left of your right shoulder,
+		//put your right hand to the left of your right shoulder,
+		put your right hand tip to the left of your right shoulder,
 		put your right hand below your right shoulder,
 		put your right hand in front of your right shoulder,
 		put your right hand to the left of your right elbow,
@@ -30,7 +31,7 @@ APP app:
 		put your right hip below your right elbow,
 		put your right hip below your right wrist,
 		put your right hip behind your right wrist,
-		put your right hip to the right of your right hand,
+		//put your right hip to the right of your right hand,
 		put your right hip below your right hand,
 		put your right hip behind your right hand,
 		don't align your right shoulder and your spine mid,
@@ -66,7 +67,7 @@ APP app:
       
 		EXECUTION:
 		start,
-		slightly_back,
+		//slightly_back,
 		to_up,
 		to_front,
 		start.
@@ -81,7 +82,7 @@ APP app:
     
 		EXECUTION:
 		start,
-		slightly_front,
+		//slightly_front,
 		to_up,
 		to_back,
 	    start.

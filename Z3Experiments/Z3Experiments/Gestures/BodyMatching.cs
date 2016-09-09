@@ -69,7 +69,7 @@ namespace PreposeGestures
             // Matching itself uses the Z3 context - and that can't be shared across threads! 
             foreach (var matcher in this.Matchers)
             {
-                result.Add(matcher.TestBody(body, this.Precision, Z3.Context));
+                result.Add(matcher.MatchBody(body, this.Precision, Z3.Context));
             }            
 
             // Check for each matcher to see if it succeeded. If it did, then synthesize a new target position. 
@@ -105,7 +105,7 @@ namespace PreposeGestures
             this.MainRestriction = "";
             if(gesture.DeclaredPoses[0].RestrictionCount > 0)
                 this.MainRestriction = gesture.DeclaredPoses[0].Restriction.ToString();
-            this.LastPercentage = 0;
+            this.StepLastPercentage = 0;
             this.CompletedCount = 0;
             this.Target = null;
         }
@@ -129,10 +129,9 @@ namespace PreposeGestures
             }
         }
 
-        public GestureStatus TestBody(Z3Body body, int precision, Context localContext)
-        {
-            StatisticsEntryMatch matchStat = new StatisticsEntryMatch();
-
+        public GestureStatus MatchBody(Z3Body body, int precision, Context localContext)
+        {            
+            var matchStat = new StatisticsEntryMatch();
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var time0 = stopwatch.ElapsedMilliseconds;
@@ -140,38 +139,42 @@ namespace PreposeGestures
             // NOT THREAD SAFE
             this.LastDistanceVectors = this.UpdateDistanceVectors(body, localContext);
 
-
             // Check distance to target transformed joints and if body satisfies restrictions
-            double transformsPercentage;
-            double restrictionsPercentage;
-            string mainRestriction;
-            CalcPercentages(body, out transformsPercentage, out restrictionsPercentage, out mainRestriction);
-            var percentage = Math.Min(transformsPercentage, restrictionsPercentage);
-
-
-            // here elapsedTimeErrorIncrement is a fixed increment to represent that error accumulates as time passes
-            var elapsedTimeErrorIncrement = 0.015; // step breaks after ~3 seconds
-            var progressError = Math.Max(0.0, this.LastPercentage - percentage) * 2.5; // breaks if 1 step goes 40% wrong
-            this.AccumulatedError += elapsedTimeErrorIncrement + progressError;
-
-            this.LastPercentage = percentage;
+            var transformsPercentage = 0.0;
+            var restrictionsPercentage = 0.0;
+            var mainRestriction = "";
+            this.CalcPercentages(
+                body, 
+                precision,
+                out transformsPercentage, 
+                out restrictionsPercentage, 
+                out mainRestriction);
             this.MainRestriction = mainRestriction;
 
-            bool transformSucceeded = transformsPercentage > 1.0 - TrigonometryHelper.GetDistance(precision) / 2.0;
+            var gestureSucceeded = false;
+            var gestureBroke = false;
+            var stepPercentage = Math.Min(transformsPercentage, restrictionsPercentage);
+            var performanceError = Math.Max(0.0, this.StepLastPercentage - stepPercentage);
+            var stepSucceeded = stepPercentage >= 1.0;
+            this.StepLastPercentage = stepPercentage;
 
-            // NOT THREAD SAFE 
-            bool restrictionSucceeded = restrictionsPercentage >= 1.0;
-
-            bool succeeded =
-                (transformSucceeded || this.Target.TransformedJoints.Count == 0) &&
-                (restrictionSucceeded); // if there are no restrictions, restrictionSucceeded is true
-
-            // Overall succeeded represents whether the entire gesture was matched on this test, not just a single pose
-            bool overallSucceeded = false;
-
+            // Increase AccumulatedError only if performanceError is positive
+            if (performanceError > 0.00001)
+            {
+                var delayBaseError = 0.05;
+                this.AccumulatedError += performanceError + delayBaseError;
+            
+                // If accumulated error is too high the gesture is broken
+                if (this.AccumulatedError > 1)
+                {
+                    this.Reset(body);
+                    this.AccumulatedError = 0;
+                    gestureBroke = true;
+                }
+            }
 
             // If body is accepted move to matching the next pose in sequence
-            if (succeeded)
+            if (stepSucceeded)
             {
                 this.CurrentStep += 1;
                 this.AccumulatedError = 0;
@@ -181,36 +184,32 @@ namespace PreposeGestures
                 {
                     this.Reset(body);
                     this.CompletedCount += 1;
-                    overallSucceeded = true;
+                    gestureSucceeded = true;
                 }
-
                 this.UpdateTargetBody(body);
                 
-                // immediatilly update percentage
-                CalcPercentages(body, out transformsPercentage, out restrictionsPercentage, out mainRestriction);
-                this.LastPercentage = Math.Min(transformsPercentage, restrictionsPercentage);
+                // Immediatilly update step percentage
+                CalcPercentages(
+                    body, 
+                    precision, 
+                    out transformsPercentage, 
+                    out restrictionsPercentage, 
+                    out mainRestriction);
+
+                this.StepLastPercentage = Math.Min(transformsPercentage, restrictionsPercentage);
             }
-
-
-            // If body was not accepted then check if error is higher than threshold
-            // If accumulated error is too high the gesture is broken
-            else if (this.AccumulatedError > 1)
-            {
-                this.Reset(body);
-                this.AccumulatedError = 0;
-            }
-
             var result = this.GetStatus();
+            result.Broke = gestureBroke;
 
             // The VisualGestureBuilder API for DiscreteGestureResult cares about whole gestures, 
             // not about individual poses. We need to check for this case explicitly.
             // We then expose succeededDetection in a DiscreteGestureResult . 
-            result.Succeeded = overallSucceeded;
+            result.Succeeded = gestureSucceeded;
 
             // TODO: check the semantics of succeededDetectionFirstFrame in the VisualGestureBuilder API
             // We here are assuming that firstFrame means this is the first frame where we successfully detected the gesture
             // We are assuming that firstFrame does NOT mean this is the first frame where we started tracking the gesture
-            if (CompletedCount == 1 & overallSucceeded)
+            if (CompletedCount == 1 & gestureSucceeded)
                 result.SucceededFirstFrame = true;
             else
                 result.SucceededFirstFrame = false;
@@ -220,15 +219,15 @@ namespace PreposeGestures
             // That is NOT the same as if confidence were a probability that we are correct
             // We want to have as close semantics as possible to the VisualGestureBuilder API, 
             // so we need to double check this
-            result.Confidence = (float)percentage;
+            result.Confidence = (float) result.GetGesturePercentage();
 
             matchStat.timeMs = stopwatch.ElapsedMilliseconds - time0;
             matchStat.gestureName = this.Gesture.Name;
             matchStat.uid = frameCount;
             matchStat.poseName = this.Gesture.Steps[CurrentStep].Pose.Name;
-            // Record the statistics entry here 
-            GestureStatistics.matchTimes.Add(matchStat);           
 
+            // Record the statistics entry here 
+            GestureStatistics.matchTimes.Add(matchStat);
             frameCount++;
 
             return result;
@@ -236,6 +235,7 @@ namespace PreposeGestures
 
         private void CalcPercentages(
             Z3Body body, 
+            int precision,
             out double transformsPercentage, 
             out double restrictionsPercentage,
             out string mainRestriction)
@@ -243,10 +243,13 @@ namespace PreposeGestures
             transformsPercentage = 1.0;
             if (this.Target.TransformedJoints.Count > 0)
             {
-                transformsPercentage = 1.0 -
-                    CalcMaxDistance(this.LastDistanceVectors, this.Target.TransformedJoints) / 2;
+                transformsPercentage = Math.Min(1.0, 
+                    TrigonometryHelper.GetDistance(precision) / 
+                    CalcMaxDistance(this.LastDistanceVectors, this.Target.TransformedJoints));
             }
-            restrictionsPercentage = this.Gesture.Steps[CurrentStep].Pose.CalcMinPercentage(body, out mainRestriction);
+
+            restrictionsPercentage = 
+                this.Gesture.Steps[CurrentStep].Pose.CalcMinPercentage(body, out mainRestriction);
         }
 
         internal void UpdateTargetBody(Z3Body startBody)
@@ -305,7 +308,7 @@ namespace PreposeGestures
         private int CompletedCount;
 
 
-        public double LastPercentage { get; private set; }
+        public double StepLastPercentage { get; private set; }
 
         public int CurrentStep { get; private set; }
 
@@ -315,7 +318,7 @@ namespace PreposeGestures
         private void Reset(Z3Body body)
         {
             this.CurrentStep = 0;
-            this.LastPercentage = 0;
+            this.StepLastPercentage = 0;
             this.UpdateTargetBody(body);
             this.AccumulatedError = 0;
             this.Target = null;
@@ -335,11 +338,12 @@ namespace PreposeGestures
             //        this.GetCurrentStep().Pose.Name,
             //        this.GetCurrentStep().Pose.ToString()));
             
-            result.StepPercentage = this.LastPercentage;
+            result.StepPercentage = this.StepLastPercentage;
             result.DistanceVectors = this.LastDistanceVectors;
             result.CompletedCount = this.CompletedCount;
             result.CurrentStep = this.CurrentStep;
             result.NumSteps = this.Gesture.Steps.Count;
+            result.AccumulatedError = this.AccumulatedError;
 
             return result;
         }
@@ -419,16 +423,18 @@ namespace PreposeGestures
 
         public double GetGesturePercentage()
         {
-            var result = 
-                (double) CurrentStep /
-                NumSteps +
-                StepPercentage /
-                NumSteps;            
+            var result = 0.0;
 
-            // overriding in case success is known
             if (Succeeded)
             {
                 result = 1.0;
+            }
+            else
+            {
+                result = (double) CurrentStep /
+                    NumSteps +
+                    StepPercentage /
+                    NumSteps;
             }
 
             return result;
@@ -454,8 +460,13 @@ namespace PreposeGestures
         public int NumSteps { get; set; }
 
         public bool Succeeded { get; set; }
-        public bool SucceededFirstFrame { get; set; }
-        public float Confidence { get; set; }
 
+        public bool SucceededFirstFrame { get; set; }
+
+        public bool Broke { get; set; }
+
+        public double AccumulatedError { get; set; }
+
+        public float Confidence { get; set; }
     }
 }

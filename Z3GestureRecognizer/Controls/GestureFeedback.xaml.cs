@@ -55,19 +55,40 @@ namespace PreposeGestureRecognizer.Controls
             var GesturePercentage = status.GetGesturePercentage();            
             if(status.Succeeded)
             {
-                this.ProgressBar.Value = 100.0; // set to 100% directly
-                this.Stopwatch.Restart(); // also restart MainInstruction cooldown because gesture was completed                
+                this.ProgressBar.Value = 1.0; // set to 100% directly
+                this.Stopwatch.Restart(); // restart MainInstruction cooldown because gesture was completed                
             }
             else
             {
-                if(this.ProgressBar.Value == 100) // it means last frame gesture was completed, then reset .Value
+                if (this.ProgressBar.Value == 1) // it means the gesture was completed on the last frame
                 {                    
-                    this.ProgressBar.Value = 0;
+                    this.ProgressBar.Value = 0.0;
+                }
+                else if (status.AccumulatedError >= 1.0) // it means gesture was broken
+                {
+                    this.ProgressBar.Value = 0.0;
                 }
                 else
                 {
-                    this.ProgressBar.Value = this.ProgressBar.Value * 0.8 + GesturePercentage * 20.0;
+                    this.ProgressBar.Value = this.ProgressBar.Value * 0.5 + GesturePercentage * 0.5;
                 }
+            }
+
+            // set FailureBar.Value
+            if (status.Broke)
+            {
+                this.FailureBar.Value = 1.0;
+                this.FailureBar.Foreground = Brushes.Red;
+                this.Stopwatch.Restart(); // restart MainInstruction cooldown because gesture was broke                
+            }
+            else if(GesturePercentage >= 1)
+            {
+                this.FailureBar.Value = 0.0;
+            }
+            else
+            {
+                this.FailureBar.Value = this.FailureBar.Value * 0.5 + status.AccumulatedError * 0.5;
+                this.FailureBar.Foreground = Brushes.Orange;
             }
 
             // set MainInstruction

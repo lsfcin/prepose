@@ -9,17 +9,18 @@
         <local:TriggeredEvents x:Name="TriggeredEvents" Margin="0,0,0.333,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
         <TextBlock x:Name="MainGestureAndPoseNameTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="14" FontWeight="Bold" Margin="9,0,0,0" Height="19" ToolTip="This is the gesture name."><Run Text="Gesture"/><LineBreak/><Run/></TextBlock>
         <TextBlock x:Name="CompletedTimesTextBlock" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Height="18" FontSize="16" Foreground="#FF000000" Margin="-28,0,98.333,0" HorizontalAlignment="Right" Width="43" ToolTip="Here you'll see how many times the user completed the gesture on this execution." FontWeight="Bold"/>
-        <ProgressBar x:Name="ProgressBar" Height="20" Margin="10,19,101,0" VerticalAlignment="Top" ToolTip="This is the gesture progress bar."/>
+        <ProgressBar x:Name="ProgressBar" Height="20" Margin="10,19,101,0" VerticalAlignment="Top" ToolTip="This is the gesture progress bar." Maximum="1" SmallChange="0.001"/>
         <!--TextBlock x:Name="CurrentStepTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Pose" VerticalAlignment="Top" FontSize="20" Margin="8,36,0,0" ToolTip="This tells which pose should be performed by the user at the moment in order to complete the gesture." Foreground="#FF3C3C3C" FontWeight="Bold"/-->
         <avalonEdit:TextEditor
 			xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
 			x:Name="CurrentStepTextBlock" 
-            HorizontalAlignment="Left" Text="Pose" VerticalAlignment="Top" FontSize="21" Margin="8,40,0,0" ToolTip="This tells which pose should be performed by the user at the moment in order to complete the gesture." 
+            HorizontalAlignment="Left" Text="Pose" VerticalAlignment="Top" FontSize="21" Margin="8,44,0,0" ToolTip="This tells which pose should be performed by the user at the moment in order to complete the gesture." 
             ScrollViewer.HorizontalScrollBarVisibility="Auto" 
             ScrollViewer.VerticalScrollBarVisibility="Auto"
 			Foreground="#FF282828"
 			SyntaxHighlighting="Custom Highlighting" Background="{x:Null}"/>
         <TextBlock TextWrapping="Wrap" Text="count" VerticalAlignment="Top" Height="18" TextAlignment="Center" FontSize="14" Foreground="#FF000000" Margin="-75,1,146.333,0" HorizontalAlignment="Right" Width="42" ToolTip="Here you'll see how many times the user completed the gesture on this execution."/>
         <Separator Margin="0,0,0.333,-1" Height="5" VerticalAlignment="Bottom" Background="#FFEDEDED"/>
+        <ProgressBar x:Name="FailureBar" Height="10" Margin="10,41,101.333,0" VerticalAlignment="Top" ToolTip="This is the gesture progress bar." Foreground="Orange" Maximum="1" SmallChange="0.001"/>
     </Grid>
 </UserControl>

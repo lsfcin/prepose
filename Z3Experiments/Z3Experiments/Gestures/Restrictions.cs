@@ -426,7 +426,7 @@ namespace PreposeGestures
                 var targetValue = 0.0;
                 var directionSign = 1.0;
                 var currentPoint = body.Joints[jointType];
-                CalcCurrentAndTargetValue(currentPoint, startPoint, degrees, direction,
+                CalcZ3CurrentAndTargetValue(currentPoint, startPoint, degrees, direction,
                     out currentValue, out targetValue, out directionSign);
                 
                 BoolExpr expr = Z3.Context.MkTrue();
@@ -447,17 +447,17 @@ namespace PreposeGestures
             },
             body =>
             {
-                ArithExpr currentValue;
+                double currentValue;
                 var targetValue = 0.0;
                 var directionSign = 1.0;
-                var currentPoint = body.Joints[jointType];
+                var currentPoint = body.Vectors[jointType];
                 CalcCurrentAndTargetValue(currentPoint, startPoint, degrees, direction, 
                     out currentValue, out targetValue, out directionSign);
 
                 var percentage = PercentageCalculator.calc(
                     -1*directionSign, 
                     targetValue, 
-                    Z3Math.GetRealValue(currentValue));
+                    currentValue);
 
                 return percentage;
             },
@@ -468,7 +468,7 @@ namespace PreposeGestures
             this.Degrees = degrees;
         }
 
-        private static void CalcCurrentAndTargetValue(
+        private static void CalcZ3CurrentAndTargetValue(
             Z3Point3D currentPoint,
             Z3Point3D startPoint,
             int degrees,
@@ -476,6 +476,79 @@ namespace PreposeGestures
             out ArithExpr currentValue,
             out double targetValue,
             out double directionSign)
+        {
+            // once it is rotating towards a direction there is a limit for the rotation
+            // in this case the limit is imposed to a single component (X, Y or Z) relative to the direction
+            var limitValue = Math.Sin(75 * Math.PI / 180.0);
+            var radians = degrees * Math.PI / 180.0; // assigning a double for angle in radians
+
+            // determining if the direction sign is negative
+            directionSign = 1.0;
+            switch (direction)
+            {
+                case Direction.Down:
+                case Direction.Back:
+                case Direction.Left:
+                    directionSign = -1.0;
+                    break;
+            }
+
+            // update limit based on the direction sign
+            limitValue *= directionSign;
+
+            // start value stores the component (X, Y or Z) from the startPoint
+            // determining the current and start value      
+            currentValue = currentPoint.X;
+            var startValue = 0.0;
+            switch (direction)
+            {
+                case Direction.Right:
+                case Direction.Left:
+                    startValue = startPoint.GetXValue();
+                    currentValue = currentPoint.X;
+                    break;
+                case Direction.Up:
+                case Direction.Down:
+                    startValue = startPoint.GetYValue();
+                    currentValue = currentPoint.Y;
+                    break;
+                case Direction.Front:
+                case Direction.Back:
+                    startValue = startPoint.GetZValue();
+                    currentValue = currentPoint.Z;
+                    break;
+            }
+
+            double startRadians = Math.Asin(startValue);
+            double targetRadians = startRadians + (directionSign * radians);
+            targetValue = Math.Sin(targetRadians);
+
+            // this first case tells that the rotation is bigger than the desired and 
+            // is moving the vector (targetValue) on the opposite direction
+            // this rotation is not desired here because we are rotating towards a direction
+            // the rotation is not a pure transform            
+            var targetIsLowerThanStart =
+                directionSign * targetValue <
+                directionSign * startValue;
+
+            // this second case tells that the rotation exceeded the limitValue
+            var targetExceedsLimit = Math.Abs(targetValue) > Math.Abs(limitValue);
+
+            // on both cases the targetValue should be the limitValue
+            if (targetIsLowerThanStart || targetExceedsLimit)
+            {
+                targetValue = limitValue;
+            }
+        }
+
+        private static void CalcCurrentAndTargetValue(
+           Point3D currentPoint,
+           Point3D startPoint,
+           int degrees,
+           Direction direction,
+           out double currentValue,
+           out double targetValue,
+           out double directionSign)
         {
             // once it is rotating towards a direction there is a limit for the rotation
             // in this case the limit is imposed to a single component (X, Y or Z) relative to the direction
