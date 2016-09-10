@@ -161,8 +161,10 @@ namespace PreposeGestures
             // Increase AccumulatedError only if performanceError is positive
             if (performanceError > 0.00001)
             {
-                var delayBaseError = 0.05;
-                this.AccumulatedError += performanceError + delayBaseError;
+                // delay error only applies if the performance is negative
+                var baseError = 0.033; // 0.033 base error allows no more than 1 sec of bad performance
+                var weightedError = performanceError * 3;
+                this.AccumulatedError += baseError + weightedError;
             
                 // If accumulated error is too high the gesture is broken
                 if (this.AccumulatedError > 1)

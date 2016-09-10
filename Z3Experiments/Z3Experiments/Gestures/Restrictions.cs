@@ -451,7 +451,11 @@ namespace PreposeGestures
                 var targetValue = 0.0;
                 var directionSign = 1.0;
                 var currentPoint = body.Vectors[jointType];
-                CalcCurrentAndTargetValue(currentPoint, startPoint, degrees, direction, 
+                var startPointConverted = new Point3D(
+                    startPoint.GetXValue(),
+                    startPoint.GetYValue(),
+                    startPoint.GetZValue());
+                CalcCurrentAndTargetValue(currentPoint, startPointConverted, degrees, direction, 
                     out currentValue, out targetValue, out directionSign);
 
                 var percentage = PercentageCalculator.calc(
@@ -577,17 +581,17 @@ namespace PreposeGestures
             {
                 case Direction.Right:
                 case Direction.Left:
-                    startValue = startPoint.GetXValue();
+                    startValue = startPoint.X;
                     currentValue = currentPoint.X;
                     break;
                 case Direction.Up:
                 case Direction.Down:
-                    startValue = startPoint.GetYValue();
+                    startValue = startPoint.Y;
                     currentValue = currentPoint.Y;
                     break;
                 case Direction.Front:
                 case Direction.Back:
-                    startValue = startPoint.GetZValue();
+                    startValue = startPoint.Z;
                     currentValue = currentPoint.Z;
                     break;
             }
