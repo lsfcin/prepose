@@ -77,7 +77,7 @@ APP app:
       	rotate your right wrist 10 degrees to your back.
     
 		EXECUTION:
-		slightly_front,
+		//slightly_front,
 		to_up,
 		to_back,
 		wrist_arc_down.
