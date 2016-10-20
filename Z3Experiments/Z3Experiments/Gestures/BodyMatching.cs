@@ -191,7 +191,7 @@ namespace PreposeGestures
                 this.UpdateTargetBody(body);
                 
                 // Immediatilly update step percentage
-                CalcPercentages(
+                this.CalcPercentages(
                     body, 
                     precision, 
                     out transformsPercentage, 
