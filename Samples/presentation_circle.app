@@ -10,20 +10,20 @@ APP app:
 		//put your right wrist to the left of your right shoulder,
 		put your right wrist below your right shoulder,
 		put your right wrist in front of your right shoulder,
-		put your right wrist to the left of your right elbow,
+		//put your right wrist to the left of your right elbow,
 		put your right wrist below your right elbow,
 		put your right wrist in front of your right elbow,
 		put your right hand below your spine mid,
 		put your right hand in front of your spine mid,
 		//put your right hand to the left of your right shoulder,
-		put your right hand tip to the left of your right shoulder,
+		//put your right hand tip to the left of your right shoulder,
 		put your right hand below your right shoulder,
 		put your right hand in front of your right shoulder,
-		put your right hand to the left of your right elbow,
+		put your right hand tip to the left of your right elbow,
 		put your right hand below your right elbow,
 		put your right hand in front of your right elbow,
 		put your right hand to the left of your right wrist,
-		put your right hand below your right wrist,
+		//put your right hand below your right wrist,
 		put your right hip below your spine mid,
 		put your right hip to the left of your right shoulder,
 		put your right hip below your right shoulder,
@@ -57,29 +57,57 @@ APP app:
 		don't touch your right hip with your left hand.
 				
 		POSE to_up:
-		rotate your right wrist 10 degrees up.
+		rotate your right wrist 25 degrees up.
 		
-		POSE to_front:
-		rotate your right wrist 10 degrees to your front.
-      
+		POSE to_right:
+		rotate your right wrist 5 degrees to your right.
+		
 		EXECUTION:
 		wrist_arc_down,
 		to_up,
-		to_front,
+		to_right,
 		wrist_arc_down.
-      
-	GESTURE prev: 
+    
+	GESTURE prev:
     	
-    	POSE slightly_front:
-		rotate your right wrist 5 degrees to your front.
-
+    	POSE wrist_down:
+		put your right elbow to the right of your spine mid,
+		put your right elbow to the right of your right shoulder,
+		put your right elbow below your right shoulder,
+		put your right wrist to the right of your spine mid,
+		put your right wrist below your spine mid,
+		put your right wrist in front of your spine mid,
+		put your right wrist below your right shoulder,
+		put your right wrist in front of your right shoulder,
+		//put your right wrist to the left of your right elbow,
+		put your right wrist below your right elbow,
+		put your right wrist in front of your right elbow,
+		put your right hand below your spine mid,
+		put your right hand in front of your spine mid,
+		put your right hand below your right shoulder,
+		put your right hand in front of your right shoulder,
+		put your right hand tip to the left of your right elbow,
+		put your right hand below your right elbow,
+		put your right hand in front of your right elbow,
+		put your right hand to the left of your right wrist,
+		//put your right hand below your right wrist,
+		put your right hip below your spine mid,
+		put your right hip to the left of your right shoulder,
+		put your right hip below your right shoulder,
+		put your right hip to the left of your right elbow,
+		put your right hip below your right elbow,
+		put your right hip below your right wrist,
+		put your right hip behind your right wrist,
+		put your right hip below your right hand,
+		put your right hip behind your right hand.
+	
 		POSE to_back:
-      	rotate your right wrist 10 degrees to your back.
+      	rotate your right wrist 5 degrees to your back.
     
 		EXECUTION:
-		//slightly_front,
+		wrist_down,
 		to_up,
 		to_back,
 		wrist_arc_down.
     	
-      
+    

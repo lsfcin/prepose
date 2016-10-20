@@ -162,7 +162,7 @@ namespace PreposeGestures
             if (performanceError > 0.00001)
             {
                 // delay error only applies if the performance is negative
-                var baseError = 0.033; // 0.033 base error allows no more than 1 sec of bad performance
+                var baseError = 0.1; // 0.1 base error allows no more than 0.3 sec of bad performance
                 var weightedError = performanceError * 3;
                 this.AccumulatedError += baseError + weightedError;
             

@@ -94,7 +94,7 @@ namespace PreposeGestureRecognizer.Controls
             // set MainInstruction
             // MainInstruction is updated only after a cooldown 
             // this makes it easier for the user to read the instruction            
-            var cooldown = 1000;
+            var cooldown = 0;
             var elapsed = this.Stopwatch.ElapsedMilliseconds;
             if(elapsed > cooldown)
             { 
