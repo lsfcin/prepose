@@ -101,7 +101,7 @@
     <Compile Include="Controls\TriggeredEvents.xaml.cs">
       <DependentUpon>TriggeredEvents.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Debug\ConsoleManager.cs" />
+    <Compile Include="Console\ConsoleManager.cs" />
     <Compile Include="EventsSender.cs" />
     <Compile Include="PreposeSyntaxCompletionData.cs" />
     <Page Include="Controls\GestureFeedback.xaml">
