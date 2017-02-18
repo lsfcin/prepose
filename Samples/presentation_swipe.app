@@ -1,14 +1,7 @@
 APP app:
 	GESTURE next: 
 		POSE rest:
-		put your right hand tip below your right hip.		
-		
-		//POSE start:
-		//put your right hand tip above your right hip,
-		//put your right hand tip to the right of your right elbow.
-		
-		//POSE on_the_left:
-		//put your right wrist to the left of your right elbow.
+		put your right hand tip below your right hip.
 		
 		POSE above_hips:
 		put your right hand tip above your right hip.
@@ -16,26 +9,32 @@ APP app:
 		POSE move_left:
 		put your right hand tip above your right hip,
 		put your right wrist to the left of your right elbow,
-		rotate your right wrist 20 degrees to your left.		
+		rotate your right wrist 30 degrees to your left.
+
+		POSE to_down:
+		rotate your right wrist 15 degrees down.
       
 		EXECUTION:
-		//rest,
-		//start,
-		//on_the_left,
-		//to_right_small,
 		above_hips,
 		move_left,
 		above_hips,
 		rest.
+		//to_down.
 		
-	//GESTURE prev:
-	//	POSE to_right:
-	//	rotate your right wrist 10 degrees to your right.
-	//	
-	//	EXECUTION:
-	//	to_up,
-	//	on_the_left,
-	//	to_right,
-	//	to_down.
+	GESTURE prev:
+		POSE move_right:
+		put your right hand tip above your right hip,
+		put your right wrist to the right of your right elbow,
+		rotate your right wrist 30 degrees to your right.
+		//rotate your right wrist 0 degrees down.
+		
+		EXECUTION:		
+		above_hips,
+		move_right,
+		above_hips,
+		rest.
       
+	
+	
+	
 	
