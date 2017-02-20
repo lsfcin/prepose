@@ -86,7 +86,7 @@ namespace PreposeGestures
             public Gesture Gesture2 { get; internal set; }
 
             public long Time { get; internal set; }
-                
+
             public bool Conflict { get; internal set; }
 
             public SolverCheckResult CheckResult { get; internal set; }
@@ -98,6 +98,105 @@ namespace PreposeGestures
         /// Check for pairwise ambiguity
         /// </summary>
         /// <returns></returns>
+        public static bool HasPairwiseConflicts(
+            App app, 
+            out string errorMessage, 
+            out List<AmbiguityTime> ambiguityTimes, 
+            int precision = 15)
+        {
+            errorMessage = "";
+            List<Gesture> gestures = (List<Gesture>)app.Gestures;
+
+            bool result = false;
+            ambiguityTimes = new List<AmbiguityTime>();
+
+            for (int i = 0; i < gestures.Count - 1; i++)
+            {
+                for (int j = i + 1; j < gestures.Count; j++)
+                {
+                    var gesture1 = gestures[i];
+                    var gesture2 = gestures[j];
+
+                    var gesture1CurrentStep = 0;
+                    var gesture2CurrentStep = 0;
+                    var gesture1LastConflictedStep = 0;
+                    var gesture2LastConflictedStep = 0;
+                    var gesture1NumSteps = gesture1.Steps.Count;
+                    var gesture2NumSteps = gesture2.Steps.Count;
+
+                    var advanceOn = 1;
+                    var conflictCount = 0;
+
+                    while (gesture1CurrentStep < gesture1NumSteps && gesture2CurrentStep < gesture2NumSteps)
+                    {
+                        var expr1 = ExpressionFromCurrentStep(gesture1, gesture1CurrentStep);
+                        var expr2 = ExpressionFromCurrentStep(gesture2, gesture2CurrentStep);
+                        var expr = Z3.Context.MkAnd(expr1, expr2);
+                        var solver = Z3AnalysisInterface.CheckStatus(expr);
+
+                        if (solver.Status == Status.SATISFIABLE)
+                        {
+                            gesture1LastConflictedStep = gesture1CurrentStep;
+                            gesture2LastConflictedStep = gesture2CurrentStep;
+                            ++gesture1CurrentStep;
+                            ++gesture2CurrentStep;
+                            ++conflictCount;
+                            advanceOn = 1;
+                        }
+                        else if (solver.Status == Status.UNSATISFIABLE)
+                        {
+                            if (gesture1CurrentStep == gesture1NumSteps - 1)
+                            {
+                                gesture1CurrentStep = gesture1LastConflictedStep;
+                                advanceOn = 2;
+                            }
+                            else if (gesture2CurrentStep == gesture2NumSteps - 1)
+                            {
+                                conflictCount = 0;
+                            }
+
+                            if (advanceOn == 1)
+                                ++gesture1CurrentStep;
+                            else if (advanceOn == 2)
+                                ++gesture2CurrentStep;
+                        }
+                    }
+                    var conflicted = (conflictCount > 0);
+                    if(conflicted)
+                    {
+                        result = true;
+
+                        var full = false;
+                        if(conflictCount >= Math.Min(gesture1NumSteps, gesture2NumSteps))
+                            full = true;
+                        if(full)
+                        {
+                            errorMessage += "\tFull conflict found between gestures " + gesture1.Name + " and " + gesture2.Name + ",\n";
+                            errorMessage += "\twhich means that one gesture may be fully executed whithin the other.\n";
+                        }
+                        else
+                        {
+                            errorMessage += "\tPartial conflict found between gestures " + gesture1.Name + " and " + gesture2.Name + ",\n";
+                            errorMessage += "\twhich means that one gesture may be started before the other one ended.\n";
+                            errorMessage += "\tIn total " + conflictCount + " sequential steps conflicted between those gestures.\n";
+                        }
+                    }
+                }
+            }           
+
+            return result;
+        }
+
+        private static BoolExpr ExpressionFromCurrentStep(Gesture gesture1, int gesture1CurrentStep)
+        {
+            var input1 = Z3Body.MkZ3Const();
+            var step1 = gesture1.Steps[gesture1CurrentStep];
+            var pose1 = step1.Pose;
+            input1 = pose1.Transform.Transform(input1);
+            var expr1 = pose1.Restriction.Evaluate(input1);
+            return expr1;
+        }
+        
         public static bool HasPairwiseConflicts(App app, out List<PairwiseConflictException> allExceptions, out List<AmbiguityTime> ambiguityTimes, int precision = 15)
         {
             List<Gesture> conflictGestures = (List<Gesture>)app.Gestures;
