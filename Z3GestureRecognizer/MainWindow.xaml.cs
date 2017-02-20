@@ -1080,14 +1080,14 @@ namespace PreposeGestureRecognizer
             this.StartButton.IsEnabled = false;
             this.OpenGesturesButton.IsEnabled = false;
             this.SaveGesturesButton.IsEnabled = false;
+            this.AnalyzeButton.IsEnabled = false;
             Analyze();
-
         }
 
         private void Analyze()
         {
             var result = "";
-            this.AnalysisResultsTextBlock.Text = "Reading gestures...\n\n";
+            this.AnalysisResultsTextBlock.Text = "Analyzing gestures...\n\n";
 
             parsedText = this.ScriptTextBox.Text;
             var app = PreposeGestures.App.ReadAppText(parsedText);
@@ -1102,11 +1102,16 @@ namespace PreposeGestureRecognizer
 
                 stopwatch.Stop();
 
-                this.AnalysisResultsTextBlock.Text += "Valid = " + isValid + ".\n";
-
-                if(!isValid)
+                if(isValid)
                 {
-                    this.AnalysisResultsTextBlock.Text += errorMessage;
+                    this.AnalysisResultsTextBlock.Text +=
+                        "[VALIDITY]\n\tAll written gestures are valid.\n";
+                }
+                else if(!isValid)
+                {
+                    this.AnalysisResultsTextBlock.Text +=
+                        "[VALIDITY]\n\tThere are written gestures that are invalid.\n" +
+                        errorMessage;
                 }
 
                 this.AnalysisResultsTextBlock.Text += 
@@ -1124,11 +1129,16 @@ namespace PreposeGestureRecognizer
                 List<long> safetyTimes = null;
                 var isSafe = Safety.IsWithinDefaultSafetyRestrictions(app, out errorMessage, out safetyTimes);
 
-                this.AnalysisResultsTextBlock.Text += "Safe = " + isSafe + ".\n";
-                
-                if (!isSafe)
+                if(isSafe)
                 {
-                    this.AnalysisResultsTextBlock.Text += errorMessage;
+                    this.AnalysisResultsTextBlock.Text +=
+                        "[SAFETY]\n\tAll written gestures are safe.\n";
+                }                
+                else
+                {
+                    this.AnalysisResultsTextBlock.Text +=
+                        "[SAFETY]\n\tThere are written gestures that are unsafe.\n" + 
+                        errorMessage;
                 }
                 stopwatch.Stop();
 
@@ -1149,10 +1159,16 @@ namespace PreposeGestureRecognizer
                 var hasConflicts = Ambiguity.HasPairwiseConflicts(app,
                     out errorMessage,
                     out ambiguityTimes);
-                this.AnalysisResultsTextBlock.Text += "Conflicts = " + hasConflicts + ".\n";
-                if (hasConflicts)
+                if(!hasConflicts)
                 {
-                    this.AnalysisResultsTextBlock.Text += errorMessage;                    
+                    this.AnalysisResultsTextBlock.Text += 
+                        "[ROBUSTNESS]\n\tOk, there are no conflicts between the written gestures.\n";
+                }
+                else
+                {
+                    this.AnalysisResultsTextBlock.Text +=
+                        "[ROBUSTNESS]\n\tThere are conflicts between the written gestures.\n" +
+                        errorMessage;
                 }
                 stopwatch.Stop();
                 this.AnalysisResultsTextBlock.Text +=
@@ -1364,6 +1380,7 @@ namespace PreposeGestureRecognizer
             this.StartButton.IsEnabled = true;
             this.OpenGesturesButton.IsEnabled = true;
             this.SaveGesturesButton.IsEnabled = true;
+            this.AnalyzeButton.IsEnabled = true;
         }
     }
 
