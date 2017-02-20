@@ -535,8 +535,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             // maximum accepted angle in degrees
             var maxAngle = 5.0;
 
-            var joints =
-                Z3KinectConverter.KinectToHipsSpineCoordinateSystem(body.Joints);
+            var jointPositions = Z3KinectConverter.KinectToHipsSpineCoordinateSystem(body.Joints);
+            var jointVectors = Z3KinectConverter.CalcBodyVectorsFromPositions(jointPositions);
 
             var name = "pose_" + (checkpoints.Count + 1);
 
@@ -547,7 +547,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 steps.Add(name);
                 checkpoints.Add(
                     new Tuple<string, Dictionary<JointType, Vector3D>>
-                        (name, joints));
+                        (name, jointVectors));
             }
             else
             {
@@ -559,7 +559,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     {
                         var jointType = selectedJoint.Key;
                         var v1 = checkpoints.Last().Item2[jointType];
-                        var v2 = joints[jointType];
+                        var v2 = jointVectors[jointType];
                         var angle = Vector3D.AngleBetween(v1, v2);
 
                         // if a single selected joint is too far
@@ -568,7 +568,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         {
                             // now check if there is a previous checkpoint
                             // that is written in the same way the current would be
-                            var currentCode = WriteActions(joints);
+                            var currentCode = WriteActions(jointVectors);
                             var found = false;
                             foreach (var checkpoint in checkpoints)
                             {
@@ -596,7 +596,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                                     checkpoints.Add(
                                         new Tuple<string, Dictionary
                                             <JointType, Vector3D>>
-                                            (name, joints));
+                                            (name, jointVectors));
                             }
 
                             break;
@@ -637,7 +637,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             return result;
         }
 
-        private string WriteActions(Dictionary<JointType, Vector3D> joints)
+        private string WriteActions(Dictionary<JointType, Vector3D> jointVectors)
         {
             var result = "";
             foreach (var selectedAction in selectedActions)
@@ -649,26 +649,26 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         case ActionType.Put:
                             foreach (var selectedJoint in selectedJoints)
                                 if (selectedJoint.Value)
-                                    result += 
-                                        WritePutAction(selectedJoint.Key, joints);
+                                    result +=
+                                        WritePutAction(selectedJoint.Key, jointVectors);
                             break;
                         case ActionType.Align:
                             foreach (var selectedJoint in selectedJoints)
                                 if (selectedJoint.Value)
-                                    result += 
-                                        WriteAlignAction(selectedJoint.Key, joints);
+                                    result +=
+                                        WriteAlignAction(selectedJoint.Key, jointVectors);
                             break;
                         case ActionType.Touch:
                             foreach (var selectedJoint in selectedJoints)
                                 if (selectedJoint.Value)
-                                    result += 
-                                        WriteTouchAction(selectedJoint.Key, joints);
+                                    result +=
+                                        WriteTouchAction(selectedJoint.Key, jointVectors);
                             break;
                         case ActionType.PointRotate:
                             foreach (var selectedJoint in selectedJoints)
                                 if (selectedJoint.Value)
-                                    result += 
-                                        WritePointRotateActions(selectedJoint.Key, joints);
+                                    result +=
+                                        WritePointRotateActions(selectedJoint.Key, jointVectors);
                             break;
                     }
                 }

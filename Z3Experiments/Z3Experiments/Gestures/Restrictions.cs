@@ -142,8 +142,7 @@ namespace PreposeGestures
             return returnResult;
         }
 
-        protected List<SimpleBodyRestriction> Restrictions;
-
+        public List<SimpleBodyRestriction> Restrictions;
         
         public List<JointType> GetJointTypes()
         {
@@ -225,6 +224,18 @@ namespace PreposeGestures
 
             foreach(var restrictedJoint in restrictedJoints)
                 this.RestrictedJoints.Add(restrictedJoint);
+        }
+
+        internal SimpleBodyRestriction(
+            Func<Z3Body, BoolExpr> restriction,
+            Func<Z3Body, double> percentage,
+            string message)
+        {
+            this.RestrictionFunc = restriction;
+            this.PercentageFunc = percentage;
+            this.RestrictedJoints = new List<JointType>();
+
+            this.Message = message;
         }
 
         public override bool Equals(object obj)
@@ -327,6 +338,8 @@ namespace PreposeGestures
 
         // Keep track of which joints are restricted
         private List<JointType> RestrictedJoints;
+        
+        public string Message;
 
 
         public int GetRestrictionCount()
@@ -402,9 +415,9 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            var result = string.Format("touch your {0} with your {1} hand", 
-                EnumUtil.GetDescription<JointType>(this.JointType), 
-                EnumUtil.GetDescription<JointSide>(this.HandSide));
+            var result = string.Format("touch your {0} with your {1} hand",
+               JointTypeHelper.JointToString(this.JointType), 
+               EnumUtil.GetDescription<JointSide>(this.HandSide).ToLower());
 
             if (this.isNegated)
                 result = "don't " + result;
@@ -620,9 +633,9 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            return string.Format("rotate your {0} {1} degrees {2}", 
-                EnumUtil.GetDescription<JointType>(this.JointType), this.Degrees, 
-                EnumUtil.GetDescription<Direction>(this.Direction));
+            return string.Format("rotate your {0} {1} degrees {2}",
+                JointTypeHelper.JointToString(this.JointType), this.Degrees, 
+                EnumUtil.GetDescription<Direction>(this.Direction).ToLower());
         }
 
         public JointType JointType { get; set; }
@@ -764,10 +777,10 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            var result = string.Format("put your {0} {1} {2}", 
-                EnumUtil.GetDescription<JointType>(this.JointType1), 
-                EnumUtil.GetDescription<RelativeDirection>(this.Direction),
-                EnumUtil.GetDescription<JointType>(this.JointType2));
+            var result = string.Format("put your {0} {1} {2}",
+                JointTypeHelper.JointToString(this.JointType1), 
+                EnumUtil.GetDescription<RelativeDirection>(this.Direction).ToLower(),
+                JointTypeHelper.JointToString(this.JointType2));
 
             if (this.isNegated)
                 result = "don't " + result;
@@ -827,9 +840,9 @@ namespace PreposeGestures
 
         public override string ToString()
         {
-            var result = string.Format("align your {0} and your {1}", 
-                EnumUtil.GetDescription<JointType>(this.JointType1), 
-                EnumUtil.GetDescription<JointType>(this.JointType2));
+            var result = string.Format("align your {0} and your {1}",
+                JointTypeHelper.JointToString(this.JointType1),
+                JointTypeHelper.JointToString(this.JointType2));
 
             if (this.isNegated)
                 result = "don't " + result;

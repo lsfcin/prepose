@@ -172,6 +172,16 @@ namespace PreposeGestures
                     this.Reset(body);
                     this.AccumulatedError = 0;
                     gestureBroke = true;
+
+                    // Immediatilly update step percentage
+                    this.CalcPercentages(
+                        body,
+                        precision,
+                        out transformsPercentage,
+                        out restrictionsPercentage,
+                        out mainRestriction);
+
+                    this.StepLastPercentage = Math.Min(transformsPercentage, restrictionsPercentage);
                 }
             }
 
@@ -320,7 +330,7 @@ namespace PreposeGestures
         private void Reset(Z3Body body)
         {
             this.CurrentStep = 0;
-            this.StepLastPercentage = 0;
+            //this.StepLastPercentage = 0;
             this.UpdateTargetBody(body);
             this.AccumulatedError = 0;
             this.Target = null;

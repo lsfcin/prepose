@@ -10,7 +10,7 @@ using System.Diagnostics.Contracts;
 
 namespace PreposeGestures
 {
-    class Validity
+    public class Validity
     {
 
         public static bool IsInternallyValid(
@@ -94,9 +94,82 @@ namespace PreposeGestures
                 // Pose is not internally valid and as a result there can be no witness created
                 return false;
             }
+        }
 
+        public static bool IsInternallyValid(
+            App app,
+            out string errorMessage,
+            out List<long> elapsedTimes)
+        {
+            errorMessage = "";
+            elapsedTimes = new List<long>();
+            var result = true;
+            foreach (var gesture in app.Gestures)
+            {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                if (!Validity.IsInternallyValid(gesture, out errorMessage))
+                {
+                    errorMessage = "\tThe gesture " + gesture.Name + " is invalid.\n" + errorMessage;
 
+                    result = false;
+                    break;
+                }
+                stopwatch.Stop();
+                elapsedTimes.Add(stopwatch.ElapsedMilliseconds);
+            }
+            return result;
+        }
 
+        public static bool IsInternallyValid(Gesture gesture, out string firstBadStep)
+        {
+            firstBadStep = "";
+            bool result = true;
+            int count = 0;
+            foreach (var step in gesture.Steps)
+            {
+                ++count;
+                var pose = step.Pose;
+                Z3Body witness = null;
+                if (!Validity.IsInternallyValid(pose, out firstBadStep))
+                {
+                    firstBadStep = "\tOn the step " + count + ": " + step.ToString() + 
+                        ".\n\tOn the statement: " + firstBadStep + 
+                        ".\n\tThis the first found statement that makes the gesture invalid.\n"; 
+
+                    result = false;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        public static bool IsInternallyValid(Pose pose, out string firstBadStatement)
+        {
+            bool result = true;
+            firstBadStatement = "";
+            Z3Body input = Z3Body.MkZ3Const();
+            Z3Body transformed = pose.Transform.Transform(input);
+            var restrictions = pose.Restriction.Restrictions;
+
+            var composite = new CompositeBodyRestriction();
+
+            foreach (var restriction in restrictions)
+            {
+                composite.And(restriction);
+                BoolExpr transformedRestricted = composite.Evaluate(transformed);
+                SolverCheckResult solverResult = Z3AnalysisInterface.CheckStatus(transformedRestricted);
+
+                if(solverResult.Status == Status.UNSATISFIABLE)
+                {
+                    firstBadStatement = restriction.ToString();
+                    result = false;
+                    break;
+                }
+            }
+
+            return result;
         }
     }
 }

@@ -28,7 +28,7 @@ namespace PreposeGestures
 
     }
 
-    internal class Runner
+    public class Runner
     {
         //public FileStream benchmarkOutputSafety = File.OpenWrite();
         //public FileStream benchmarkOutputConflict = new TextWriter(File.OpenWrite());

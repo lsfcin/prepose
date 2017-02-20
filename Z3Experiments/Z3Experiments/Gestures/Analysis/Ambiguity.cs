@@ -86,7 +86,7 @@ namespace PreposeGestures
             public Gesture Gesture2 { get; internal set; }
 
             public long Time { get; internal set; }
-
+                
             public bool Conflict { get; internal set; }
 
             public SolverCheckResult CheckResult { get; internal set; }

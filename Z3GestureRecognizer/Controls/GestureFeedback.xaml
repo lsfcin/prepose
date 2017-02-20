@@ -21,6 +21,6 @@
 			SyntaxHighlighting="Custom Highlighting" Background="{x:Null}"/>
         <TextBlock TextWrapping="Wrap" Text="count" VerticalAlignment="Top" Height="18" TextAlignment="Center" FontSize="14" Foreground="#FF000000" Margin="-75,1,146.333,0" HorizontalAlignment="Right" Width="42" ToolTip="Here you'll see how many times the user completed the gesture on this execution."/>
         <Separator Margin="0,0,0.333,-1" Height="5" VerticalAlignment="Bottom" Background="#FFEDEDED"/>
-        <ProgressBar x:Name="FailureBar" Height="10" Margin="10,41,101.333,0" VerticalAlignment="Top" ToolTip="This is the gesture progress bar." Foreground="Orange" Maximum="1" SmallChange="0.001"/>
+        <ProgressBar x:Name="FailureBar" Height="10" Margin="10,41,101.333,0" VerticalAlignment="Top" ToolTip="This is the gesture progress bar." Foreground="#FFBDBDBD" Maximum="1" SmallChange="0.001"/>
     </Grid>
 </UserControl>

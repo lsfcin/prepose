@@ -6,6 +6,42 @@ namespace PreposeGestures
 {
 	public class JointTypeHelper
 	{
+        public static string JointToString(JointType joint)
+        {
+            var result = "";
+
+            switch(joint)
+            {
+                case JointType.SpineShoulder: result = "spine shoulder"; break;
+                case JointType.ShoulderLeft: result = "left shoulder"; break;
+                case JointType.ElbowLeft: result = "left elbow"; break;
+                case JointType.WristLeft: result = "left wrist"; break;
+                case JointType.HandLeft: result = "left hand"; break;
+                case JointType.HandTipLeft: result = "left hand tip"; break;
+                case JointType.ThumbLeft: result = "left thumb"; break;
+                case JointType.Neck: result = "neck"; break;
+                case JointType.Head: result = "head"; break;
+                case JointType.ShoulderRight: result = "right shoulder"; break;
+                case JointType.ElbowRight: result = "right elbow"; break;
+                case JointType.WristRight: result = "right wrist"; break;
+                case JointType.HandRight: result = "right hand"; break;
+                case JointType.HandTipRight: result = "right hand tip"; break;
+                case JointType.ThumbRight: result = "right thumb"; break;
+                case JointType.SpineBase: result = "spine base"; break;
+                case JointType.HipLeft: result = "left hip"; break;
+                case JointType.KneeLeft: result = "left knee"; break;
+                case JointType.AnkleLeft: result = "left ankle"; break;
+                case JointType.FootLeft: result = "left foot"; break;
+                case JointType.HipRight: result = "right hip"; break;
+                case JointType.KneeRight: result = "right knee"; break;
+                case JointType.AnkleRight: result = "right ankle"; break;
+                case JointType.FootRight: result = "right foot"; break;
+                default: break;
+            }
+
+            return result;
+        }
+
 		public static JointType GetSidedJointType(SidedJointName name, JointSide side)
 		{
 			switch (name)

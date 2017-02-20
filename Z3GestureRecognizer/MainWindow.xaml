@@ -66,7 +66,7 @@
             Grid.Row="1" ToolTip="Write your code here."/>
 
         <TextBlock Margin="10,0,10,10" MinWidth="150" Foreground="{DynamicResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18" Height="28" VerticalAlignment="Bottom" Text="Prepose Code"/>
-        <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,41" Grid.Row="1" Click="StartPauseButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="F5 or Ctrl + B to run, ESC or PAUSE to stop"/>
+        <Button x:Name="StartButton"  Content=" ► " Margin="10,0,0,41" Grid.Row="1" Click="StartPauseButton_Click" Grid.Column="0" Width="80" HorizontalAlignment="Left" MinWidth="70" MinHeight="50" Height="50" VerticalAlignment="Bottom" Foreground="White" Background="#FF564583" FontSize="32" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" ToolTip="F5 or Ctrl + B to run, ESC or PAUSE to stop" RenderTransformOrigin="0.5,0.513"/>
 
         <Grid HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="95,0,0,16" VerticalAlignment="Bottom" Height="22" Width="175">
             <Slider x:Name="PrecisionSlider" Grid.Column="0" Margin="50,2,30,0" Maximum="30" Minimum="5" RenderTransformOrigin="0.5,0.5" Loaded="PrecisionSlider_Loaded" ValueChanged="PrecisionSlider_ValueChanged" LargeChange="0" Value="30" Height="18" VerticalAlignment="Top" ToolTip="Set the precision for the user in order to fit specific body positions written with the point and rotate actions.">
@@ -104,5 +104,22 @@
             </Separator.RenderTransform>
         </Separator>
         <TextBlock x:Name="CaretStatus" Margin="0,0,10.667,3" TextWrapping="Wrap" Grid.Row="1" Grid.RowSpan="2" Height="16" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" HorizontalAlignment="Right" Width="104" ToolTip="Current caret position (line and column)."/>
+        <Grid x:Name="AnalysisGrid" Visibility="Hidden" Margin="200,20,200,18" Grid.ColumnSpan="2" Background="#FFF2F2F2" Grid.RowSpan="2">
+            <avalonEdit:TextEditor
+			xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+			x:Name="AnalysisResultsTextBlock" 
+            ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+			FontFamily="Consolas"
+			Text="Code here..."
+			Margin="10,10,10,53"
+			MinHeight="300"
+			Foreground="#FF282828"
+			FontSize="13"
+			SyntaxHighlighting="Custom Highlighting" 
+            Background="#FFFDFDFD" 
+            IsEnabled="False" ToolTip="Write your code here."/>
+            <Button Content="close" Height="38" Canvas.Left="429" Canvas.Top="310" Foreground="White" Background="#FF564583" FontSize="14" FontWeight="Bold" FontFamily="Arial" BorderBrush="{x:Null}" Margin="0,0,10,10" HorizontalAlignment="Right" Width="61" VerticalAlignment="Bottom" Click="Button_Click_1" />
+        </Grid>
     </Grid>
 </Window>

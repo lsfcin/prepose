@@ -76,7 +76,7 @@ namespace PreposeGestureRecognizer
             return jointPositionsRotated;
         }
 
-        private static Dictionary<Microsoft.Kinect.JointType, Vector3D> CalcBodyVectorsFromPositions(Dictionary<Microsoft.Kinect.JointType, Vector3D> jointPositionsRotated)
+        public static Dictionary<Microsoft.Kinect.JointType, Vector3D> CalcBodyVectorsFromPositions(Dictionary<Microsoft.Kinect.JointType, Vector3D> jointPositionsRotated)
         {
             var jointVectors = new Dictionary<Microsoft.Kinect.JointType, Vector3D>();
 

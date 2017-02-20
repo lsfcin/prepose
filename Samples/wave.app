@@ -28,3 +28,15 @@ APP sample:
         EXECUTION : 
             a_part,
             together.
+            
+     GESTURE crossover-arm-stretch:
+		POSE relax-arms:
+		point your arms down.
+		
+		POSE stretch:
+		rotate your left arm 90 degrees to your right, 
+		touch your left elbow with your right hand.
+		
+		EXECUTION:
+		relax-arms,
+		slowly stretch and hold for 30 seconds.

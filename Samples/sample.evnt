@@ -1,6 +1,6 @@
-GESTURE generic_left_punch
-	TRIGGERED BY anything NONE NONE
-
 GESTURE wave
 	TRIGGERED BY anything h i
+
+GESTURE clap
+	TRIGGERED BY anything ALT TAB
 

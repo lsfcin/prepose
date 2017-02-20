@@ -863,8 +863,33 @@ namespace PreposeGestures
 			foreach (var jointType in jointTypes)
 			{
 				result.Joints.Add(jointType, Z3Point3D.MkZ3Const(EnumUtil.GetDescription<JointType>(jointType)));
-				result.Norms.Add(jointType, Z3.Context.MkRealConst(EnumUtil.GetDescription<JointType>(jointType) + " Norm"));
 			}
+
+            result.Norms.Add(JointType.SpineMid, Z3Math.Real(0.3));
+            result.Norms.Add(JointType.SpineShoulder, Z3Math.Real(0.3));
+            result.Norms.Add(JointType.ShoulderLeft, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.ElbowLeft, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.WristLeft, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.HandLeft, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.HandTipLeft, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.ThumbLeft, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.Neck, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.Head, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.ShoulderRight, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.ElbowRight, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.WristRight, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.HandRight, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.HandTipRight, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.ThumbRight, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.SpineBase, Z3Math.Real(0.0));
+            result.Norms.Add(JointType.HipLeft, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.KneeLeft, Z3Math.Real(0.3));
+            result.Norms.Add(JointType.AnkleLeft, Z3Math.Real(0.3));
+            result.Norms.Add(JointType.FootLeft, Z3Math.Real(0.1));
+            result.Norms.Add(JointType.HipRight, Z3Math.Real(0.2));
+            result.Norms.Add(JointType.KneeRight, Z3Math.Real(0.3));
+            result.Norms.Add(JointType.AnkleRight, Z3Math.Real(0.3));
+            result.Norms.Add(JointType.FootRight, Z3Math.Real(0.1));
 
 			return result;
 		}

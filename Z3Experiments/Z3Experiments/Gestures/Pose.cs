@@ -86,13 +86,16 @@ namespace PreposeGestures
 
 		public bool IsTransformAcceptedByRestriction()
 		{
-			Z3Body body = Z3Body.MkZ3Const();
-			Z3Body transformedBody = this.mTransform.Transform(body);
-			BoolExpr expr = this.mRestriction.Evaluate(transformedBody);
+            //Z3Body body = Z3Body.MkZ3Const();
+            //Z3Body transformedBody = this.mTransform.Transform(body);
+            //BoolExpr expr = this.mRestriction.Evaluate(transformedBody);
 
-			SolverCheckResult checkResult = Z3AnalysisInterface.CheckStatus(expr);
+            //SolverCheckResult checkResult = Z3AnalysisInterface.CheckStatus(expr);
 
-			return (checkResult.Status != Status.UNSATISFIABLE);
+            //return (checkResult.Status != Status.UNSATISFIABLE);
+
+            // TODO see if we still need this
+            return true;
 		}		
 
 		public void Compose(JointType jointType, JointTransform point3DTransform)

@@ -1076,6 +1076,170 @@ namespace PreposeGestureRecognizer
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             GestureStatistics.DumpStatisticsToFile("matchstats.csv");
+            this.AnalysisGrid.Visibility = Visibility.Visible;
+            this.StartButton.IsEnabled = false;
+            this.OpenGesturesButton.IsEnabled = false;
+            this.SaveGesturesButton.IsEnabled = false;
+            Analyze();
+
+        }
+
+        private void Analyze()
+        {
+            var result = "";
+            this.AnalysisResultsTextBlock.Text = "Reading gestures...\n\n";
+
+            parsedText = this.ScriptTextBox.Text;
+            var app = PreposeGestures.App.ReadAppText(parsedText);
+            var DoValidityChecking = true;
+            if (DoValidityChecking)
+            {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                List<long> validityTimes = null;
+                string errorMesage = "";
+                var isValid = Validity.IsInternallyValid(app, out errorMesage, out validityTimes);
+
+                stopwatch.Stop();
+
+                this.AnalysisResultsTextBlock.Text += "Valid = " + isValid + ".\n";
+
+                if(!isValid)
+                {
+                    this.AnalysisResultsTextBlock.Text += errorMesage;
+                }
+
+                this.AnalysisResultsTextBlock.Text += 
+                    "\tChecking validity took " + 
+                    stopwatch.ElapsedMilliseconds + " milliseconds.\n\n";
+            }
+
+            var DoSafetyChecking = true;
+            if (DoSafetyChecking)
+            {
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                // Test if app gestures are safe
+                string errorMesage = "";
+                List<long> safetyTimes = null;
+                var isSafe = Safety.IsWithinDefaultSafetyRestrictions(app, out errorMesage, out safetyTimes);
+
+                this.AnalysisResultsTextBlock.Text += "Safe = " + isSafe + ".\n";
+                
+                if (!isSafe)
+                {
+                    this.AnalysisResultsTextBlock.Text += errorMesage;
+                }
+                stopwatch.Stop();
+
+                this.AnalysisResultsTextBlock.Text +=
+                    "\tChecking safety took " +
+                    stopwatch.ElapsedMilliseconds + " milliseconds.\n\n";
+            }
+
+            //if (DoAmbiguityChecking)
+            //{
+            //    var stopwatch = new Stopwatch();
+            //    stopwatch.Start();
+            //    uint numConflicts = 0;
+            //    // Test if app gestures present conflicts
+            //    List<PairwiseConflictException> conflictExceptions = null;
+            //    List<PreposeGestures.Ambiguity.AmbiguityTime> ambiguityTimes;
+            //    var hasConflicts = Ambiguity.HasPairwiseConflicts(app,
+            //        out conflictExceptions,
+            //        out ambiguityTimes);
+            //    if (hasConflicts)
+            //    {
+            //        foreach (var ex in conflictExceptions)
+            //        {
+            //            numConflicts++;
+            //        }
+            //    }
+            //    stopwatch.Stop();
+            //    long elapsedTime = stopwatch.ElapsedMilliseconds;
+            //    var numGestures = app.Gestures.Count();
+            //    var numPoses = 0;
+            //    var numTotalRestrictions = app.Gestures.Sum(r => r.RestrictionCount);
+            //    var numTotalNegatedRestrictions = app.Gestures.Sum(r => r.NegatedRestrictionCount);
+            //    var numTotalTransforms = app.Gestures.Sum(r => r.TransformCount);
+            //    var numTotalTransformedJoints = app.Gestures.Sum(r => r.DistinctTransformedJointsCount);
+            //    var numTotalSteps = app.Gestures.Sum(r => r.Steps.Count());
+            //    foreach (var ges in app.Gestures)
+            //    {
+            //        numPoses += ges.DeclaredPoses.Count();
+            //    }
+
+
+            //    swConflict.WriteLine();
+            //    swConflict.WriteLine("Name,ElapsedTime,NumGestures,NumPoses,NumTotalRestrictions,NumTotalNegatedRestrictions,NumTotalTransforms, NumTotalTransformedJoints,NumSteps,NumConflicts");
+            //    swConflict.Flush();
+
+
+            //    swConflict.WriteLine("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}",
+            //        app.Name,
+            //        numGestures,
+            //        numPoses,
+            //        numTotalRestrictions,
+            //        numTotalNegatedRestrictions,
+            //        numTotalTransforms,
+            //        numTotalTransformedJoints,
+            //        numTotalSteps,
+            //        numConflicts,
+
+            //        elapsedTime
+            //        );
+            //    swConflict.Flush();
+
+            //    swConflict.WriteLine();
+            //    swConflict.WriteLine("NameG1*NameG2,NumPosesG1,NumRestrictionsG1,NumNegatedRestrictionsG1,NumTransformsG1,NumStepsG1,NumDistinctJointsG1,NumPosesG2,NumRestrictionsG2,NumNegatedRestrictionsG2,NumTransformsG2,NumStepsG2,NumDistinctJointsG2,Conflict,NumPivots,ElapsedTime");
+            //    swConflict.Flush();
+
+            //    foreach (var timing in ambiguityTimes)
+            //    {
+            //        Console.WriteLine("Logging results for {0}X{1}", timing.Gesture1.Name, timing.Gesture2.Name);
+
+            //        uint numPivots = 0;
+            //        long time = timing.Time;
+
+            //        if (timing.CheckResult.bTimedOut)
+            //        {
+            //            time = -1; // Timed out goes to -1
+            //        }
+
+            //        if (timing.CheckResult.stats != null)
+            //        {
+            //            if (timing.CheckResult.stats["pivots"] != null)
+            //            {
+            //                numPivots = timing.CheckResult.stats["pivots"].UIntValue;
+            //            }
+            //        }
+
+            //        var times = new object[]{
+            //            string.Format("{0}*{1}", timing.Gesture1.Name, timing.Gesture2.Name),
+            //            timing.Gesture1.DeclaredPoses.Count, 
+            //            timing.Gesture1.RestrictionCount,
+            //            timing.Gesture1.NegatedRestrictionCount,
+            //            timing.Gesture1.TransformCount,
+            //            timing.Gesture1.Steps.Count,
+            //            timing.Gesture1.DistinctTransformedJointsCount,
+            //            timing.Gesture2.DeclaredPoses.Count, 
+            //            timing.Gesture2.RestrictionCount,
+            //            timing.Gesture2.NegatedRestrictionCount,
+            //            timing.Gesture2.TransformCount,
+            //            timing.Gesture2.Steps.Count,
+            //            timing.Gesture2.DistinctTransformedJointsCount,
+            //            timing.Conflict,
+            //            numPivots,
+            //            time,
+            //        };
+
+            //        Statistics stats = timing.CheckResult.stats;
+
+            //        string output = string.Join(",", times);
+            //        swConflict.WriteLine("{0}", output);
+            //        swConflict.Flush();
+            //    }
+            //}
         }
 
         private void OpenGesturesButton_Click(object sender, RoutedEventArgs e)
@@ -1273,6 +1437,14 @@ namespace PreposeGestureRecognizer
             {
                 this.StartPauseButton_Click(sender, null);
             }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            this.AnalysisGrid.Visibility = System.Windows.Visibility.Hidden;
+            this.StartButton.IsEnabled = true;
+            this.OpenGesturesButton.IsEnabled = true;
+            this.SaveGesturesButton.IsEnabled = true;
         }
     }
 

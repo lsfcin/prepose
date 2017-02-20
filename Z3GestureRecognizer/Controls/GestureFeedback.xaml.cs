@@ -60,25 +60,26 @@ namespace PreposeGestureRecognizer.Controls
             }
             else
             {
-                if (this.ProgressBar.Value == 1) // it means the gesture was completed on the last frame
-                {                    
-                    this.ProgressBar.Value = 0.0;
-                }
-                else if (status.AccumulatedError >= 1.0) // it means gesture was broken
-                {
-                    this.ProgressBar.Value = 0.0;
-                }
-                else
-                {
-                    this.ProgressBar.Value = this.ProgressBar.Value * 0.5 + GesturePercentage * 0.5;
-                }
+                this.ProgressBar.Value = GesturePercentage;
+                //if (this.ProgressBar.Value == 1) // it means the gesture was completed on the last frame
+                //{                    
+                //    this.ProgressBar.Value = 0.0;
+                //}
+                //else if (status.AccumulatedError >= 1.0) // it means gesture was broken
+                //{
+                //    this.ProgressBar.Value = 0.0;
+                //}
+                //else
+                //{
+                //    this.ProgressBar.Value = this.ProgressBar.Value * 0.5 + GesturePercentage * 0.5;
+                //}
             }
 
             // set FailureBar.Value
             if (status.Broke)
             {
                 this.FailureBar.Value = 1.0;
-                this.FailureBar.Foreground = Brushes.Red;
+                this.FailureBar.Foreground = Brushes.DarkGray;
                 this.Stopwatch.Restart(); // restart MainInstruction cooldown because gesture was broke                
             }
             else if(GesturePercentage >= 1)
@@ -88,7 +89,7 @@ namespace PreposeGestureRecognizer.Controls
             else
             {
                 this.FailureBar.Value = this.FailureBar.Value * 0.5 + status.AccumulatedError * 0.5;
-                this.FailureBar.Foreground = Brushes.Orange;
+                this.FailureBar.Foreground = Brushes.LightGray;
             }
 
             // set MainInstruction

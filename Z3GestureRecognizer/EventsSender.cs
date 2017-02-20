@@ -141,7 +141,7 @@ namespace PreposeGestureRecognizer
 
         internal static void AddMouseRollEvent(GestureEventType mouseEvent, double percentage, ref MOUSEINPUT mouse)
         {
-            var velocity = 0.05;
+            var velocity = 0.15;
             var sign = 1;
             var middleDistance = (percentage - 0.5);
             if (middleDistance < 0) sign = -1;
