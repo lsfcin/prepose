@@ -53,9 +53,8 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Antlr4.Runtime.v4.5, Version=4.2.0.0, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\x64\Debug\Antlr4.Runtime.v4.5.dll</HintPath>
+    <Reference Include="Antlr4.Runtime.v4.5">
+      <HintPath>..\External\Antlr4.Runtime.v4.5.dll</HintPath>
     </Reference>
     <Reference Include="BigRationalLibrary">
       <HintPath>..\External\BigRationalLibrary.dll</HintPath>
