@@ -49,8 +49,8 @@ APP soccer:
   		// pointing down is not natural, rotation needed
   		rotate your left wrist 30 degrees to your front,
   		rotate your right wrist 30 degrees to your front,
-      point your head up,
-    	rotate your head 20 degrees to your front.
+      		point your head up,
+    		rotate your head 20 degrees to your front.
 
 
 		// We need more than one pose declared, so let’s create the next pose
